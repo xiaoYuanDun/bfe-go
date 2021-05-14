@@ -6,10 +6,10 @@ const ws = fs.createWriteStream(path.resolve(__dirname, './write.txt'), {
   highWaterMark: 2, // 默认16*64 表示预计用多少内存来进行写，但即使超过了还是会往里面写
 })
 
-const rs = fs.createReadStream(path.resolve(__dirname, './test.txt'), {
-  highWaterMark: 3, // 当读取大于写入的时候，会进入等待状态
-  flags: 'r',
-})
+// const rs = fs.createReadStream(path.resolve(__dirname, './test.txt'), {
+//   highWaterMark: 3, // 当读取大于写入的时候，会进入等待状态
+//   flags: 'r',
+// })
 // write只接受字符串或者buffer
 // flag根据highWaterMark来决定返回的是true或者false，
 // 假如超出或等于设定值就会返回false，
@@ -30,15 +30,30 @@ const rs = fs.createReadStream(path.resolve(__dirname, './test.txt'), {
 // })
 
 // ws.end() // end + close
-rs.on('data', (chunk) => {
-  console.log(chunk)
-  const flag = ws.write(chunk)
-  if (!flag) {
-    rs.pause()
+// rs.on('data', (chunk) => {
+//   console.log(chunk)
+//   const flag = ws.write(chunk)
+//   if (!flag) {
+//     rs.pause()
+//   }
+// })
+
+let i = 0
+
+function write() {
+  let flag = true
+  while (i < 10 && flag) {
+    flag = ws.write(i + '')
+    i++
   }
-})
+}
+
+write()
 
 // 当写入完毕之后，触发的回调
 ws.on('drain', () => {
-  rs.resume()
+  // 只有当有缓存并且清空的时候，才会触发drain
+  console.log('吃完了')
+  write()
+  // rs.resume()
 })
