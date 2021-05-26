@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <style type="text/css">
+    .wrapper {
+      border: 1px gray solid;
+      width: 500px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+  </style>
+  <body>
+    <div class="container wrapper">
+      <div class="label">Decoding quantum filament tachyon emissions...</div>
+			<button id="startButton" onclick="decodeTechnoStuff()">Start</button>
+			</br>
+      <progress id="progress" value="0"></progress>
+    </div>
+    <div class="label counter wrapper">
+      Task <span id="currentTaskNumber">0</span> of
+      <span id="totalTaskCount">0</span>
+    </div>
+    <div class="logBox wrapper">
+      <div class="logHeader">Log</div>
+      <div id="log"></div>
+    </div>
+	</body>
+	<script>
+    {
+			let taskList = [];
+			let totalTaskCount = 0;
+			let currentTaskNumber = 0;
+			// 当前是否有任务在执行
+			let taskHandle = null;
+
+			let totalTaskCountElem = document.getElementById("totalTaskCount");
+			let currentTaskNumberElem = document.getElementById("currentTaskNumber");
+			let progressBarElem = document.getElementById("progress");
+			let startButtonElem = document.getElementById("startButton");
+			let logElem = document.getElementById("log");
+
+			let logFragment = null;
+			let statusRefreshScheduled = false;
+
+			let everyStartTime = 0
+
+			// 入队函数
+			function enqueueTask(taskHandler, taskData) {
+				console.log('入栈... ')
+				taskList.push({
+					handler: taskHandler,
+					data: taskData
+				});
+
+				totalTaskCount++;
+
+				if (!taskHandle) {
+					taskHandle = requestIdleCallback(runTaskQueue, { timeout: 1000 });
+				}
+
+				scheduleStatusRefresh();
+			}
+
+			function runTaskQueue(deadline) {
+				// 在队列为清空的情况下
+				// 剩余时间大于 0 或者 任务已过期, 会弹出队列头部任务并执行
+				// 任务过期指的是, 在超过 requestIdleCallback 申明回调时的第二个参数规定的时间后, 回调依然没有执行, 认定为此任务超时
+
+				everyStartTime = performance.now()
+				console.log('开始一帧的空闲任务序列, 可分配时长为: ', deadline.timeRemaining(), 'ms')
+				while ((deadline.timeRemaining() > 0 || deadline.didTimeout) && taskList.length) {
+					
+					console.log('  tast start')
+					let task = taskList.shift();
+					currentTaskNumber++;
+					task.handler(task.data);
+					scheduleStatusRefresh();
+					console.log('  tast end')
+					console.log('  task remain: ', deadline.timeRemaining())
+					console.log('  task timeout: ', deadline.didTimeout)
+					console.log('  taskList.length', taskList.length)
+				}
+				console.log('一帧结束...' )
+
+				if (taskList.length) {
+					taskHandle = requestIdleCallback(runTaskQueue, { timeout: 1000} );
+				} else {
+					taskHandle = 0;
+				}
+			}
+
+			function scheduleStatusRefresh() {
+				if (!statusRefreshScheduled) {
+					console.log('    actully call scheduleStatusRefresh')
+					requestAnimationFrame(updateDisplay);
+					statusRefreshScheduled = true;
+				}
+			}
+
+			// 更新视图, 不用关心这里, 知道他是更新 dom 即可
+			function updateDisplay() {
+				console.log('----- update view')
+				let scrolledToEnd = logElem.scrollHeight - logElem.clientHeight <= logElem.scrollTop + 1;
+				// 更新进度条
+				if (totalTaskCount) {
+					if (progressBarElem.max != totalTaskCount) {
+						totalTaskCountElem.textContent = totalTaskCount;
+						progressBarElem.max = totalTaskCount;
+					}
+					if (progressBarElem.value != currentTaskNumber) {
+						currentTaskNumberElem.textContent = currentTaskNumber;
+						progressBarElem.value = currentTaskNumber;
+					}
+				}
+				// 追加 log
+				if (logFragment) {
+					logElem.appendChild(logFragment);
+					logFragment = null;
+				}
+				// 滑动至 log 底部
+				if (scrolledToEnd) {
+						logElem.scrollTop = logElem.scrollHeight - logElem.clientHeight;
+				}
+			// 更新完成后, 把 statusRefreshScheduled 变为 false, 表示当前没有正在进行的任务
+				statusRefreshScheduled = false;
+			}
+
+			function log(text) {
+				if (!logFragment) {
+					logFragment = document.createDocumentFragment();
+				}
+
+				const el = document.createElement("div");
+				el.textContent = text;
+				logFragment.appendChild(el);
+			}
+
+			function logTaskHandler(data) {
+				log("<strong>Running task #" + currentTaskNumber + "</strong>");
+
+				for (i=0; i<data.count; i+=1) {
+					log((i+1).toString() + ". " + data.text);
+				}
+			}
+
+			function decodeTechnoStuff() {
+				totalTaskCount = 0;
+				currentTaskNumber = 0;
+				updateDisplay();
+
+				let n = getRandomIntInclusive(100, 200);
+				
+				// let res = []
+				for (i=0; i<n; i++) {
+					let taskData = {
+						count: getRandomIntInclusive(75, 150),
+						text: "This text is from task number " + (i+1).toString() + " of " + n
+					};
+					// res.push(taskData)
+					enqueueTask(logTaskHandler, taskData);
+				}
+				// console.log(res)
+			}
+
+			function getRandomIntInclusive(min, max) {
+				min = Math.ceil(min);
+				max = Math.floor(max);
+				return Math.floor(Math.random() * (max - min + 1) + min); //The maximum is inclusive and the minimum is inclusive
+			}
+
+    }
+  </script>
+</html>

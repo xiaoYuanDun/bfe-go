@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <script>
+    {
+      let count = 0;
+      let startTime = 0;
+
+      function handleClick() {
+        window.requestAnimationFrame(handleRaf);
+      }
+
+      function handleRaf(timestamp) {
+        // 在每一次执行时用时间戳参数减去上一次执行开始时的时间, 可以大概看出每次任务(帧)所分配的时间(未超时的情况下)
+        console.log('cast: ', timestamp - startTime);
+        startTime = timestamp;
+
+        const ele = document.getElementById('app');
+        count++;
+        ele.innerHTML = count;
+
+        if (count < 80) {
+          window.requestAnimationFrame(handleRaf);
+        }
+      }
+      function handleClear() {
+        count = 0;
+        const ele = document.getElementById('app');
+        ele.innerHTML = count;
+      }
+    }
+  </script>
+  <body>
+    <div id="app"></div>
+    <button onclick="handleClick()">click me</button>
+    <button onclick="handleClear()">clear</button>
+  </body>
+</html>
