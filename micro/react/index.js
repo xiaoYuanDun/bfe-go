@@ -185,10 +185,10 @@ console.log('workInProgressRoot', workInProgressRoot);
 
 // 若一帧中存在空闲时间, 则执行工作循环
 requestIdleCallback(workLoop);
+ 
 
-const React = {
-  createElement: () => console.log(123),
-};
-const element = <div id="A1">123</div>;
 
-console.log('element', element);
+// TODO 
+// 新旧 fiber 树对比时, 最初只有 rootFiber 存在 alternate 连接
+// 子节点的 alternate 连接都是在对比了新的虚拟子节点和旧的子fiber之后, 新添加的关系
+// 之后再向下遍历时, 就可以通过这个 alertnate 关系找到其子节点对应的旧fiber, 并建立关系
