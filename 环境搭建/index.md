@@ -204,4 +204,7 @@ yarn add @babel/plugin-transform-runtime
 
 ### 参考资料
 
+**大部分资料还是官方资料比较准确，多看看吧**
 [webpack 官方文档](https://webpack.docschina.org/concepts/)
+[搭建参考\_01](https://www.freecodecamp.org/news/learn-webpack-for-react-a36d4cac5060/)
+[搭建参考\_02](https://www.robinwieruch.de/minimal-react-webpack-babel-setup#react-with-webpack)
