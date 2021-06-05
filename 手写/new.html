@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <script>
+    {
+      // 	这个还是比较简单的，具体步骤可以看这里
+      // 	https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/new
+
+      //	一次 new 操作，有哪些步骤呢
+      //	1. 创建一个空对象
+      // 	2. 改变 this 指向这个空对象，这样调用构造函数时就正确的往空对象里添加属性了
+      // 	3. 补充原型链，实例.__proto__ = 实例的构造函数.prototype
+      // 	4. 若构造函数没有指定返回值并且是个对象，就返回这个新生成的对象，否则返回指定值
+
+      function myNew(constructor) {
+        const args = [].slice.call(arguments, 1);
+        const tmp = {};
+        const returnObj = constructor.apply(tmp, args);
+        tmp.__proto__ = constructor.prototype;
+        return typeof returnObj === 'object' ? returnObj : tmp;
+      }
+
+      function Person(name, age) {
+        console.log('1');
+        this.name = name;
+        this.age = age;
+      }
+
+      //  测试
+
+      const p1 = new Person('xiaoMing', 15);
+      console.log(p1);
+
+      const p2 = myNew(Person, 'xiaoMing', 18);
+      console.log(p2);
+    }
+  </script>
+  <body></body>
+</html>
