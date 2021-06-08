@@ -6,6 +6,17 @@ export default class Counter extends Component<{}, { counter: number }> {
   };
 
   handleClick = () => {
+
+    this.setState((preState) => ({ counter: preState.counter + 1 }), () => {
+      console.log(this.state.counter);
+    })
+    
+    this.setState(preState => ({ counter: preState.counter + 1 }), () => {
+      console.log(this.state.counter);
+    })
+ 
+    return
+
     this.setState({ counter: this.state.counter + 1 });
     // this.setState((prev) => ({ counter: prev.counter + 1 }));
     console.log('setState_1', this.state.counter);
