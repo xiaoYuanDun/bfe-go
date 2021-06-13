@@ -92,12 +92,28 @@ function workLoopConcurrent() {
 }
 ```
 
-`ReactDOM.render` 是整个 `react` 应用的起点
+`ReactDOM.render` 是整个 `react` 应用的起点，一般一个 SPA 应用都会在根元素上挂载根组件，如：`ReactDOM.render(<CountHook />, document.getElementById('root'));`
 
 ```js
 /**
- * render
- *   legacyRenderSubtreeIntoContainer
+ * render                                       (element, container, callback)
+ *   //  挂载元素合法性验证
+ *   legacyRenderSubtreeIntoContainer           (null, element, container, false, callback)
+ *     //  初始化
+ *     legacyCreateRootFromDOMContainer         (container, forceHydrate)
+ *       createLegacyRoot
+ *         new ReactDOMLegacyRoot               (container, options = undefined)
+ *           createRootImpl                     (container, LegacyRoot = 1, options = undefined)
+ *                                              LegacyRoot 是 根fiber 的 tag类型，有两个可选值(LegacyRoot / Concurrent Root)，对应 同步 / 异步 更新模式的根fiber
+ *             createContainer
+ *               createFiberRoot
+ *
+ *
+ *
+ *
+ *
+ *
+ *
  *
  */
 ```

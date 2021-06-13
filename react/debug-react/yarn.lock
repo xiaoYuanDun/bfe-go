@@ -2848,7 +2848,7 @@ jest-worker@^27.0.2:
     merge-stream "^2.0.0"
     supports-color "^8.0.0"
 
-"js-tokens@^3.0.0 || ^4.0.0", js-tokens@^4.0.0:
+js-tokens@^4.0.0:
   version "4.0.0"
   resolved "http://192.168.0.202:4873/js-tokens/-/js-tokens-4.0.0.tgz#19203fb59991df98e3a287050d4647cdeaf32499"
   integrity sha1-GSA/tZmR35jjoocFDUZHzerzJJk=
@@ -2964,13 +2964,6 @@ loglevel@^1.6.8:
   version "1.7.1"
   resolved "http://192.168.0.202:4873/loglevel/-/loglevel-1.7.1.tgz#005fde2f5e6e47068f935ff28573e125ef72f197"
   integrity sha1-AF/eL15uRwaPk1/yhXPhJe9y8Zc=
-
-loose-envify@^1.1.0:
-  version "1.4.0"
-  resolved "http://192.168.0.202:4873/loose-envify/-/loose-envify-1.4.0.tgz#71ee51fa7be4caec1a63839f7e682d8132d30caf"
-  integrity sha1-ce5R+nvkyuwaY4OffmgtgTLTDK8=
-  dependencies:
-    js-tokens "^3.0.0 || ^4.0.0"
 
 lower-case@^2.0.2:
   version "2.0.2"
@@ -3230,7 +3223,7 @@ nth-check@^1.0.2:
   dependencies:
     boolbase "~1.0.0"
 
-object-assign@^4.0.1, object-assign@^4.1.1:
+object-assign@^4.0.1:
   version "4.1.1"
   resolved "http://192.168.0.202:4873/object-assign/-/object-assign-4.1.1.tgz#2109adc7965887cfc05cbbd442cac8bfbb360863"
   integrity sha1-IQmtx5ZYh8/AXLvUQsrIv7s2CGM=
@@ -3578,23 +3571,6 @@ raw-body@2.4.0:
     iconv-lite "0.4.24"
     unpipe "1.0.0"
 
-react-dom@^0.0.0-experimental-f77c7b9d7:
-  version "0.0.0-experimental-f77c7b9d7"
-  resolved "http://192.168.0.202:4873/react-dom/-/react-dom-0.0.0-experimental-f77c7b9d7.tgz#1e6efbeb8520d1b6f244837be87d1e51e1cdd107"
-  integrity sha1-Hm7764Ug0bbyRIN76H0eUeHN0Qc=
-  dependencies:
-    loose-envify "^1.1.0"
-    object-assign "^4.1.1"
-    scheduler "0.0.0-experimental-f77c7b9d7"
-
-react@^0.0.0-experimental-f77c7b9d7:
-  version "0.0.0-experimental-f77c7b9d7"
-  resolved "http://192.168.0.202:4873/react/-/react-0.0.0-experimental-f77c7b9d7.tgz#24beef9c87e519d3c5f464762d532f08d63ce229"
-  integrity sha1-JL7vnIflGdPF9GR2LVMvCNY84ik=
-  dependencies:
-    loose-envify "^1.1.0"
-    object-assign "^4.1.1"
-
 readable-stream@^2.0.1, readable-stream@^2.0.2:
   version "2.3.7"
   resolved "http://192.168.0.202:4873/readable-stream/-/readable-stream-2.3.7.tgz#1eca1cf711aef814c04f62252a36a62f6cb23b57"
@@ -3818,14 +3794,6 @@ safe-regex@^1.1.0:
   version "2.1.2"
   resolved "http://192.168.0.202:4873/safer-buffer/-/safer-buffer-2.1.2.tgz#44fa161b0187b9549dd84bb91802f9bd8385cd6a"
   integrity sha1-RPoWGwGHuVSd2Eu5GAL5vYOFzWo=
-
-scheduler@0.0.0-experimental-f77c7b9d7:
-  version "0.0.0-experimental-f77c7b9d7"
-  resolved "http://192.168.0.202:4873/scheduler/-/scheduler-0.0.0-experimental-f77c7b9d7.tgz#4cf10dc08e16af747c14e079824e1f719a52b9e9"
-  integrity sha1-TPENwI4Wr3R8FOB5gk4fcZpSuek=
-  dependencies:
-    loose-envify "^1.1.0"
-    object-assign "^4.1.1"
 
 schema-utils@^1.0.0:
   version "1.0.0"

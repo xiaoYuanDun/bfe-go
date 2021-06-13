@@ -13,6 +13,10 @@ function CountHook() {
   return (
     <div key="count-wrap">
       <p key="p">{number}</p>
+
+      {/* {[...Array(100000)].map((it) => (
+        <div>123</div>
+      ))} */}
       <button key="button" onClick={() => dispatch('add')}>
         click me ...
       </button>
