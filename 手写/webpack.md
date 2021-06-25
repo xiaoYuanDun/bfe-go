@@ -275,3 +275,11 @@ var webpackJsonpCallback = (parentChunkLoadingFunction, data) => {
    module = { id, name, deps }
 
 这里会得到一个所有 module 的集合，多次引用的模块会做去重处理，类似一个字典结构
+
+5. 根据配置的 chunk 和 entry，进行 modules 的分类，把同属一个 chunk 的 module 都组织在一起
+
+6. 根据模板文件，把同一个 chunk 内的 module 合并成一个代码块
+
+7. 确定输出路径，输出文件名等信息，把 chunk 对应的代码块写入文件系统
+
+tip: 整个过程中，webpack 会在每个阶段触发不同的 tapable 注册方法，对应不同插件的不同触发时机
