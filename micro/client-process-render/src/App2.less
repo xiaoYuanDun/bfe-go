@@ -1,0 +1,37 @@
+button {
+  margin: 20px;
+}
+
+.container {
+  height: 10px;
+  border-radius: 5px;
+  border: 1px solid black;
+  width: 800px;
+}
+
+@keyframes play {
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes replay {
+  to {
+    width: 100%;
+  }
+}
+
+.progress {
+  height: 100%;
+  width: 0;
+  background-color: red;
+  animation-timing-function: linear;
+  animation-duration: 3s;
+  animation-fill-mode: forwards;
+  &.play {
+    animation-play-state: running;
+  }
+  &.pause {
+    animation-play-state: paused;
+  }
+}

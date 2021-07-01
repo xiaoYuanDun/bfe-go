@@ -1,0 +1,67 @@
+Arguments: 
+  /home/sugo/.nvm/versions/node/v14.17.0/bin/node /usr/share/yarn/bin/yarn.js add less,less-loader,css-loader,style-loader -D
+
+PATH: 
+  /usr/java/jdk/bin/:/home/sugo/.yarn/bin:/home/sugo/.vscode-server/bin/d2e414d9e4239a252d1ab117bd7067f125afd80a/bin:/usr/java/jdk/bin/:/home/sugo/.nvm/versions/node/v14.17.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/mnt/c/Program Files/VanDyke Software/Clients/:/mnt/c/Windows/system32:/mnt/c/Windows:/mnt/c/Windows/System32/Wbem:/mnt/c/Windows/System32/WindowsPowerShell/v1.0/:/mnt/c/Windows/System32/OpenSSH/:/mnt/c/Program Files/nodejs/:/mnt/c/Program Files/Microsoft VS Code/bin:/mnt/c/Users/Administrator/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/Administrator/AppData/Roaming/npm
+
+Yarn version: 
+  1.22.5
+
+Node version: 
+  14.17.0
+
+Platform: 
+  linux x64
+
+Trace: 
+  Error: http://192.168.0.202:4873/less,less-loader,css-loader,style-loader: invalid package
+      at Request.params.callback [as _callback] (/usr/share/yarn/lib/cli.js:66988:18)
+      at Request.self.callback (/usr/share/yarn/lib/cli.js:140749:22)
+      at Request.emit (events.js:376:20)
+      at Request.<anonymous> (/usr/share/yarn/lib/cli.js:141721:10)
+      at Request.emit (events.js:376:20)
+      at IncomingMessage.<anonymous> (/usr/share/yarn/lib/cli.js:141643:12)
+      at Object.onceWrapper (events.js:482:28)
+      at IncomingMessage.emit (events.js:388:22)
+      at endReadableNT (internal/streams/readable.js:1336:12)
+      at processTicksAndRejections (internal/process/task_queues.js:82:21)
+
+npm manifest: 
+  {
+    "name": "simple-react",
+    "version": "1.0.0",
+    "main": "index.js",
+    "license": "MIT",
+    "scripts": {
+      "build": "webpack -c ./config/webpack.config.js",
+      "dev": "webpack serve -c ./config/webpack.config.js"
+    },
+    "devDependencies": {
+      "@babel/core": "^7.14.3",
+      "@babel/plugin-syntax-dynamic-import": "^7.8.3",
+      "@babel/plugin-transform-runtime": "^7.14.3",
+      "@babel/preset-env": "^7.14.4",
+      "@babel/preset-react": "^7.13.13",
+      "@babel/preset-typescript": "^7.13.0",
+      "@types/react": "^17.0.8",
+      "@types/react-dom": "^17.0.5",
+      "babel-loader": "^8.2.2",
+      "html-webpack-plugin": "^5.3.1",
+      "typescript": "^4.3.2",
+      "webpack": "^5.38.1",
+      "webpack-cli": "^4.7.0",
+      "webpack-dev-server": "^3.11.2"
+    },
+    "dependencies": {
+      "@babel/runtime": "^7.14.0",
+      "core-js": "^3.13.1",
+      "react": "^17.0.2",
+      "react-dom": "^17.0.2"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
