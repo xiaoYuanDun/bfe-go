@@ -44,6 +44,8 @@ const App3 = () => {
           onAnimationEnd={handleEnd}
         />
       </div>
+
+      <button className="test">3123</button>
     </div>
   );
 };
