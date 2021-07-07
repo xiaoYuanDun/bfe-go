@@ -3,6 +3,7 @@ const config = require('../webpack.config');
 
 const complier = webpack(config);
 
+debugger;
 complier.run((err, stats) => {
   const res = stats.toJson({
     files: true,
