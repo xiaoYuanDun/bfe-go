@@ -1,10 +1,11 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const SpeedMeasureWebpackPlugin = require('speed-measure-webpack-plugin');
-const smw = new SpeedMeasureWebpackPlugin();
+// const SpeedMeasureWebpackPlugin = require('speed-measure-webpack-plugin');
+// const smw = new SpeedMeasureWebpackPlugin();
 
-module.exports = smw.wrap({
+module.exports = {
   mode: 'development',
+  // mode: 'production',
   entry: './src/index.js',
   devtool: false,
 
@@ -19,4 +20,4 @@ module.exports = smw.wrap({
       template: path.resolve(__dirname, './index.html'),
     }),
   ],
-});
+};
