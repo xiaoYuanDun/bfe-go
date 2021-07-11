@@ -3,7 +3,8 @@ import ReactDOM from 'react-dom';
 
 import NewsList from './NewsList';
 
-const RemoteBanner = lazy(() => import('remote_2/banner'));
+const RemoteBanner = lazy(() => import('remote_host/banner'));
+const RemoteContent = lazy(() => import('remote_2/content'));
 
 const ele = (
   <div>
@@ -14,6 +15,9 @@ const ele = (
     <Suspense fallback={<div>loading ...</div>}>
       <RemoteBanner />
     </Suspense>
+    {/* <Suspense fallback={<div>loading ...</div>}>
+      <RemoteContent />
+    </Suspense> */}
   </div>
 );
 

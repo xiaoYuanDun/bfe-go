@@ -7,7 +7,7 @@ module.exports = {
   devtool: false,
   entry: './src/index.js',
   output: {
-    filename: '[name]_2.[chunkhash:8].js',
+    filename: '[name]_host.[chunkhash:8].js',
     path: path.resolve(__dirname, './dist'),
     clean: true,
   },
@@ -37,9 +37,10 @@ module.exports = {
     new HWP({ template: './template.html' }),
     new MFP({
       filename: 'remoteEntry.js',
-      name: 'remote_2',
+      name: 'remote_host',
       remotes: {
         remote_1: 'remote_1@http://localhost:3000/remoteEntry.js',
+        remote_2: 'remote_2@http://localhost:3002/remoteEntry.js',
       },
       exposes: {
         './banner': './src/Banner',

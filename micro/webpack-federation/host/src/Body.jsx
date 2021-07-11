@@ -1,7 +1,8 @@
 import React, { lazy, Suspense } from 'react';
 import Banner from './Banner';
 
-const RemoteComponent = lazy(() => import('remote_1/newsList'));
+const RemoteNewList = lazy(() => import('remote_1/newsList'));
+const RemoteContent = lazy(() => import('remote_2/content'));
 
 React.xxxx = '123';
 
@@ -13,7 +14,10 @@ function Body() {
       <Banner />
       <p>远程组件: </p>
       <Suspense fallback={<div>loading...</div>}>
-        <RemoteComponent />
+        <RemoteContent />
+      </Suspense>
+      <Suspense fallback={<div>loading...</div>}>
+        <RemoteNewList />
       </Suspense>
     </div>
   );

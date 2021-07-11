@@ -6,12 +6,12 @@ module.exports = {
   devtool: false,
   entry: './src/index.js',
   output: {
-    filename: '[name]_r1.[chunkhash:8].js',
+    filename: '[name]_r2.[chunkhash:8].js',
     path: path.resolve(__dirname, './dist'),
     clean: true,
   },
   devServer: {
-    port: 3000,
+    port: 3002,
   },
   resolve: {
     extensions: ['.jsx', '.js'],
@@ -38,13 +38,12 @@ module.exports = {
     }),
     new MFP({
       filename: 'remoteEntry.js',
-      name: 'remote_1',
+      name: 'remote_2',
       exposes: {
-        './newsList': './src/NewsList',
+        './content': './src/Content',
       },
       remotes: {
-        remote_host: 'remote_host@http://localhost:3001/remoteEntry.js',
-        remote_2: 'remote_2@http://localhost:3002/remoteEntry.js',
+        remote_1: 'remote_1@http://localhost:3000/remoteEntry.js',
       },
       shared: {
         react: {
