@@ -1,0 +1,10 @@
+{
+  "name": "my-single-spa",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "rollup": "^2.50.2",
+    "rollup-plugin-serve": "^1.1.0"
+  }
+}

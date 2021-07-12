@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <p>ssssss</p>
+    <div id="shadow"></div>
+  </body>
+  <style>
+    p {
+      color: blue;
+    }
+  </style>
+  <script>
+    {
+      const ele = document.getElementById('shadow');
+      const shadowDom = ele.attachShadow({ mode: 'closed' });
+      let p = document.createElement('p');
+      p.innerHTML = 'hi U';
+
+      const style = document.createElement('style');
+      style.textContent = `
+        p { color: red }
+      `;
+
+      shadowDom.appendChild(style);
+      shadowDom.appendChild(p);
+    }
+  </script>
+
+  <!-- 快照沙箱 -->
+  <script>
+    {
+      class SandBox {
+        constructor(proxy) {
+          this.proxy = proxy;
+          this.modify = {};
+          this.snapShot = {};
+          this.active();
+        }
+        active() {
+          // 先重置, 再快照
+          this.snapShot = {};
+          for (let attr in this.proxy) {
+            if (this.proxy.hasOwnProperty(attr)) {
+              this.snapShot[attr] = this.proxy[attr];
+            }
+          }
+          // 把变更应用到当前代理对象上
+          Object.keys(this.modify).forEach((attr) => {
+            this.proxy[attr] = this.modify[attr];
+          });
+        }
+        inActive() {
+          // 还原到快照, 并且记录变更
+          for (let attr in this.proxy) {
+            if (this.proxy[attr] !== this.snapShot[attr]) {
+              this.modify[attr] = this.proxy[attr];
+              this.proxy[attr] = this.snapShot[attr];
+            }
+          }
+        }
+      }
+
+      (() => {
+        const person = { name: 'xiaoMing' };
+        const proxy = new SandBox(person);
+
+        person.age = 10;
+        person.school = 'good';
+        console.log(person);
+
+        proxy.inActive();
+        console.log(person);
+
+        proxy.active();
+        console.log(person);
+      })();
+    }
+  </script>
+</html>

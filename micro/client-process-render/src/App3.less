@@ -1,0 +1,51 @@
+button {
+  margin: 20px;
+}
+
+.container {
+  height: 10px;
+  border-radius: 5px;
+  border: 1px solid black;
+  // width: 800px;
+}
+
+@keyframes play {
+  0% {
+    transform: translateX(-50%) scaleX(0);
+  }
+  to {
+    transform: translateX(0) scaleX(1);
+  }
+}
+
+@keyframes replay {
+  0% {
+    transform: translateX(-50%) scaleX(0);
+  }
+  to {
+    transform: translateX(0) scaleX(1);
+  }
+}
+
+.progress {
+  height: 100%;
+  width: 100%;
+  background-color: red;
+  animation-timing-function: linear;
+  animation-duration: 3s;
+  animation-fill-mode: forwards;
+  // will-change: transform;
+
+  &.play {
+    // 可有可无, 只要不是 paused 就可以继续动画
+    animation-play-state: running;
+  }
+  &.pause {
+    animation-play-state: paused;
+  }
+}
+
+.test {
+  transform: translateZ(-10px);
+  // z-index: 10;
+}
