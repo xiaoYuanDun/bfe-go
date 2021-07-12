@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script>
+    {
+
+      function run(gen) {
+        const args = [].slice.call(arguments, 1)
+        let it = gen.apply(this, args)
+
+        return Promise.resolve().then(
+          function handleNext(value) {
+            let next = it.next(value)
+            return (function handleResult(next) {
+              if(next.done) {
+                return next.value
+              } else {
+                return Promise.resolve(next.value).then(
+                  handleNext,
+                  function handleError(err) {
+                    return Promise.resolve(
+                      it.throw(err)
+                    ).then(handleResult)
+                  }
+                )
+              }
+            })(next)
+          }
+        )
+      }
+
+      function runGen(generator) {
+        const args = [].slice.call(arguments, 1)
+        const gen = generator.apply(this, args)
+
+        function handleNext(nextVal) {
+
+          const result = gen.next(nextVal)
+          if(result.done) {
+            return result.value
+          }
+          return Promise.resolve(result.value).then(handleNext, err => {
+            // 两种抛出异常的方式都可以, 但是通过 gen 抛出, 没有调用栈信息
+            // gen.throw(err)
+            throw new Error(err)
+          })
+        }
+
+        return Promise.resolve().then(handleNext)
+      }
+
+      function *foo() {
+        const a1 = yield new Promise(resolve => {
+          setTimeout(() => {
+            resolve(111)
+          }, 1000);
+        })
+        console.log(a1)
+        const a2 = yield new Promise((resolve, reject) => {
+          setTimeout(() => {
+            // resolve(222)
+            reject('--')
+          }, 1000);
+        })
+        console.log(a2)
+        const a3 = yield new Promise(resolve => {
+          setTimeout(() => {
+            resolve(333)
+          }, 1000);
+        })
+        console.log(a3)
+        return a1 + a2 + a3
+      }
+
+      // 普通调用方式
+      // const gen = foo()
+      // const v1 = gen.next().value
+      // v1.then(res => {
+      //   return gen.next(res).value
+      // }).then(res => {
+      //   return gen.next(res).value
+      // }) 
+
+
+      // 权威写法
+      // run(foo)
+      
+      
+      //  自己的简陋写法
+      runGen(foo)
+    }
+  </script>
+</head>
+<body>
+  promise + generator, 实现协同运作
+</body>
+</html>
