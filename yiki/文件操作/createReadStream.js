@@ -34,6 +34,18 @@ class CreateReadStream extends EventEmitter {
     this.flowing = true
     this.read()
   }
+  pipe(ws) {
+    this.on('data', (thunk) => {
+      const flag = ws.write(thunk)
+      if (!flag) {
+        this.pause()
+      }
+    })
+
+    ws.on('drain', () => {
+      this.resume()
+    })
+  }
   read() {
     if (typeof this.fd !== 'number') {
       this.once('open', () => this.read())
