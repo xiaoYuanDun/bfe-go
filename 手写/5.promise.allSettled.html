@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      {
+        Promise.myAllSettled = function (promises) {
+          const len = promises.length;
+          let count = 0;
+          let result = [];
+
+          return new Promise((resolve) => {
+            promises.forEach((promise, index) => {
+              promise
+                .then(
+                  (res) => {
+                    result[index] = {
+                      status: 'fulfilled',
+                      value: res,
+                    };
+                  },
+                  (err) => {
+                    result[index] = {
+                      status: 'rejected',
+                      reason: err,
+                    };
+                  }
+                )
+                .finally(() => {
+                  if (++count === len) {
+                    resolve(result);
+                  }
+                });
+            });
+          });
+        };
+
+        const p1 = new Promise((resolve) => {
+          setTimeout(resolve, 1000);
+        });
+        const p2 = new Promise((resolve, reject) => {
+          setTimeout(reject, 1000);
+        });
+        const p3 = new Promise((resolve) => {
+          setTimeout(resolve, 1000);
+        });
+
+        const pp2 = Promise.allSettled([p1, p2, p3]).then(
+          (res) => {
+            console.log('res', res);
+          },
+          (err) => {
+            console.log('err', err);
+          }
+        );
+
+        const pp3 = Promise.myAllSettled([
+          new Promise((resolve) => {
+            setTimeout(() => {
+              resolve(111);
+            }, 1000);
+          }),
+          new Promise((resolve, reject) => {
+            setTimeout(() => {
+              reject(222);
+            }, 1000);
+          }),
+          new Promise((resolve) => {
+            setTimeout(() => {
+              resolve(333);
+            }, 1000);
+          }),
+        ]).then(
+          (res) => {
+            console.log('res', res);
+          },
+          (err) => {
+            console.log('err', err);
+          }
+        );
+      }
+    </script>
+  </head>
+  <body>
+    <p>Promise.allSettled</p>
+    <p>
+      注意挂载 allSettled 的地方, 是直接挂载到 Promise 上而非 Promise.prototype
+    </p>
+  </body>
+</html>
