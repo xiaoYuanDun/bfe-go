@@ -1,6 +1,13 @@
 var modules = {}
-function require() {
-
+function require(moduleId) {
+	if (cache[moduleId]) {
+		return cache[moduleId].exports;
+	}
+	var module = cache[moduleId] = {
+		exports: {}
+	};
+	modules[moduleId](module, module.exports, require);
+	return module.exports;
 }
 // 定义查找代码块的方法
 require.find = {}
