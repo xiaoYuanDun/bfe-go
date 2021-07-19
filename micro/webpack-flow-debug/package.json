@@ -1,0 +1,15 @@
+{
+  "name": "webpack-flow-debug",
+  "version": "1.0.0",
+  "description": "",
+  "build": "webpack",
+  "scripts": {
+    "build": "webpack"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "webpack": "^5.45.1",
+    "webpack-cli": "^4.7.2"
+  }
+}
