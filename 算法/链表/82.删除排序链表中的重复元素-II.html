@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      {
+        function ListNode(val, next) {
+          this.val = val === undefined ? 0 : val;
+          this.next = next === undefined ? null : next;
+        }
+
+        const n1 = new ListNode(1);
+        const n2 = new ListNode(1);
+        const n3 = new ListNode(2);
+        const n4 = new ListNode(3);
+        const n5 = new ListNode(3);
+        const n6 = new ListNode(4);
+        const n7 = new ListNode(5);
+
+        n1.next = n2;
+        n2.next = n3;
+        n3.next = n4;
+        n4.next = n5;
+        n5.next = n6;
+        n6.next = n7;
+
+        // function deleteDuplicates(head) {
+        //   let start = new ListNode('');
+
+        //   let pre = start;
+        //   let cur = head;
+        //   let next;
+
+        //   while (cur !== null) {
+        //     next = cur.next;
+
+        //     if (cur.val !== (next && next.val)) {
+        //       pre = pre.next = cur;
+        //       cur = next;
+        //     } else {
+        //       while (next !== null && cur.val === next.val) {
+        //         next = next.next;
+        //       }
+        //       if (next === null) {
+        //         pre.next = next;
+        //       }
+        //       cur = next;
+        //     }
+        //   }
+        //   return start.next;
+        // }
+
+        // 递归版
+        function deleteDuplicates(head) {
+          if (head === null || head.next === null) {
+            return head;
+          }
+
+          const value = head.val;
+
+          if (value !== head.next.val) {
+            head.next = deleteDuplicates(head.next);
+          } else {
+            while ((head && head.val) === value) {
+              head = head.next;
+            }
+            return deleteDuplicates(head);
+          }
+          return head;
+        }
+
+        const res = deleteDuplicates(n1);
+        console.log(res);
+      }
+    </script>
+  </head>
+
+  <body>
+    <div>
+      存在一个按升序排列的链表，给你这个链表的头节点 head,
+      请你删除链表中所有存在数字重复情况的节点，只保留原始链表中 没有重复出现 的数字。
+      返回同样按升序排列的结果链表。
+    </div>
+    <a
+      href="https://leetcode-cn.com/problems/remove-duplicates-from-sorted-list-ii/"
+      >传送门</a
+    >
+  </body>
+</html>
