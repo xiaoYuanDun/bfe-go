@@ -8,9 +8,14 @@ function webpack(options) {
     return shellConfig
   }, {})
   let finalConfig = { ...options, ...shellConfig }
-  console.log(finalConfig)
   // 2. 用上一步得到的参数初始化 Compiler 对象
-  let compiler = new Compiler()
+  const compiler = new Compiler(finalConfig)
+  // 3. 加载所有配置的插件
+  const { plugins } = finalConfig
+  for (let plugin of plugins) {
+    plugin.apply(compiler)
+  }
+  return compiler
 }
 
 module.exports = webpack
