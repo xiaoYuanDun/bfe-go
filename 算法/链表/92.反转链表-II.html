@@ -1,89 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-    <script>
-      {
-        function ListNode(val, next) {
-          this.val = val === undefined ? 0 : val;
-          this.next = next === undefined ? null : next;
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+  <script>
+    {
+      function ListNode(val, next) {
+        this.val = val === undefined ? 0 : val;
+        this.next = next === undefined ? null : next;
+      }
+
+      const n1 = new ListNode(3);
+      const n2 = new ListNode(5);
+      // const n3 = new ListNode(3);
+      // const n4 = new ListNode(4);
+      // const n5 = new ListNode(5);
+      // const n6 = new ListNode(6);
+      // const n7 = new ListNode(7);
+
+      n1.next = n2;
+      // n2.next = n3;
+      // n3.next = n4;
+      // n4.next = n5;
+      // n5.next = n6;
+      // n6.next = n7;
+
+      // ---
+      var reverseBetween = function (head, left, right) {
+
+        if (head === null || head.next === null || left === right) {
+          return head
         }
 
-        const n1 = new ListNode(3);
-        const n2 = new ListNode(5);
-        // const n3 = new ListNode(3);
-        // const n4 = new ListNode(4);
-        // const n5 = new ListNode(5);
-        // const n6 = new ListNode(6);
-        // const n7 = new ListNode(7);
+        const start = new ListNode('-')
+        let pre = start
+        let cur = start.next = head
+        let next
 
-        n1.next = n2;
-        // n2.next = n3;
-        // n3.next = n4;
-        // n4.next = n5;
-        // n5.next = n6;
-        // n6.next = n7;
+        let ll, lr, rl, rr
+        let count = 1
+        let reverse = false
 
-        // ---
-        var reverseBetween = function (head, left, right) {
-          if (head === null || head.next === null) {
-            return head;
+        while (cur !== null) {
+          next = cur.next
+
+          if (count === left) {
+            ll = pre
+            lr = cur
+            reverse = true
           }
-
-          const start = new ListNode('');
-
-          let pre = null;
-          let cur = (start.next = head);
-          let next;
-
-          // 记录断点处的四个节点
-          let l_l, l_r, r_l, r_r;
-          let execReverse = false;
-          let count = 1;
-
-          while (cur !== null) {
-            next = cur.next;
-            if (cur.val === left) {
-              l_l = pre;
-              l_r = cur;
-              execReverse = true;
-            } else if (cur.val === right) {
-              r_l = cur;
-              r_r = next;
-            } else if (!!r_r && cur.val === r_r.val) {
-              execReverse = false;
-            }
-            if (execReverse) {
-              cur.next = pre;
-            }
-
-            pre = cur;
-            cur = next;
+          if (count === right) {
+            rl = cur
+            rr = next
+            cur.next = pre
+            reverse = false
           }
-          l_l.next = r_l;
-          l_r.next = r_r;
+          if (reverse) {
+            cur.next = pre
+          }
+          pre = cur
+          cur = next
+          count++
+        }
+        ll.next = rl
+        lr.next = rr
 
-          return start.next;
-        };
+        return start.next
+      };
 
-        const res = reverseBetween(n1, 1, 1);
-        console.log(res);
-      }
-    </script>
-  </head>
+      const res = reverseBetween(n1, 1, 1);
+      console.log(res);
+    }
+  </script>
+</head>
 
-  <body>
-    <div>
-      给你单链表的头指针 head 和两个整数 left 和 right ，其中 left <= right
-      。请你反转从位置 left 到位置 right 的链表节点，返回 反转后的链表 。
-    </div>
-    <p>tips:</p>
-    <p>{一些自己的理解}</p>
-    <a href="https://leetcode-cn.com/problems/reverse-linked-list-ii/"
-      >传送门</a
-    >
-  </body>
+<body>
+  <div>
+    给你单链表的头指针 head 和两个整数 left 和 right ，其中 left <= right 。请你反转从位置 left 到位置 right 的链表节点，返回 反转后的链表 。 </div>
+      <p>tips:</p>
+      <p>进阶: leecode-25</p>
+      <a href="https://leetcode-cn.com/problems/reverse-linked-list-ii/">传送门</a>
+</body>
+
 </html>
