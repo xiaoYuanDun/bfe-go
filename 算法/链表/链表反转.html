@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+	<script src='./LinkNode.js'></script>
+	<script>
+		{
+			const n1 = new ListNode('n1')
+			const n2 = new ListNode('n2')
+			const n3 = new ListNode('n3')
+			const n4 = new ListNode('n4')
+			n1.next = n2
+			n2.next = n3
+			n3.next = n4
+
+			// 链表头部节点
+			console.log(n1)
+
+			// 递归的方式
+			// function reverse(node, pre = null) {
+			// 	let next = node.next
+			// 	node.next = pre
+
+			// 	if(next !== null) {
+			// 		reverse(next, node)
+			// 	}
+			// }
+
+
+			// 优化 - 前序
+			function reverse(node) {
+
+				const newTail = node
+
+				let pre = null
+				let cur = node
+				let next 
+
+				while(next !== null) {
+					next = cur.next
+					cur.next = pre
+					pre = cur
+					cur = next
+				}
+
+				const newHead = pre
+
+				return [newHead, newTail]
+			}
+
+
+			const res = reverse(n1)
+
+			console.log(res)
+
+
+
+
+
+			const ans = new ListNode(1)
+			let head = new ListNode('h')
+
+			ans.next = head
+			head = head.next
+
+			console.log(ans.next)
+
+		}
+	</script>
+</head>
+
+<body>
+	链表反转
+</body>
+
+</html>
