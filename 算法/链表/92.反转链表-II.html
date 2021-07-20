@@ -1,88 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      {
+        function ListNode(val, next) {
+          this.val = val === undefined ? 0 : val;
+          this.next = next === undefined ? null : next;
+        }
 
-<head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Document</title>
-  <script>
-    {
-      function ListNode(val, next) {
-        this.val = val === undefined ? 0 : val;
-        this.next = next === undefined ? null : next;
+        const n1 = new ListNode(3);
+        // const n2 = new ListNode(5);
+        // const n3 = new ListNode(3);
+        // const n4 = new ListNode(4);
+        // const n5 = new ListNode(5);
+        // const n6 = new ListNode(6);
+        // const n7 = new ListNode(7);
+
+        // n1.next = n2;
+        // n2.next = n3;
+        // n3.next = n4;
+        // n4.next = n5;
+        // n5.next = n6;
+        // n6.next = n7;
+
+        /**
+         *  道题主要是处理截取子链表左右断点处的4个节点: left_left, left_right, right_left, right_right
+         *  对 [left, right] 区间内的子链表进行反转
+         *  之后处理四个节点的 next 指针进行拼接: left_left.next = right_left, left_right.next = right_right
+         *  借助一个 '哑节点[start]' start.next = head, 可以涵盖一些边界值处理, 不用单独提出来特殊处理
+         *  我这里写的方法只需要遍历一遍, 但是逻辑混在一个 while 里(变脸递增, 边界节点确认, 子链表反转, 一些边界值特殊处理)
+         *  看起来不是很清晰, 而且我这个反转链表的方法也不是最简便的, 下面改进一下
+         */
+
+        // var reverseBetween = function (head, left, right) {
+        //   if (head === null || head.next === null || left === right) {
+        //     return head;
+        //   }
+
+        //   const start = new ListNode('-');
+        //   let pre = start;
+        //   let cur = (start.next = head);
+        //   let next;
+
+        //   let ll, lr, rl, rr;
+        //   let count = 1;
+        //   let reverse = false;
+
+        //   while (cur !== null) {
+        //     next = cur.next;
+
+        //     if (count === left) {
+        //       ll = pre;
+        //       lr = cur;
+        //       reverse = true;
+        //     }
+        //     if (count === right) {
+        //       rl = cur;
+        //       rr = next;
+        //       cur.next = pre;
+        //       reverse = false;
+        //     }
+        //     if (reverse) {
+        //       cur.next = pre;
+        //     }
+        //     pre = cur;
+        //     cur = next;
+        //     count++;
+        //   }
+        //   ll.next = rl;
+        //   lr.next = rr;
+
+        //   return start.next;
+        // };
+
+        // ---------- ---------- ----------
+
+        /**
+         *  使用新的方式进行链表反转
+         *  反转节点的头节点肯定是新链表的尾节点, 简历一个 '哑结点': start.next = node(1)
+         *  遍历链表, 把每个遍历到的节点插入到链表头(即哑节点的 .next), 具体逻辑如下:
+         *  cur.next = next.next;
+         *  next.next = pre.next;
+         *  pre.next = next;
+         *
+         *  这种写法同时涵盖了 left 和 right 相等, 链表长度为 0, 1 的特殊情况
+         *
+         *  非常简洁, 逻辑清晰
+         */
+        var reverseBetween = function (head, left, right) {
+          const start = new ListNode('-');
+          start.next = head;
+
+          let pre = start;
+          for (let i = 0; i < left - 1; i++) {
+            pre = pre.next;
+          }
+
+          let cur = pre.next;
+          let next;
+          for (let i = 0; i < right - left; i++) {
+            next = cur.next;
+            cur.next = next.next;
+            next.next = pre.next;
+            pre.next = next;
+          }
+          return start.next;
+        };
+
+        const res = reverseBetween(n1, 1, 1);
+        console.log(res);
       }
+    </script>
+  </head>
 
-      const n1 = new ListNode(3);
-      const n2 = new ListNode(5);
-      // const n3 = new ListNode(3);
-      // const n4 = new ListNode(4);
-      // const n5 = new ListNode(5);
-      // const n6 = new ListNode(6);
-      // const n7 = new ListNode(7);
-
-      n1.next = n2;
-      // n2.next = n3;
-      // n3.next = n4;
-      // n4.next = n5;
-      // n5.next = n6;
-      // n6.next = n7;
-
-      // ---
-      var reverseBetween = function (head, left, right) {
-
-        if (head === null || head.next === null || left === right) {
-          return head
-        }
-
-        const start = new ListNode('-')
-        let pre = start
-        let cur = start.next = head
-        let next
-
-        let ll, lr, rl, rr
-        let count = 1
-        let reverse = false
-
-        while (cur !== null) {
-          next = cur.next
-
-          if (count === left) {
-            ll = pre
-            lr = cur
-            reverse = true
-          }
-          if (count === right) {
-            rl = cur
-            rr = next
-            cur.next = pre
-            reverse = false
-          }
-          if (reverse) {
-            cur.next = pre
-          }
-          pre = cur
-          cur = next
-          count++
-        }
-        ll.next = rl
-        lr.next = rr
-
-        return start.next
-      };
-
-      const res = reverseBetween(n1, 1, 1);
-      console.log(res);
-    }
-  </script>
-</head>
-
-<body>
-  <div>
-    给你单链表的头指针 head 和两个整数 left 和 right ，其中 left <= right 。请你反转从位置 left 到位置 right 的链表节点，返回 反转后的链表 。 </div>
-      <p>tips:</p>
-      <p>进阶: leecode-25</p>
-      <a href="https://leetcode-cn.com/problems/reverse-linked-list-ii/">传送门</a>
-</body>
-
+  <body>
+    <div>
+      给你单链表的头指针 head 和两个整数 left 和 right ，其中 left <= right
+      。请你反转从位置 left 到位置 right 的链表节点，返回 反转后的链表 。
+    </div>
+    <p>tips:</p>
+    <p>进阶: leecode-25</p>
+    <a href="https://leetcode-cn.com/problems/reverse-linked-list-ii/"
+      >传送门</a
+    >
+  </body>
 </html>
