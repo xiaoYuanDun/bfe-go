@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+  <script>
+    {
+      function ListNode(val, next) {
+        this.val = val === undefined ? 0 : val;
+        this.next = next === undefined ? null : next;
+      }
+
+      //  用例1
+      const n1 = new ListNode(1)
+      const n2 = new ListNode(2)
+      const n3 = new ListNode(3)
+
+      // n1.next = n2
+      // n2.next = n3
+      // n3.next = n2
+
+
+
+      //  最普通的思路, 遍历链表, 存储每个节点出现的情况, 只要有大于1次的, 表示成环
+      //  需要遍历整个链表, 复杂度 O(n)
+      // var hasCycle = function (head) {
+
+      //   const dict = new Map()
+
+      //   while (head !== null) {
+      //     if (dict.get(head)) {
+      //       return true
+      //     }
+      //     dict.set(head, 1)
+      //     head = head.next
+      //   }
+      //   return false
+      // };
+
+      // 尝试一下快慢指针, 无需额外的存储空间 dict
+
+      var hasCycle = function (head) {
+
+        if(head === null || head.next === null) return false
+        let fastCur = head.next
+        let slowCur = head
+
+        while (fastCur !== null && fastCur.next !== null) {
+          if (fastCur === slowCur) return true
+          fastCur = fastCur.next.next
+          slowCur = slowCur.next
+        }
+        return false
+      }
+
+      const res = hasCycle(n1)
+      console.log(res)
+
+    }
+  </script>
+</head>
+
+<body>
+  <div>给定一个链表，判断链表中是否有环。
+    如果链表中有某个节点，可以通过连续跟踪 next 指针再次到达，则链表中存在环。 为了表示给定链表中的环，我们使用整数 pos 来表示链表尾连接到链表中的位置（索引从 0 开始）。 如果 pos 是
+    -1，则在该链表中没有环。注意：pos 不作为参数进行传递，仅仅是为了标识链表的实际情况。
+    如果链表中存在环，则返回 true 。 否则，返回 false 。 </div>
+  <p>tips:</p>
+  <p>进阶: 你能用 O(1)（即，常量）内存解决此问题吗？</p>
+  <p>快慢指针, 如果存在环, 两个指针一定会在环里相遇</p>
+  <a href="https://leetcode-cn.com/problems/linked-list-cycle/">传送门</a>
+</body>
+
+</html>
