@@ -1,6 +1,7 @@
 const path = require('path')
 const RunPlugin = require('./plugins/run-plugin')
 const DownPlugin = require('./plugins/down-plugin')
+const AssetsPlugin = require('./plugins/assets-plugin')
 
 module.exports = {
   mode: 'development',
@@ -12,11 +13,11 @@ module.exports = {
   },
   output: {
     path: path.join(__dirname, 'dist'),
-    filename: '[name].js'
+    filename: '[name].js',
   },
-  plugins: [new RunPlugin(), new DownPlugin()],
+  plugins: [new RunPlugin(), new DownPlugin(), new AssetsPlugin()],
   resolve: {
-    extensions: ['.js', '.jsx', '.json']
+    extensions: ['.js', '.jsx', '.json'],
   },
   module: {
     rules: [

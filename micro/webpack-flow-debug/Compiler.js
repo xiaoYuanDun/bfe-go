@@ -15,7 +15,18 @@ class Compiler {
     this.hooks.run.call()
     // 4. 执行对象的 run 方法开始执行编译
     // 5. 根据配置中的 entry 找出入口文件
-    this.compiler(callback)
+    this.compiler((err, assets) => {
+      this.hooks.emit.call(assets)
+      callback(null, {
+        toJson: () => ({
+          entries: this.entries,
+          chunks: this.chunks,
+          modules: this.modules,
+          files: this.files,
+          assets: this.assets,
+        }),
+      })
+    })
     this.hooks.down.call()
     Object.values(this.options.entry).map((entry) => {
       fs.watchFile(entry, () => {
