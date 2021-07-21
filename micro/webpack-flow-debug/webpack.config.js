@@ -11,6 +11,9 @@ module.exports = {
     entry2: './src/index2.js',
   },
   plugins: [new RunPlugin(), new DownPlugin()],
+  resolve: {
+    extensions: ['.js', '.jsx', '.json']
+  },
   module: {
     rules: [
       {

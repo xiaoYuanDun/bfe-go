@@ -22,6 +22,7 @@ class Compiler {
         this.compiler(callback)
       })
     })
+    // 最后返回
     callback(null, {
       toJson() {
         return {

@@ -1,1 +1,2 @@
-console.log(1, 2, 3)
+const title = require('./title1')
+console.log(title)
