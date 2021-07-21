@@ -1,34 +1,147 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      {
+        function ListNode(val, next) {
+          this.val = val === undefined ? 0 : val;
+          this.next = next === undefined ? null : next;
+        }
 
-<head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Document</title>
-  <script>
-    {
-      function ListNode(val, next) {
-        this.val = val === undefined ? 0 : val;
-        this.next = next === undefined ? null : next;
+        // 用例1
+        const n1 = new ListNode(1);
+        const n2 = new ListNode(2);
+        const n3 = new ListNode(3);
+        const n4 = new ListNode(4);
+        const n5 = new ListNode(5);
+        const n6 = new ListNode(6);
+
+        n1.next = n2;
+        n2.next = n3;
+        n3.next = n4;
+        n4.next = n5;
+        n5.next = n6;
+
+        // 快慢指针确定中间节点位置
+        // 基本实现了, 但是 单数/双数 节点时, 分割节点的确定需要分别处理
+        // var reorderList = function (head) {
+        //   let fast = head;
+        //   let slow = head;
+
+        //   // 新增一个 pre 指针, 方便在找到中间节点后向前回溯
+        //   // 刚开始考虑是对后半段链表进行反转, 但这样要多遍历 N/2 个节点, 所以该用这种
+        //   let pre = head;
+        //   while (fast !== null && fast.next !== null) {
+        //     fast = fast.next.next;
+        //     pre = slow;
+        //     slow = slow.next;
+        //     slow.pre = pre;
+        //   }
+
+        //   // 从前半部分链表的尾节点开始向前回溯
+        //   // 1,2,3,4 和 1,2,3,4,5 的中间节点都是3, 但是回溯时的起始节点却不一样(分别是1,2)
+        //   // 若链表有奇数个节点, 则它的遍历总是以 cur.next === null 结束
+        //   // 若链表有偶数个节点, 则它的遍历总是以 cur === null 结束
+        //   // 以此为判断条件
+        //   if (fast !== null) {
+        //     leftPartCur = slow;
+        //   } else {
+        //     leftPartCur = pre;
+        //     delete slow.pre;
+        //   }
+
+        //   // 当前 slow 指针指向的节点一定是重排后的最后一个节点, 所以 .next = null, 不知道为什么可以画个图就清楚了
+        //   let rightPartCur = slow.next;
+        //   slow.next = null;
+
+        //   let rightNext;
+        //   while (rightPartCur !== null) {
+        //     pre = leftPartCur.pre;
+        //     rightNext = rightPartCur.next;
+        //     delete leftPartCur.pre;
+
+        //     // 把右子链表合适的节点插入左子链表
+        //     pre.next = rightPartCur;
+        //     rightPartCur.next = leftPartCur;
+
+        //     // 左子链表向前回溯
+        //     leftPartCur = pre;
+        //     // 右子链表向后遍历
+        //     rightPartCur = rightNext;
+        //   }
+        //   return leftPartCur;
+        // };
+
+        // 看看能不能精简一下
+        // 使用 快慢指针 + 链表反转 + 链表拼接
+        // 空间复杂度和上一个方法一样 O(1), 事件复杂度比上一个方法多了个链表反转, 基本无影响 O(n)
+        // 但是可以避免上一个方法确定中间点的逻辑, 因为拼接用的不是回溯
+        var reorderList = function (head) {
+          // 1. 找到中间节点
+          let fast = head;
+          let slow = head;
+          while (fast !== null && fast.next !== null) {
+            fast = fast.next.next;
+            slow = slow.next;
+          }
+
+          // 2. 右侧子链表反转
+          let next = slow.next;
+          // 断开链表
+          slow.next = null;
+          // 继续使用 slow 指针标记当前正在工作的节点
+          slow = next;
+          let pre = null;
+          while (next !== null) {
+            next = slow.next;
+            slow.next = pre;
+            pre = slow;
+            slow = next;
+          }
+
+          // 3. 链表拼接
+          let cur = head;
+          let curr = pre;
+          while (curr !== null) {
+            next = curr.next;
+            curr.next = cur.next;
+            cur.next = curr;
+
+            cur = curr.next;
+            curr = next;
+          }
+          return head;
+        };
+
+        const res = reorderList(n1);
+
+        console.log(res);
       }
+    </script>
+  </head>
 
-      //
-    }
-  </script>
-</head>
+  <body>
+    <div>
+      给定一个单链表 L 的头节点 head ，单链表 L 表示为：  L0 → L1 → … → Ln-1 →
+      Ln  请将其重新排列后变为： L0 → Ln → L1 → Ln-1 → L2 → Ln-2 → …
+      不能只是单纯的改变节点内部的值，而是需要实际的进行节点交换。
+    </div>
+    <p>tips:</p>
+    <p>
+      做了一些链表的题可以发现, 链表因为不能直接下标访问,
+      一般涉及到取中间位置或者某个特定位置的需求, 都可以用快慢指针来确定节点位置
+    </p>
+    <p>基本思路是:</p>
 
-<body>
-  <div>
-    给定一个单链表 L 的头节点 head ，单链表 L 表示为：
-     L0 → L1 → … → Ln-1 → Ln 
-    请将其重新排列后变为：
-    L0 → Ln → L1 → Ln-1 → L2 → Ln-2 → …
-    不能只是单纯的改变节点内部的值，而是需要实际的进行节点交换。
-  </div>
-  <p>tips:</p>
-  <p>{一些自己的理解}</p>
-  <a href="https://leetcode-cn.com/problems/reorder-list/">传送门</a>
-</body>
+    <p>1. 找到中间节点(快慢指针)</p>
+    <p>2. 分割链表, 确定两个子链表的开头位置</p>
+    <p>1. 找到中间节点(快慢指针)</p>
+    3. 反转右侧子链表 4. 对两个子链表进行条件拼接
 
+    <a href="https://leetcode-cn.com/problems/reorder-list/">传送门</a>
+  </body>
 </html>
