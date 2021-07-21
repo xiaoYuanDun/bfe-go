@@ -10,6 +10,10 @@ module.exports = {
     entry1: './src/index.js',
     entry2: './src/index2.js',
   },
+  output: {
+    path: path.join(__dirname, 'dist'),
+    filename: '[name].js'
+  },
   plugins: [new RunPlugin(), new DownPlugin()],
   resolve: {
     extensions: ['.js', '.jsx', '.json']

@@ -12,7 +12,7 @@ class Complication {
     this.entries = [] // 存放所有的入口文件
     this.modules = [] // 存放所有的模块
     this.chunks = [] // 存放所有的代码块
-    this.assets = [] // 存放所有的产出资源
+    this.assets = {} // 存放所有的产出资源
     this.files = [] // 存放所有的产出文件
   }
   build(callback) {
@@ -30,8 +30,33 @@ class Complication {
       //6. 从入口文件出发,调用所有配置的 Loader 对模块进行编译
       let entryModule = this.buildModule(entryName, entryFilePath)
       this.modules.push(entryModule)
+      // 8. 根据入口和模块之间的依赖关系，组装成一个个包含多个模块的 Chunk
+      // entryModule 是入口的模块，modules是依赖的模块
+      let chunk = { name: entryName, entryModule, modules: this.modules.filter(item => item.name === entryName) }
+      this.entries.push(chunk)
+      this.chunks.push(chunk)
     }
-    console.log(this.modules)
+    // 9. 再把每个 Chunk 转换成一个单独的文件加入到输出列表
+    this.chunks.forEach(chunk => {
+      let filename = this.options.output.filename.replace('[name]', chunk.name)
+      // this.assets就是输出列表，key就是文件名，值就是输出内容
+      this.assets[filename] = getSource(chunk)
+    })
+    // 10. 在确定好输出内容后，根据配置确定输出的路径和文件名，把文件内容写入到文件系统
+    this.files = Object.keys(this.assets)
+    for (let file of this.files) {
+      const filePath = path.join(this.options.output.path, file)
+      fs.writeFileSync(filePath, this.assets[file], 'utf8')
+    }
+    callback(null, {
+      toJson: () => ({
+        entries: this.entries,
+        chunks: this.chunks,
+        modules: this.modules,
+        files: this.files,
+        assets: this.assets
+      })
+    })
   }
   buildModule(name, modulePath) {
     // 6. 从入口文件出发,调用所有配置的 Loader 对模块进行编译
@@ -62,8 +87,9 @@ class Complication {
           let depModulePath = path.posix.join(dirname, moduleName)
           let extensions = this.options.resolve.extensions
           depModulePath = tryExtension(depModulePath, extensions)
-          // 得到依赖的模块id ./src/index.js
-          const depModuleId = path.posix.relative(baseDir, depModulePath)
+          // 得到依赖的模块id ./src/index.js 
+          // 相对于项目根目录 的相对路径 ./src/title1.js
+          const depModuleId = './' + path.posix.relative(baseDir, depModulePath)
           // require('./index) => require('./src/index.js)
           node.arguments = [types.stringLiteral(depModuleId)]
           // 依赖的模块id放到当前模块的依赖数组里
@@ -72,7 +98,8 @@ class Complication {
       }
     })
     // 生成新的代码
-    let code = generator(ast)
+    let { code } = generator(ast)
+
     module._source = code // 模块源代码指向语法树转换后新生成的源代码
     // 7. 再找出该模块依赖的模块，再递归本步骤直到所有入口依赖的文件都经过了本步骤的处理
     module.dependencies.forEach((depModulePath) => {
@@ -81,6 +108,38 @@ class Complication {
     })
     return module
   }
+}
+
+function getSource(chunk) {
+  return `
+  (() => {
+      var modules = ({
+          ${chunk.modules.map(module => `
+                  "${module.id}":(module,exports,require)=>{
+                      ${module._source}
+                  }
+              `).join(',')
+    }
+      });
+      var cache = {};
+      function require(moduleId) {
+        var cachedModule = cache[moduleId];
+        if (cachedModule !== undefined) {
+          return cachedModule.exports;
+        }
+        var module = cache[moduleId] = {
+          exports: {}
+        };
+        modules[moduleId](module, module.exports, require);
+        return module.exports;
+      }
+      var exports = {};
+      (() => {
+       ${chunk.entryModule._source}
+      })();
+    })()
+      ;
+  `
 }
 
 function tryExtension(modulePath, extensions) {

@@ -12,5 +12,5 @@ compiler.run((err, stats) => {
     module: true, //模块信息
     entries: true, //入口信息
   })
-  console.log(JSON.stringify(result, null, 2))
+  // console.log(JSON.stringify(result, null, 2))
 })
