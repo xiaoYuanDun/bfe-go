@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="./LinkNode.js"></script>
+    <script>
+      {
+        const n1 = new ListNode('n1');
+        const n2 = new ListNode('n2');
+        const n3 = new ListNode('n3');
+        const n4 = new ListNode('n4');
+
+        n1.next = n2;
+        n2.next = n3;
+        n3.next = n4;
+
+        // 递归
+        // function reverseList(node, pre = null) {
+        //   if (!node) return null;
+
+        //   const next = node.next;
+        //   node.next = pre;
+
+        //   if (!!next) {
+        //     return reverseList(next, node);
+        //   }
+        //   return node;
+        // }
+
+        // 迭代 - 玩弄 pre, cur, next 指针, 逻辑和上面一样, 只不过换成迭代写法
+        // function reverseList(head) {
+        //   let pre = null;
+        //   let cur = head;
+        //   let next;
+
+        //   while (!!cur) {
+        //     next = cur.next;
+        //     cur.next = pre;
+        //     pre = cur;
+        //     cur = next;
+        //   }
+        //   return pre;
+        // }
+
+        // 插入 - 遍历元素, 每遍历一个节点, 就插入到链表头部
+        function reverseList(head) {
+          const dummyHead = new ListNode('-');
+          let cur = head;
+
+          let next;
+          while (!!cur) {
+            next = cur.next;
+            cur.next = dummyHead.next;
+            dummyHead.next = cur;
+            cur = next;
+          }
+          return dummyHead.next;
+        }
+
+        const res = reverseList(n1);
+        console.log(res);
+      }
+    </script>
+  </head>
+
+  <body>
+    <div>给你单链表的头节点 head ，请你反转链表，并返回反转后的链表。</div>
+    <p>tips:</p>
+    <p>很简单, 基础算法</p>
+    <a href="https://leetcode-cn.com/problems/reverse-linked-list/">传送门</a>
+  </body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      {
+        function ListNode(val, next) {
+          this.val = val === undefined ? 0 : val;
+          this.next = next === undefined ? null : next;
+        }
+
+        // 用例1
+        const n1 = new ListNode('2');
+        const n2 = new ListNode('1');
+        const n3 = new ListNode('1');
+        const n4 = new ListNode('2');
+
+        n1.next = n2;
+        n2.next = n3;
+        n3.next = n4;
+
+        // 简单
+        var isPalindrome = function (head) {
+          // 快门指针找到中间节点, 构建回溯指针
+          let fast = head;
+          let slow = head;
+          let pre = null;
+          while (!!fast && !!fast.next) {
+            fast = fast.next.next;
+            pre = slow;
+            slow = slow.next;
+            slow.pre = pre;
+          }
+
+          // 确定左右起点, 开始遍历比较
+          let left;
+          // 处理一下单双数节点的边界值, 同时删除临时变量 pre
+          if (fast !== null) {
+            left = slow;
+          } else {
+            left = pre;
+            delete slow.pre;
+          }
+
+          let right = slow;
+          while (!!right) {
+            if (left.val !== right.val) {
+              return false;
+            }
+            // 修改 left 指针前移, 并且删除临时 pre 标识
+            pre = left.pre;
+            delete left.pre;
+            left = pre;
+            right = right.next;
+          }
+          return true;
+        };
+
+        const res = isPalindrome(n1);
+
+        console.log(res);
+      }
+    </script>
+  </head>
+
+  <body>
+    <div>https://leetcode-cn.com/problems/palindrome-linked-list/</div>
+    <p>tips:</p>
+    <p>
+      关于回文问题一般拿来比较的数据结构是链表和数组, 看看<a
+        href="https://leetcode-cn.com/problems/palindrome-linked-list/solution/hui-wen-lian-biao-by-leetcode-solution/"
+        >题解</a
+      >
+    </p>
+    <a href="https://leetcode-cn.com/problems/palindrome-linked-list/"
+      >传送门</a
+    >
+  </body>
+</html>
