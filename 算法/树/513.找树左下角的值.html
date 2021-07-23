@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      {
+        function TreeNode(val, left, right) {
+          this.val = val === undefined ? 0 : val;
+          this.left = left === undefined ? null : left;
+          this.right = right === undefined ? null : right;
+        }
+
+        // 用例1
+        const n1 = new TreeNode(1);
+        const n2 = new TreeNode(2);
+        const n3 = new TreeNode(3);
+        const n4 = new TreeNode(4);
+        const n5 = new TreeNode(5);
+        const n6 = new TreeNode(6);
+        const n7 = new TreeNode(7);
+
+        n1.left = n2;
+        n1.right = n3;
+        n2.right = n4;
+        n3.left = n5;
+        n3.right = n6;
+        n5.right = n7;
+
+        // 这道题不用记录层级, 也无需关注每层的所有节点, 值关注每层的第一个节点
+        var findBottomLeftValue = function (root) {
+          // bfs 时, 使用的是队列的特性
+          const queue = root ? [root] : [];
+
+          let res = null;
+          // 只要 queue 里还有节点, 表示还有下一层
+          while (queue.length) {
+            // 用来控制层次, 每次遍历前获取下一层的节点数, 遍历够数量后, 表示当前层遍历完毕
+            let len = queue.length;
+            let node;
+            for (let i = 0; i < len; i++) {
+              // 已经处理过的节点丢弃, 从头部删除, 队列的特点: 先进先出
+              node = queue.shift();
+              if (i === 0) {
+                res = node.val;
+              }
+              // 继续构建当前节点的下层节点, 入队列
+              if (node.left) queue.push(node.left);
+              if (node.right) queue.push(node.right);
+            }
+          }
+          return res;
+        };
+
+        // 改变一下判断最左侧节点的逻辑
+        // 因为每次 for 循环都要判断一次当点节点是否为这一层的第一个节点, 有多余判断的情况
+        // 所以我们在做 '把当前节点的下层节点入队列' 的操作时, 直接从右向左入队列, 这样每层的最后一个节点就是最左侧的节点了
+        var findBottomLeftValue = function (root) {
+          const queue = root ? [root] : [];
+          let res = null;
+
+          while (queue.length) {
+            let len = queue.length;
+            let node;
+            for (let i = 0; i < len; i++) {
+              node = queue.shift();
+              if (node.right) queue.push(node.right);
+              if (node.left) queue.push(node.left);
+              res = node.val;
+            }
+          }
+          return res;
+        };
+
+        const res = findBottomLeftValue(n1);
+        console.log(res);
+      }
+    </script>
+  </head>
+
+  <body>
+    <div>
+      给定一个二叉树的 根节点 root，请找出该二叉树的 最底层 最左边 节点的值。
+      假设二叉树中至少有一个节点。
+    </div>
+    <p>tips:</p>
+    <p>
+      题目要求找到最底层, 那么应该想到要使用 BFS, 记录每一层的第一个节点,
+      知道遍历完毕
+    </p>
+    <a href="https://leetcode-cn.com/problems/find-bottom-left-tree-value/"
+      >传送门</a
+    >
+  </body>
+</html>

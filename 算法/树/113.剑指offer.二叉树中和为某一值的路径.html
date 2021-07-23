@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      {
+        function TreeNode(val, left, right) {
+          this.val = val === undefined ? 0 : val;
+          this.left = left === undefined ? null : left;
+          this.right = right === undefined ? null : right;
+        }
+
+        // 用例1
+        // const n1 = new TreeNode(5);
+        // const n2 = new TreeNode(4);
+        // const n3 = new TreeNode(8);
+        // const n4 = new TreeNode(11);
+        // const n5 = new TreeNode(13);
+        // const n6 = new TreeNode(4);
+        // const n7 = new TreeNode(7);
+        // const n8 = new TreeNode(2);
+        // const n9 = new TreeNode(5);
+        // const n10 = new TreeNode(1);
+
+        // n1.left = n2;
+        // n1.right = n3;
+        // n2.left = n4;
+        // n3.left = n5;
+        // n3.right = n6;
+        // n4.left = n7;
+        // n4.right = n8;
+        // n6.left = n9;
+        // n6.right = n10;
+
+        // 用例2
+        // const n1 = new TreeNode(1);
+        // const n2 = new TreeNode(2);
+        // n1.left = n2;
+
+        // 用例3
+        const n1 = new TreeNode(-2);
+        const n2 = new TreeNode(-3);
+        n1.right = n2;
+
+        // 第一感觉是用 dfs + 回溯
+        // var pathSum = function (root, target) {
+        //   function dfs(root, prev, path = []) {
+        //     const now = prev - root.val;
+        //     // 这题目有个大坑, 路径的终点必须是叶子节点, 前几次做的时候没看到
+        //     if (now === 0 && !root.left && !root.right)
+        //       return res.push([...path, root.val]);
+        //     // 还有个坑, 节点值不一定是正数, 所以不能简单用 > 判断是否达到条件
+        //     // 假设有 1, 10, -3 三个节点, target = 8, 若达到 1->10 时, 和为11 就跳出 dfs 的话, 会忽略下边的 -3
+        //     // 所以一定要遍历到最底层
+        //     if (!!root.left) dfs(root.left, now, [...path, root.val]);
+        //     if (!!root.right) dfs(root.right, now, [...path, root.val]);
+        //   }
+
+        //   const res = [];
+        //   if (!root) return res;
+        //   dfs(root, target);
+        //   return res;
+        // };
+
+        // 上面这个有点问题, 就是每次调用 dfs 的时候, 都会进行 path 数组的浅拷贝, 这里优化一下
+        var pathSum = function (root, target) {
+          // dfs 的判断条件是全局共享的
+          const path = [];
+          const res = [];
+
+          // 每次进入 dfs, 动态改变 now, 添加当前 path; 退出 dfs 时, 改回 now, 弹出 path 末尾
+          function dfs(root, sum) {
+            if (!root) return;
+            sum -= root.val;
+            path.push(root.val);
+
+            if (sum === 0 && !root.left && !root.right) res.push([...path]);
+            dfs(root.left, sum);
+            dfs(root.right, sum);
+
+            path.pop();
+          }
+
+          dfs(root, target);
+          return res;
+        };
+
+        const res = pathSum(n1, -5);
+        console.log(res);
+      }
+    </script>
+  </head>
+
+  <body>
+    <div>
+      输入一棵二叉树和一个整数，打印出二叉树中节点值的和为输入整数的所有路径。从树的根节点开始往下一直到叶节点所经过的节点形成一条路径。
+    </div>
+    <p>tips:</p>
+    <p>{一些自己的理解}</p>
+    <a
+      href="https://leetcode-cn.com/problems/er-cha-shu-zhong-he-wei-mou-yi-zhi-de-lu-jing-lcof/"
+      >传送门</a
+    >
+  </body>
+</html>
