@@ -61,3 +61,9 @@ https://leetcode-cn.com/problems/sum-of-root-to-leaf-binary-numbers/
 https://leetcode-cn.com/problems/binary-tree-pruning/
 
 1325
+
+<!-- 中序 -->
+
+https://leetcode-cn.com/problems/kth-smallest-element-in-a-bst/
+
+https://leetcode-cn.com/problems/validate-binary-search-tree/

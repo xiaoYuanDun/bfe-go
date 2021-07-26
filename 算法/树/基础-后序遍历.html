@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      {
+        function TreeNode(val, left, right) {
+          this.val = val === undefined ? 0 : val;
+          this.left = left === undefined ? null : left;
+          this.right = right === undefined ? null : right;
+        }
+
+        // 用例1
+        const n1 = new TreeNode(1);
+        const n2 = new TreeNode(2);
+        const n3 = new TreeNode(3);
+        const n4 = new TreeNode(4);
+        const n5 = new TreeNode(5);
+        const n6 = new TreeNode(6);
+
+        n1.left = n2;
+        n1.right = n3;
+        // n2.left = n4;
+        // n4.right = n5;
+        // n3.left = n6;
+
+        // 递归 - 没啥可说的
+        var postorderTraversal = function (_root) {
+          function dfs(root) {
+            if (!root) return;
+            dfs(left);
+            dfs(right);
+            res.push(root.val);
+          }
+          let res = [];
+          dfs(_root);
+          return res;
+        };
+
+        // 迭代
+        var postorderTraversal = function (_root) {
+          let res = [];
+          let stack = root ? [root] : [];
+
+          let item;
+          while ((item = stack.pop())) {
+            if (item.right) stack.push(item.right);
+            if (item.left) stack.push(item.left);
+          }
+          return res;
+        };
+
+        const res = postorderTraversal(n1);
+        console.log(res);
+      }
+    </script>
+  </head>
+
+  <body>
+    <div>基础的遍历: 后序遍历</div>
+  </body>
+</html>
