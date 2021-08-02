@@ -19,13 +19,12 @@
         const n3 = new TreeNode(3);
         const n4 = new TreeNode(4);
         const n5 = new TreeNode(5);
-        const n6 = new TreeNode(6);
+        // const n6 = new TreeNode(6);
 
         n1.left = n2;
         n1.right = n3;
-        // n2.left = n4;
-        // n4.right = n5;
-        // n3.left = n6;
+        n3.left = n4;
+        n3.right = n5;
 
         // 递归 - 没啥可说的
         var postorderTraversal = function (_root) {
@@ -40,15 +39,56 @@
           return res;
         };
 
-        // 迭代
-        var postorderTraversal = function (_root) {
+        // 迭代 - 使用一个 visible 判断是否操作过当前节点
+        // 临界条件: 1.访问过的, 直接返回值 2.叶子节点, 直接返回 3.首次访问, 当前节点改变访问状态, 判断子节点
+        var postorderTraversal = function (root) {
           let res = [];
-          let stack = root ? [root] : [];
+          let stack = root ? [{ node: root }] : [];
 
           let item;
           while ((item = stack.pop())) {
-            if (item.right) stack.push(item.right);
-            if (item.left) stack.push(item.left);
+            const { visited, node } = item;
+
+            if (visited) {
+              res.push(node.val);
+              continue;
+            }
+
+            if (!node.left && !node.right) {
+              res.push(node.val);
+              continue;
+            }
+
+            stack.push({ node, visited: 1 });
+            if (node.right) stack.push({ node: node.right });
+            if (node.left) stack.push({ node: node.left });
+          }
+          return res;
+        };
+
+        // 迭代 - 2
+        // 上面的方法是通过构建一个 visited 变量控制每个节点的访问状态
+        // 这里, 也可以通过记录上一轮出栈的结果来判断当前节点是否可以出栈(所有子节点已出栈)
+        var postorderTraversal = function (root) {
+          let res = [];
+          let stack = root ? [root] : [];
+          let pre;
+
+          while (stack.length) {
+            // 注意这里的 top 取值, 因为当前节点在这一轮循环中不一样要出栈, 所以用下标来访问
+            const top = stack[stack.length - 1];
+
+            if (
+              (!top.left && !top.right) ||
+              top.left === pre ||
+              top.right === pre
+            ) {
+              pre = stack.pop();
+              res.push(pre.val);
+              continue;
+            }
+            if (top.right) stack.push(top.right);
+            if (top.left) stack.push(top.left);
           }
           return res;
         };
