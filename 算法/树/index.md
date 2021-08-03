@@ -10,7 +10,7 @@
 
 ~~https://leetcode-cn.com/problems/er-cha-shu-zhong-he-wei-mou-yi-zhi-de-lu-jing-lcof/~~
 
-https://leetcode-cn.com/problems/longest-zigzag-path-in-a-binary-tree/
+~~https://leetcode-cn.com/problems/longest-zigzag-path-in-a-binary-tree/~~
 
 https://github.com/azl397985856/leetcode/blob/master/problems/886.possible-bipartition.md
 
