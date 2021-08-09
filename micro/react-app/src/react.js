@@ -1,3 +1,4 @@
+import { findDOM } from './react-dom'
 import { wrapToVdom } from './utils'
 
 function createElement(type, config, children) {
@@ -27,11 +28,31 @@ class Updater {
   }
   addState = (partialState) => {
     this.pendingState.push(partialState)
-
+    this.emitUpdate()
   }
   emitUpdate = () => {
-
+    this.updateComponent()
   }
+  updateComponent = () => {
+    const { classInstance, pendingState } = this
+    if(pendingState.length) {
+      shouldUpdate(classInstance, this.getState())
+    }
+  }
+  getState = () => {
+    const {classInstance,pendingState} = this
+    let {state} = classInstance
+    pendingState.forEach((partialState) => {
+      state = {...state, ...partialState}
+    })
+    pendingState.length = 0 // 清空等待生效的状态的数组
+    return state
+  }
+}
+
+function shouldUpdate(classInstance, nextState) {
+  classInstance.state = nextState
+  classInstance.forceUpdate() // 强制更新
 }
 
 class Component {
@@ -40,8 +61,17 @@ class Component {
     this.props = props
     this.updater = new Updater(this)
   }
+  // 类组件更新
   setState(partialState) {
     this.updater.addState(partialState)
+  }
+
+  // 根据新的属性状态，计算新的要渲染的虚拟DOM
+  forceUpdate() {
+    console.log('Component forceUpdate')
+    let oldRenderVdom = this.oldRenderVdom // 上一次render方法计算得到的虚拟DOM
+    let oldDom = oldRenderVdom.dom
+    oldDom = findDOM(oldRenderVdom) // 获取oldRenderVdom对应的真实DOM
   }
 }
 

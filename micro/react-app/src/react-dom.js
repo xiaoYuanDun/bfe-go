@@ -38,15 +38,16 @@ function createDom(vdom) {
       reconcileChildren(child, dom)
     }
   }
+  vdom.dom = dom
   return dom
 }
 
 // 类组件渲染
 function mountClassComponent(vdom) {
   const { type: ClassComponent, props } = vdom
-  const instance = new ClassComponent(props)
-  const renderdom = instance.render()
-  vdom.oldRenderVdom = renderdom
+  const classInstance = new ClassComponent(props)
+  const renderdom = classInstance.render()
+  classInstance.oldRenderVdom = vdom.oldRenderVdom = renderdom
   return createDom(renderdom)
 }
 
@@ -78,6 +79,14 @@ function updateProps(dom, oldProps, newProps) {
     } else {
       dom[key] = newProps[key]
     }
+  }
+}
+
+export function findDOM (vdom) {
+  if(vdom.dom){
+    return vdom.dom
+  } else{
+    return findDOM(vdom.oldRenderVdom)
   }
 }
 
