@@ -20,7 +20,33 @@ function createElement(type, config, children) {
   return { type, ref, key, props }
 }
 
+class Updater {
+  constructor(classInstance) {
+    this.classInstance = classInstance
+    this.pendingState = [] // 等待生效的数组
+  }
+  addState = (partialState) => {
+    this.pendingState.push(partialState)
+
+  }
+  emitUpdate = () => {
+
+  }
+}
+
+class Component {
+  static isReactComponent = true
+  constructor(props) {
+    this.props = props
+    this.updater = new Updater(this)
+  }
+  setState(partialState) {
+    this.updater.addState(partialState)
+  }
+}
+
 const React = {
-  createElement
+  createElement,
+  Component
 }
 export default React
