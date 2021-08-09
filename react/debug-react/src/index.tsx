@@ -25,7 +25,7 @@ import ReactDOM from 'react-dom';
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
 
-// React.createElement, ReactDOM.render 调试用例
+// React.createElement, ReactDOM.render 调试用例, ./debug_01
 
 import FC1 from './debug_01/FunctionComponent1';
 import CC1 from './debug_01/ClassComponent1';
