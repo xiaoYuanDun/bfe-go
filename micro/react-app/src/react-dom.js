@@ -1,5 +1,5 @@
 import { REACT_TEXT } from "./constant"
-
+import { addEvent } from './event'
 function render(vdom, container) {
   mount(vdom, container)
 }
@@ -11,7 +11,7 @@ function mount(vdom, parentDOM) {
   }
 }
 
-function createDom(vdom) {
+export function createDom(vdom) {
   if (!vdom) {
     return null
   }
@@ -74,18 +74,31 @@ function updateProps(dom, oldProps, newProps) {
       for (const attr in styleObj) {
         dom.style[attr] = styleObj[attr]
       }
-    } else if (key.startsWith('on')) {
-      dom[key.toLocaleLowerCase()] = newProps[key]
+    } else if (key.startsWith('on')) { // 绑定事件
+      addEvent(dom, key.toLocaleLowerCase(), newProps[key]) // 合成事件
+      // dom[key.toLocaleLowerCase()] = newProps[key] 
     } else {
       dom[key] = newProps[key]
     }
   }
 }
 
-export function findDOM (vdom) {
-  if(vdom.dom){
+/**
+ * diff算法比较
+ * @param {*} parentDOM 
+ * @param {*} oldVdom 
+ * @param {*} newVdom 
+ */
+export function compareTwoVdom(parentDOM, oldVdom, newVdom) {
+  let oldDOM = findDOM(oldVdom)
+  let newDOM = createDom(newVdom)
+  parentDOM.replaceChild(newDOM, oldDOM) // 直接替换节点，没有做任何优化
+}
+
+export function findDOM(vdom) {
+  if (vdom.dom) {
     return vdom.dom
-  } else{
+  } else {
     return findDOM(vdom.oldRenderVdom)
   }
 }
