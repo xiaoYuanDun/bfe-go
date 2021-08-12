@@ -1,4 +1,4 @@
-import { REACT_TEXT } from "./constant"
+import { REACT_FORWARD_REF, REACT_TEXT } from "./constant"
 import { addEvent } from './event'
 function render(vdom, container) {
   mount(vdom, container)
@@ -16,9 +16,12 @@ export function createDom(vdom) {
     return null
   }
   let dom; // 真实dom
-  let { type, props } = vdom
+  let { type, props, ref } = vdom
   if (type === REACT_TEXT) {
     dom = document.createTextNode(props.content)
+  }
+  else if (type && type.$$typeof === REACT_FORWARD_REF) {
+    return mountForwardComponent(vdom) // 渲染有ref的函数组件
   } else if (typeof type === 'function') {
     if (type.isReactComponent) {
       return mountClassComponent(vdom)
@@ -39,16 +42,32 @@ export function createDom(vdom) {
     }
   }
   vdom.dom = dom
+  // 假如有ref，则给ref赋上当前的dom
+  if (ref) {
+    ref.current = dom
+  }
   return dom
 }
 
+
 // 类组件渲染
 function mountClassComponent(vdom) {
-  const { type: ClassComponent, props } = vdom
+  const { type: ClassComponent, props, ref } = vdom
   const classInstance = new ClassComponent(props)
+  if (ref) { // 类组件的ref就是类本身
+    ref.current = classInstance
+  }
   const renderdom = classInstance.render()
   classInstance.oldRenderVdom = vdom.oldRenderVdom = renderdom
   return createDom(renderdom)
+}
+
+// 有ref的函数组件
+function mountForwardComponent(vdom) {
+  const { type, props, ref } = vdom
+  const renderVdom = type.render(props, ref)
+  vdom.oldRenderVdom = renderVdom
+  return createDom(renderVdom)
 }
 
 // 函数式组件渲染

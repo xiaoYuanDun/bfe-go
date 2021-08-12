@@ -10,42 +10,26 @@ import ReactDom from './react-dom'
 //   }
 // }, 'hello', React.createElement('span', null, 'world'))
 
-const FunctionComponent2 = (props) => {
-  return <h1>{props.title}</h1>
+const FunctionComponent2 = (props, forwardRef) => {
+  return <input ref={forwardRef} />
 }
+// ref不能通过props传递下去
+const RefElement = React.forwardRef(FunctionComponent2)
 
-const FunctionComponent = (props) => {
-  return <FunctionComponent2 {...props} />
-}
-// 类组件
-class ReactClass extends React.Component {
+class Form extends React.Component {
   constructor(props) {
     super(props)
-    this.state = {
-      count: 1
-    }
+    this.inputRef = React.createRef()
   }
-  handleAddCount = () => {
-    this.setState({ count: this.state.count + 1 })
-    console.log(this.state.count)
-    this.setState({ count: this.state.count + 1 })
-    console.log(this.state.count)
+  handleFocus = () => {
+    this.inputRef.current.focus()
   }
   render() {
-    return <div onClick={this.handleAddCount}>{this.state.count}</div>
+    return <div>
+      <RefElement ref={this.inputRef} />
+      <button onClick={this.handleFocus}>点击输入焦点</button>
+    </div>
   }
 }
 
-// 函数式组件
-const element2 = React.createElement(
-  FunctionComponent, {
-  title: '标题1'
-}
-)
-
-// 类组件
-const class1Component = React.createElement(ReactClass, {
-  title: '标题2'
-})
-
-ReactDom.render(class1Component, document.getElementById('root'))
+ReactDom.render(<Form />, document.getElementById('root'))

@@ -1,5 +1,6 @@
 
 import { Component } from './Component'
+import { REACT_FORWARD_REF } from './constant'
 import { wrapToVdom } from './utils'
 
 function createElement(type, config, children) {
@@ -22,10 +23,23 @@ function createElement(type, config, children) {
   return { type, ref, key, props }
 }
 
+function createRef() {
+  return {
+    current: null
+  }
+}
 
+function forwardRef(render) { // 创建一个函数组件的ref
+  return {
+    $$typeof: REACT_FORWARD_REF,
+    render
+  }
+}
 
 const React = {
   createElement,
-  Component
+  Component,
+  createRef,
+  forwardRef
 }
 export default React
