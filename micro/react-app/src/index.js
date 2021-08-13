@@ -19,14 +19,43 @@ const RefElement = React.forwardRef(FunctionComponent2)
 class Form extends React.Component {
   constructor(props) {
     super(props)
-    this.inputRef = React.createRef()
+    this.state = {
+      number: 0
+    }
+    console.log('constructor')
   }
+
+  componentWillMount() {
+    console.log('componentWillMount')
+  }
+
+  componentDidMount() {
+    console.log('componentDidMount')
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    console.log('shouldComponentUpdate')
+    return nextState.number % 2 === 0
+  }
+
+  componentWillUpdate() {
+    console.log('componentWillUpdate')
+  }
+
+  componentDidUpdate() {
+    console.log('componentDidUpdate')
+  }
+
+
+
   handleFocus = () => {
-    this.inputRef.current.focus()
+    this.setState({
+      number: this.state.number + 1
+    })
   }
   render() {
     return <div>
-      <RefElement ref={this.inputRef} />
+      {this.state.number}
       <button onClick={this.handleFocus}>点击输入焦点</button>
     </div>
   }

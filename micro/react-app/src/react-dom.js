@@ -1,13 +1,12 @@
 import { REACT_FORWARD_REF, REACT_TEXT } from "./constant"
 import { addEvent } from './event'
-function render(vdom, container) {
-  mount(vdom, container)
-}
-
-function mount(vdom, parentDOM) {
-  const dom = createDom(vdom)
-  if (dom) {
-    parentDOM.appendChild(dom)
+function render(vdom, parentDOM) {
+  const newDom = createDom(vdom)
+  if (newDom) {
+    parentDOM.appendChild(newDom)
+    if (newDom._componentDidMount) {
+      newDom._componentDidMount()
+    }
   }
 }
 
@@ -36,7 +35,7 @@ export function createDom(vdom) {
     updateProps(dom, {}, props)
     const child = props.children
     if (typeof child === 'object' && child.type) {
-      mount(props.children, dom)
+      render(props.children, dom)
     } else if (Array.isArray(child)) {
       reconcileChildren(child, dom)
     }
@@ -57,9 +56,16 @@ function mountClassComponent(vdom) {
   if (ref) { // 类组件的ref就是类本身
     ref.current = classInstance
   }
+  if (classInstance.componentWillMount) {
+    classInstance.componentWillMount()
+  }
   const renderdom = classInstance.render()
   classInstance.oldRenderVdom = vdom.oldRenderVdom = renderdom
-  return createDom(renderdom)
+  let dom = createDom(renderdom)
+  if (classInstance.componentDidMount) {
+    dom._componentDidMount = classInstance.componentDidMount.bind(classInstance)
+  }
+  return dom
 }
 
 // 有ref的函数组件
@@ -80,7 +86,7 @@ function mountFunctionComponent(vdom) {
 }
 
 function reconcileChildren(childrenVdom, parentDOM) {
-  childrenVdom.forEach(v => mount(v, parentDOM))
+  childrenVdom.forEach(v => render(v, parentDOM))
 }
 
 function updateProps(dom, oldProps, newProps) {

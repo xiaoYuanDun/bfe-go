@@ -21,8 +21,9 @@ class Updater {
     this.pendingState.push(partialState)
     this.emitUpdate()
   }
-  // 触发更新
-  emitUpdate = () => {
+  // 触发更新 状态和属性变化都可能会执行这个方法
+  emitUpdate = (nextProps) => {
+    this.nextProps = nextProps
     if (updateQueue.isBatchingUpdate) {
       updateQueue.updaters.push(this)
     } else {
@@ -30,9 +31,9 @@ class Updater {
     }
   }
   updateComponent = () => {
-    const { classInstance, pendingState } = this
-    if (pendingState.length) {
-      shouldUpdate(classInstance, this.getState())
+    const { classInstance, nextProps, pendingState } = this
+    if (nextProps || pendingState.length) {
+      shouldUpdate(classInstance, this.nextProps, this.getState())
     }
   }
   getState = () => {
@@ -49,9 +50,25 @@ class Updater {
   }
 }
 
-function shouldUpdate(classInstance, nextState) {
+function shouldUpdate(classInstance, nextProps, nextState) {
+  let willUpdate = true// 表示组件是否更新
   classInstance.state = nextState // 更新state状态
-  classInstance.forceUpdate() // 强制更新
+  // 如果有shouldComponentUpdate方法并且shouldComponentUpdate返回了false
+  if (classInstance.shouldComponentUpdate && !classInstance.shouldComponentUpdate(nextProps, nextState)) {
+    willUpdate = false
+  }
+  if (willUpdate && classInstance.componentWillUpdate) {
+    classInstance.componentWillUpdate()
+  }
+
+  // 不管要不要更新组件，状态都要更新
+  if (nextProps) {
+    classInstance.props = nextProps
+  }
+
+  if (willUpdate) {
+    classInstance.forceUpdate() // 强制更新
+  }
 }
 
 export class Component {
@@ -74,5 +91,8 @@ export class Component {
     // let newDOM = createDom(newVdom)
     // oldDOM.parentNode.replaceChild(newDOM, oldDOM) // 直接替换节点，没有做任何优化
     this.oldRenderVdom = newVdom
+    if (this.componentDidUpdate) {
+      this.componentDidUpdate(this.props, this.state)
+    }
   }
 }
