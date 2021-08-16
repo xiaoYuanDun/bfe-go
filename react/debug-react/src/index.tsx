@@ -27,15 +27,31 @@ import ReactDOM from 'react-dom';
 
 // React.createElement, ReactDOM.render 调试用例, ./debug_01
 
-import FC1 from './debug_01/FunctionComponent1';
-import CC1 from './debug_01/ClassComponent1';
+// import FC1 from './debug_01/FunctionComponent1';
+// import CC1 from './debug_01/ClassComponent1';
 
-const element = (
-  <div key="div-1">
-    <span key="span-1">head...</span>
-    <FC1 key="fc-1" />
-    <CC1 key="cc-1" title="hhh" />
-  </div>
-);
+// const element = (
+//   <div key="div-1">
+//     <span key="span-1">head...</span>
+//     <FC1 key="fc-1" />
+//     <CC1 key="cc-1" title="hhh" />
+//   </div>
+// );
 
-ReactDOM.render(element, document.getElementById('root'));
+// ReactDOM.render(element, document.getElementById('root'));
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+
+// DIFF 调试用例 ./diff
+
+// import Root from './diff';
+// import Root from './diff/case_1';
+// import Root from './commit/case_1';
+import Root from './commit/case_2';
+
+const root = <Root />;
+ReactDOM.render(root, document.getElementById('root'));
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
