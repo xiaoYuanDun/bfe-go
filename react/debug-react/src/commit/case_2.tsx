@@ -2,8 +2,12 @@ import React, { useEffect, useState, useLayoutEffect } from 'react';
 
 // useEffect
 
+function Show(props: any) {
+  return <p>{props.num}</p>;
+}
+
 function App() {
-  const [name, setName] = useState('xiaoMing');
+  const [num, setNum] = useState(1);
 
   useEffect(() => {
     console.log('----====---->>');
@@ -13,26 +17,31 @@ function App() {
     };
   });
 
+  const [name, setName] = useState('xiaoMing');
+
   useEffect(() => {
     console.log('----====---->>');
     console.log('invoke once');
+    return () => {
+      console.log('---------------------------------------------FC unmount');
+    };
   }, []);
 
   useLayoutEffect(() => {
     console.log('----====---->>');
     console.log('every useLayoutEffect');
     return () => {
-      console.log('every useLayoutEffect');
+      console.log('every layout unmount');
     };
   });
 
   const handleClick = () => {
-    setName(name === 'xiaoHong' ? 'danny' : 'xiaoHong');
+    setNum(num + 1);
   };
   return (
     <div>
       <button onClick={handleClick}>click me</button>
-      <p>{name}</p>
+      {num % 3 === 0 ? null : <Show num={num} />}
     </div>
   );
 }

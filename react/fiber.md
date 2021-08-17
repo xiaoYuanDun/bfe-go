@@ -20,26 +20,8 @@
 
 ##### `enqueueSetState` 会先通过当前节点的实例(如 Count 组件的实例就是 new Count())获取对应的 `fiber`
 
-setState
--- enqueueSetState
--- -- // 构建 update 对象
--- -- enqueueUpdate 使用 update 对象构建循环链表, updateQueue
--- -- scheduleUpdateOnFiber
--- -- -- checkForNestedUpdates 检查是否存在循环更新的情况
--- -- -- markUpdateLaneFromFiberToRoot 向上循环找到 rootFiber, 还会对遍历到的 fiber 进行修改 lane 的操作, 暂时没看懂
--- -- -- markRootUpdated ???
--- -- -- ensureRootIsScheduled
--- -- -- -- scheduleLegacySyncCallback(performSyncWorkOnRoot.bind(null, root)) // performSyncWorkOnRoot 是调度关键方法, 这里有可能会复用上一个 task, 直接 return
--- -- -- -- -- scheduleSyncCallback 把 performSyncWorkOnRoot 放在 syncQueue 数组中
--- -- -- -- scheduleMicrotask // flushSyncCallbacks
--- -- -- flushSyncCallbacksOnlyInLegacyMode // 如果不是 batchUpdate 上下文, 则直接触发这次更新
--- -- -- -- flushSyncCallbacks 内部调用的 flush 方法和异步环境的一致
+---
 
-之后会从 syncQueue 取出每一个 fnc 并执行(这里是 performSyncWorkOnRoot)
-
-每个 fiber 都有一个 updateQueue, 会在 fiber 初始化时调用 initializeUpdateQueue 生成
-
-### render 过程
-
--- render
--- -- legacyRenderSubtreeIntoContainer
+useEffect:
+unmount: commitHookEffectListUnmount
+mount: commitHookEffectListMount
