@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      {
+        const history = window.history
+
+        ;(function(originHistory){
+          // save origin function behive
+          const oldPush = originHistory.pushState
+          const res = originHistory.pushState = (state, title, path) => {
+            // get origin behive
+            oldPush.call(originHistory, state, title, path)
+            // custom behive
+            const evt = new CustomEvent('pushstate', { detail: { state, title, path } })
+            window.dispatchEvent(evt)
+
+            return res
+          }
+        })(history)
+
+        // custom onpushstate event
+        window.addEventListener('pushstate', e => {
+          document.getElementById('root').innerHTML = e.detail.path
+        })
+
+        window.addEventListener('popstate', () => {
+          console.log(11222)
+        })
+       
+        function handleState(path) {
+          history.pushState(null, null, path)
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <a onclick="handleState('/home')">home</a>
+    <a onclick="handleState('/user')">user</a>
+    <a onclick="handleState('/profile')">profile</a>
+    <div id="root"></div>
+  </body>
+</html>
