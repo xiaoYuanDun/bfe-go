@@ -22,7 +22,8 @@ export function createDom(vdom) {
   }
   else if (type && type.$$typeof === REACT_FORWARD_REF) {
     return mountForwardComponent(vdom) // 渲染有ref的函数组件
-  } else if (typeof type === 'function') {
+  }
+  else if (typeof type === 'function') {
     if (type.isReactComponent) {
       return mountClassComponent(vdom)
     } else {
@@ -117,7 +118,7 @@ function updateProps(dom, oldProps, newProps) {
  * @param {*} oldVdom 
  * @param {*} newVdom 
  */
-export function compareTwoVdom(parentDOM, oldVdom, newVdom) {
+export function compareTwoVdom(parentDOM, oldVdom, newVdom, nextDOM) {
   // 方法一： 直接暴力替换
   // let oldDOM = findDOM(oldVdom)
   // let newDOM = createDom(newVdom)
@@ -132,8 +133,15 @@ export function compareTwoVdom(parentDOM, oldVdom, newVdom) {
     // 假如新的有，旧的没有，插入新的节点
   } else if (!oldVdom && newVdom) {
     const newDOM = createDom(newVdom)
-    // ?
-    parentDOM.appendChild(newDOM)
+
+    // 如果有下一个dom，就插在下一个dom的前面
+    if (nextDOM) {
+      parentDOM.insertBefore(newDOM, nextDOM)
+    } else {
+      parentDOM.appendChild(newDOM)
+    }
+
+
     if (newDOM._componentDidMount) {
       newDOM._componentDidMount()
     }
@@ -156,11 +164,10 @@ export function compareTwoVdom(parentDOM, oldVdom, newVdom) {
  * @param {*} oldVdom 
  * @param {*} newVdom 
  */
-function updateElement(oldVdom, newVdom) {
-  // 文本节点
+function updateElement(oldVdom, newVdom) { // 文本节点
   if (oldVdom.type === REACT_TEXT) {
     if (oldVdom.props.contnet !== newVdom.props.content) {
-      const currentDOM = findDOM(oldVdom)
+      const currentDOM = newVdom.dom = findDOM(oldVdom) // 获取老的真实DOM，准备复用
       currentDOM.textContent = newVdom.props.content // 更新文本节点的内容
     }
     // 更新div或者span等原生dom，复用老的dom节点
@@ -170,17 +177,41 @@ function updateElement(oldVdom, newVdom) {
     updateChildren(currentDOM, oldVdom.props.children, newVdom.props.children)
     // 类组件和函数式组件
   } else if (typeof oldVdom.type === 'function') {
-
+    if (oldVdom.type.isReactComponent) {
+      updateClassComponent(oldVdom, newVdom)
+    } else {
+      // 函数组件
+      updateFunctionComponent(oldVdom, newVdom)
+    }
   }
 }
-
+// 类组件更新
+function updateClassComponent(oldVdom, newVdom) {
+  let classInstance = newVdom.classInstance = oldVdom.classInstance
+  let renderVdom = newVdom.oldRenderVdom = oldVdom.oldRenderVdom
+  if (classInstance.componentWillReceiveProps) {
+    classInstance.componentWillReceiveProps(newVdom.props)
+  }
+  classInstance.updateProps.emitUpdate(newVdom.props)
+}
+// 函数组件更新
+function updateFunctionComponent(oldVdom, newVdom) {
+  let currentDOM = findDOM(oldVdom)
+  let parentDOM = currentDOM.parentNode
+  let { type, props } = newVdom
+  let newRenderVDOM = type(props)
+  compareTwoVdom(parentDOM, oldVdom.oldRenderVdom, newRenderVDOM)
+  newVdom.oldRenderVdom = newRenderVDOM
+}
 // 更新子组件
 function updateChildren(parentDOM, oldVChildren, newVChildren) {
   let oldChildren = Array.isArray(oldVChildren) ? oldVChildren : oldVChildren ? [oldVChildren] : []
   let newChildren = Array.isArray(newVChildren) ? newVChildren : newVChildren ? [newVChildren] : []
   let maxChildrenLength = Math.max(oldChildren.length, newChildren.length)
   for (let i = 0; i < maxChildrenLength - 1; ++i) {
-    compareTwoVdom(parentDOM, oldChildren[i], newChildren[i])
+    // 视图取出当前节点的下一个，最近的弟弟真实DOM
+    let nextVdom = oldVChildren.find((item, index) => index > i && item && findDOM(item))
+    compareTwoVdom(parentDOM, oldChildren[i], newChildren[i], findDOM(nextVdom))
   }
 }
 

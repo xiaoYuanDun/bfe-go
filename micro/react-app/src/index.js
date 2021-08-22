@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { Component, useState } from 'react'
 import ReactDom from 'react-dom'
 
 const FunctionComponent2 = (props, forwardRef) => {
@@ -49,8 +49,13 @@ class Counter extends React.Component {
       {this.state.number}
       {this.state.number === 4 ? null : <ChildCounter count={this.state.number} />}
       <button onClick={this.handleFocus}>点击输入焦点</button>
+      <Show />
     </div>
   }
+}
+function Show() {
+  const [name, setName] = useState('xiaoming')
+  return <p>{name}</p>
 }
 
 class ChildCounter extends React.Component {
@@ -87,5 +92,27 @@ class ChildCounter extends React.Component {
   }
 }
 
+class AAA  extends Component{
+  state = {
+    num: 0
+  }
+  componentDidMount() {
+    this.setState((preState) => {
+      console.log(preState)
+      return { num: preState.num + 1 }
+    }, () => {
+      console.log(this.state.num);
+    })
+    this.setState(preState => {
+      console.log(preState)
+      return { num: preState.num + 1 }
+    }, () => {
+      console.log(this.state.num);
+    })
+  }
+  render() {
+    return 123
+  }
+}
 
-ReactDom.render(<Counter />, document.getElementById('root'))
+ReactDom.render(<AAA />, document.getElementById('root'))
