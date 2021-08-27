@@ -1,5 +1,6 @@
-import React from 'react'
-import ReactDom from 'react-dom'
+import React from './react'
+import ReactDom from './react-dom'
+import './call-bind-apply'
 
 const FunctionComponent2 = (props, forwardRef) => {
   return <input ref={forwardRef} />
@@ -87,5 +88,29 @@ class ChildCounter extends React.Component {
   }
 }
 
+function Person(name) {
+  this.list = ['1', '2', '3']
+}
 
-ReactDom.render(<Counter />, document.getElementById('root'))
+Person.prototype.getList = function () {
+  return this.list
+}
+
+function Child(name) {
+  this.name = name
+  Person.call(this)
+}
+
+Child.prototype = new Person()
+
+const child = new Child()
+child.list.push(4)
+console.log(child.getList())
+const child2 = new Child()
+console.log(child2.getList())
+
+
+
+
+
+// ReactDom.render(<Counter />, document.getElementById('root'))

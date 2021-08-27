@@ -170,7 +170,10 @@ function updateElement(oldVdom, newVdom) {
     updateChildren(currentDOM, oldVdom.props.children, newVdom.props.children)
     // 类组件和函数式组件
   } else if (typeof oldVdom.type === 'function') {
-
+    // 类组件
+    if (oldVdom.type.isReactComponent) {
+      newVdom.classInstance = oldVdom.classInstance
+    }
   }
 }
 
