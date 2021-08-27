@@ -33,7 +33,7 @@ class Updater {
   updateComponent = () => {
     const { classInstance, nextProps, pendingState } = this
     if (nextProps || pendingState.length) {
-      shouldUpdate(classInstance, this.nextProps, this.getState())
+      shouldUpdate(classInstance, nextProps, this.getState())
     }
   }
   getState = () => {

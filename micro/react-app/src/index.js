@@ -1,6 +1,11 @@
+<<<<<<< HEAD
 import React from './react'
 import ReactDom from './react-dom'
 import './call-bind-apply'
+=======
+import React, { Component, useState } from 'react'
+import ReactDom from 'react-dom'
+>>>>>>> 5e8e7abde1abbe619ba5cee7d58ac2c478ba7d9a
 
 const FunctionComponent2 = (props, forwardRef) => {
   return <input ref={forwardRef} />
@@ -50,8 +55,13 @@ class Counter extends React.Component {
       {this.state.number}
       {this.state.number === 4 ? null : <ChildCounter count={this.state.number} />}
       <button onClick={this.handleFocus}>点击输入焦点</button>
+      <Show />
     </div>
   }
+}
+function Show() {
+  const [name, setName] = useState('xiaoming')
+  return <p>{name}</p>
 }
 
 class ChildCounter extends React.Component {
@@ -88,6 +98,7 @@ class ChildCounter extends React.Component {
   }
 }
 
+<<<<<<< HEAD
 function Person(name) {
   this.list = ['1', '2', '3']
 }
@@ -114,3 +125,29 @@ console.log(child2.getList())
 
 
 // ReactDom.render(<Counter />, document.getElementById('root'))
+=======
+class AAA  extends Component{
+  state = {
+    num: 0
+  }
+  componentDidMount() {
+    this.setState((preState) => {
+      console.log(preState)
+      return { num: preState.num + 1 }
+    }, () => {
+      console.log(this.state.num);
+    })
+    this.setState(preState => {
+      console.log(preState)
+      return { num: preState.num + 1 }
+    }, () => {
+      console.log(this.state.num);
+    })
+  }
+  render() {
+    return 123
+  }
+}
+
+ReactDom.render(<AAA />, document.getElementById('root'))
+>>>>>>> 5e8e7abde1abbe619ba5cee7d58ac2c478ba7d9a
