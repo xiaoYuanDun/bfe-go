@@ -18,10 +18,13 @@ function useSelectorWithStoreAndSubscription<TStoreState, TSelectedState>(
 ): TSelectedState {
   const [, forceRender] = useReducer((s) => s + 1, 0);
 
-  const subscription = useMemo(() => createSubscription(store, contextSub), [
-    store,
-    contextSub,
-  ]);
+  const subscription = useMemo(() => {
+    console.log('selector sub');
+    return createSubscription(store, contextSub);
+  }, [store, contextSub]);
+
+  subscription.name = selector;
+  subscription.handleChangeWrapper.xxx = 'useSelector-wrapper';
 
   const latestSubscriptionCallbackError = useRef<Error>();
   const latestSelector = useRef<TSelector<TStoreState, TSelectedState>>();
