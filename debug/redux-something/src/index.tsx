@@ -17,7 +17,7 @@ const Root = () => {
   return (
     <>
       <App />
-      <App2 />
+      {/* <App2 /> */}
     </>
   );
 };

@@ -4,9 +4,11 @@ import { createHashHistory } from '../origin/hash';
 
 const history = createHashHistory();
 
-history.listen((update) => {
-  console.log('listen', update);
+history.listen((loaction, action) => {
+  console.log('loaction', loaction);
+  console.log('action', action);
 });
+
 (async function () {
   await new Promise((resolve) => setTimeout(resolve, 500));
   history.push('111');

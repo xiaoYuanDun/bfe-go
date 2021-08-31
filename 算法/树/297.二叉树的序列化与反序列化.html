@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+  <script>
+    {
+      function TreeNode(val, left, right) {
+        this.val = val === undefined ? 0 : val;
+        this.left = left === undefined ? null : left;
+        this.right = right === undefined ? null : right;
+      }
+
+      // 用例 serialize
+      // const n1 = new TreeNode('n1');
+      // const n2 = new TreeNode('n2');
+      // const n3 = new TreeNode('n3');
+      // const n4 = new TreeNode('n4');
+      // const n5 = new TreeNode('n5'); 
+
+      // n1.left = n2
+      // n1.right = n3
+      // n3.left = n4
+      // n3.right = n5
+
+      // 先用 dfs 顺序输出, 最后一层会出现一整行都是 null 的情况, 需要特殊处理一下
+      var serialize = function (root) {
+        let queue = root ? [root] : []
+        let result = []
+        while (queue.length) {
+          let len = queue.length
+          let temp
+          if (queue.every(item => !item)) return result
+          for (let i = 0; i < len; i++) {
+            temp = queue.shift()
+            result.push(temp)
+            if (temp) {
+              queue.push(temp.left)
+              queue.push(temp.right)
+            }
+          }
+        }
+        return result
+      };
+
+      // console.log(serialize(n1))
+
+      // 用例 serialize
+      // [
+      //   4,
+      //   -7,-3,
+      //   null,null,-9,-3,
+      //   9,-7,-4,null,
+      //   6,null,-6,-6,null,null,0,6,
+      //   5,null,9,null,null,-1,-4,null,null,null,-2]
+
+      const n1 = new TreeNode('n1');
+      const n2 = new TreeNode('n2');
+      const n3 = new TreeNode('n3');
+      const n4 = new TreeNode('n4');
+      const n5 = new TreeNode('n5');
+      const n6 = new TreeNode('n6');
+      const n7 = new TreeNode('n7');
+      const n8 = new TreeNode('n8');
+      const n9 = new TreeNode('n9');
+      const n10 = new TreeNode('n10');
+      const n11 = new TreeNode('n11');
+      const n12 = new TreeNode('n12');
+      const n13 = new TreeNode('n13');
+
+
+      const arr = [
+        n1,
+        n2, n3,
+        null, null, n4, n5,
+        n6, n7
+      ]
+ 
+
+      // 要注意的点, 收集下一层节点时, 如果是 null, 则不收集, 因为 null 不是有效父节点
+      // var deserialize = function (data) {
+
+      //   if (!data.length) return null
+
+      //   let len = 1
+      //   const root = data.shift()
+      //   let prev = [root]
+
+      //   while (data.length) {
+
+      //     len = prev.length * 2
+      //     let length = Math.min(len, data.length)
+      //     let temp
+
+      //     for (let i = 0; i < length; i++) {
+      //       temp = temp = data.shift()
+            
+      //       if(temp) prev.push(temp)
+      //       if (i % 2 === 0) {
+      //         prev[0].left = temp
+      //       } else {
+      //         prev[0].right = temp
+      //         prev.shift()
+      //       }
+      //     }
+      //   }
+      //   return root
+      // };
+
+
+      // 试试通过 直接操作数组下标, 完成一次数组的遍历, 表示树构建完毕
+      // 构建的本质是, 遍历一遍数组, 可以直接用两个指针分别代表当前节点(curIndex)和他的下层节点(childIndex)
+      // 用一个 step 表示判断插入位置(left/right)
+      // data[curIndex] === null 表示下个节点不可作为父节点, 跳过, 一直到找到下一个有效节点
+      var deserialize = function (data) {
+
+        if (!data.length) return null
+        
+        let curIndex = 0
+        let childIndex = 1
+        let step = true
+        while(data.length > childIndex) {
+          if(step) {
+            while(!data[curIndex]) {
+              curIndex++
+            }
+            data[curIndex].left = data[childIndex++]
+          } else {
+            data[curIndex++].right = data[childIndex++]
+          }
+          step = !step
+        }
+        return data[0]
+      }
+      console.log(deserialize(arr))
+    }
+  </script>
+</head>
+
+<body>
+  <div>
+    序列化是将一个数据结构或者对象转换为连续的比特位的操作，进而可以将转换后的数据存储在一个文件或者内存中，同时也可以通过网络传输到另一个计算机环境，采取相反方式重构得到原数据。
+
+    请设计一个算法来实现二叉树的序列化与反序列化。这里不限定你的序列 / 反序列化算法执行逻辑，你只需要保证一个二叉树可以被序列化为一个字符串并且将这个字符串反序列化为原始的树结构。
+
+    提示: 输入输出格式与 LeetCode 目前使用的方式一致，详情请参阅 LeetCode 序列化二叉树的格式。你并非必须采取这种方式，你也可以采用其他的方法解决这个问题。
+
+  </div>
+  <p>tips:</p>
+  <p></p>
+  <a href="https://leetcode-cn.com/problems/serialize-and-deserialize-binary-tree/">传送门</a>
+</body>
+
+</html>
