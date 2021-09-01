@@ -48,7 +48,17 @@ import ReactDOM from 'react-dom';
 // import Root from './diff';
 // import Root from './diff/case_1';
 // import Root from './commit/case_1';
-import Root from './commit/case_2';
+// import Root from './commit/case_2';
+
+// const root = <Root />;
+// ReactDOM.render(root, document.getElementById('root'));
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+
+// DIFF 调试用例2 ./diff_02
+
+import Root from './diff_02';
 
 const root = <Root />;
 ReactDOM.render(root, document.getElementById('root'));

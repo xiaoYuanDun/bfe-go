@@ -8,8 +8,6 @@ import {
 } from './store/actions';
 
 const App: FC = () => {
-  console.log(1);
-
   const number = useSelector((s: any) => s.number);
   const dispatch = useDispatch();
 
