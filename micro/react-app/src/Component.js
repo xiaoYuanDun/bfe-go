@@ -87,6 +87,10 @@ export class Component {
     let oldRenderVdom = this.oldRenderVdom // 上一次render方法计算得到的虚拟DOM
     let oldDOM = findDOM(oldRenderVdom) // 获取oldRenderVdom对应的真实DOM
     // getDerivedFromProps 传入新的props参数，和旧的state进行对比，然后返回值赋给state
+    // 更新class context的值
+    if (this.constructor.contextType) {
+      this.context = this.constructor.contextType._currentValue
+    }
     if (this.constructor.getDerivedStateFromProps) {
       const newState = this.constructor.getDerivedStateFromProps(this.props, this.state)
       if (newState) {

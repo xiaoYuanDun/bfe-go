@@ -1,6 +1,6 @@
 
 import { Component } from './Component'
-import { REACT_ELEMENT, REACT_FORWARD_REF, REACT_FRAGMENT } from './constant'
+import { REACT_ELEMENT, REACT_FORWARD_REF, REACT_FRAGMENT, REACT_CONTEXT, REACT_PROVIDER } from './constant'
 import { wrapToVdom } from './utils'
 
 function createElement(type, config, children) {
@@ -36,11 +36,25 @@ function forwardRef(render) { // 创建一个函数组件的ref
   }
 }
 
+function createContext() {
+  const context = { $$typeof: REACT_CONTEXT, _currentValue: null }
+  context.Provider = {
+    $$typeof: REACT_PROVIDER,
+    _context: context,
+  }
+  context.Consumer = {
+    $$typeof: REACT_CONTEXT,
+    _context: context
+  }
+  return context
+}
+
 const React = {
   createElement,
   Component,
   createRef,
   forwardRef,
-  Fragment: REACT_FRAGMENT // Fragment其实就是一个Symbol
+  Fragment: REACT_FRAGMENT, // Fragment其实就是一个Symbol
+  createContext
 }
 export default React

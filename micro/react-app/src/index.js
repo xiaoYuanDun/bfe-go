@@ -1,52 +1,58 @@
 import React from './react'
 import ReactDom from './react-dom'
 
+const Context = React.createContext()
+
+class Headers extends React.Component {
+  static contextType = Context
+  render() {
+    return <div style={{ border: `5px solid ${this.context.color}` }}>
+      Header
+      <Main />
+    </div>
+  }
+}
+
+const Main = () => {
+  return <Context.Consumer>
+    {
+      (value) => {
+        return <div style={{ border: `5px solid ${value.color}` }}>
+          main
+          <button onClick={() => { value.onChangeColor('green') }}>绿色</button>
+          <button onClick={() => { value.onChangeColor('red') }}>红色</button>
+        </div>
+      }
+    }
+
+  </Context.Consumer>
+}
 
 class Count extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      message: []
+      color: 'red'
     }
     this.domRef = React.createRef()
   }
 
-  getSnapshotBeforeUpdate() {
-    return {
-      scrollTop: this.domRef.current.scrollTop,
-      scrollHeight: this.domRef.current.scrollHeight
-    }
-  }
-
-  componentDidUpdate(props, state, snapShot) {
-    const currentHeight = this.domRef.current.scrollHeight
-    const prevHeight = snapShot.scrollHeight
-    const addHeight = currentHeight - prevHeight
-    this.domRef.current.scrollTop = snapShot.scrollTop + addHeight
-  }
-
-  componentDidMount() {
-    const timer = setInterval(() => {
-      this.handleChangeMessage()
-    }, 1000)
-  }
-
-  handleChangeMessage = () => {
-    const { message } = this.state
+  handleChangeColor = (color) => {
     this.setState({
-      message: [`${message.length + 1}`, ...message]
+      color
     })
   }
 
   render() {
-    const { message } = this.state
-    return <React.Fragment>
-      <div ref={this.domRef} style={{ height: '100px', overflowY: 'scroll', width: '100px' }}>
-        {message.map((item) => {
-          return <div key={item}>{item}</div>
-        })}
-      </div>
-    </React.Fragment>
+    const { color } = this.state
+    const value = {
+      color,
+      onChangeColor: this.handleChangeColor
+    }
+    return <Context.Provider value={value}>
+      <Headers>
+      </Headers>
+    </Context.Provider>
   }
 }
 

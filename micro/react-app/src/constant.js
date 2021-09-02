@@ -9,3 +9,8 @@ export const PLACEMENT = 'PLACEMENT'
 export const MOVE = 'MOVE'
 // 删除元素
 export const DELETE = 'DELETION'
+
+// provider
+export const REACT_PROVIDER = Symbol('react.provider')
+// context consumers
+export const REACT_CONTEXT = Symbol('react.context')
