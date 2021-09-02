@@ -66,6 +66,9 @@ function mountClassComponent(vdom) {
     classInstance.componentWillMount()
   }
   const renderdom = classInstance.render()
+  
+  vdom.classInstance = classInstance
+
   classInstance.oldRenderVdom = vdom.oldRenderVdom = renderdom
   let dom = createDom(renderdom)
   // 在dom上挂载实例，方便后面调用对应方法
@@ -173,7 +176,7 @@ export function compareTwoVdom(parentDOM, oldVdom, newVdom, nextDOM) {
  */
 function updateElement(oldVdom, newVdom) { // 文本节点
   if (oldVdom.type === REACT_TEXT) {
-    if (oldVdom.props.contnet !== newVdom.props.content) {
+    if (oldVdom.props.content !== newVdom.props.content) {
       const currentDOM = newVdom.dom = findDOM(oldVdom) // 获取老的真实DOM，准备复用
       currentDOM.textContent = newVdom.props.content // 更新文本节点的内容
     }
@@ -204,7 +207,7 @@ function updateClassComponent(oldVdom, newVdom) {
   if (classInstance.componentWillReceiveProps) {
     classInstance.componentWillReceiveProps(newVdom.props)
   }
-  classInstance.updateProps.emitUpdate(newVdom.props)
+  classInstance.updater.emitUpdate(newVdom.props)
 }
 // 函数组件更新
 function updateFunctionComponent(oldVdom, newVdom) {

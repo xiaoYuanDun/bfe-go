@@ -22,7 +22,7 @@ class Updater {
     this.emitUpdate()
   }
   // 触发更新 状态和属性变化都可能会执行这个方法
-  emitUpdate = (nextProps ) => {
+  emitUpdate = (nextProps) => {
     this.nextProps = nextProps
     if (updateQueue.isBatchingUpdate) {
       updateQueue.updaters.push(this)
@@ -86,13 +86,24 @@ export class Component {
   forceUpdate() {
     let oldRenderVdom = this.oldRenderVdom // 上一次render方法计算得到的虚拟DOM
     let oldDOM = findDOM(oldRenderVdom) // 获取oldRenderVdom对应的真实DOM
+    // getDerivedFromProps 传入新的props参数，和旧的state进行对比，然后返回值赋给state
+    if (this.constructor.getDerivedStateFromProps) {
+      const newState = this.constructor.getDerivedStateFromProps(this.props, this.state)
+      if (newState) {
+        this.state = newState
+      }
+    }
+    // getSnapshotBeforeUpdate 在render前执行，可以获取到渲染前的dom实例
+    let snapshot = this.getSnapshotBeforeUpdate && this.getSnapshotBeforeUpdate()
+
     let newVdom = this.render() // 类组件的render方法，在之前已经将state重新赋值
+
     compareTwoVdom(oldDOM.parentNode, oldRenderVdom, newVdom)
     // let newDOM = createDom(newVdom)
     // oldDOM.parentNode.replaceChild(newDOM, oldDOM) // 直接替换节点，没有做任何优化
     this.oldRenderVdom = newVdom
     if (this.componentDidUpdate) {
-      this.componentDidUpdate(this.props, this.state)
+      this.componentDidUpdate(this.props, this.state, snapshot)
     }
   }
 }
