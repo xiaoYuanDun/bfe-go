@@ -1,6 +1,6 @@
 
 import { Component } from './Component'
-import { REACT_FORWARD_REF } from './constant'
+import { REACT_ELEMENT, REACT_FORWARD_REF, REACT_FRAGMENT } from './constant'
 import { wrapToVdom } from './utils'
 
 function createElement(type, config, children) {
@@ -20,7 +20,7 @@ function createElement(type, config, children) {
   } else {
     props.children = wrapToVdom(children)
   }
-  return { type, ref, key, props }
+  return { $$typeof: REACT_ELEMENT, type, ref, key, props }
 }
 
 function createRef() {
@@ -40,6 +40,7 @@ const React = {
   createElement,
   Component,
   createRef,
-  forwardRef
+  forwardRef,
+  Fragment: REACT_FRAGMENT // Fragment其实就是一个Symbol
 }
 export default React

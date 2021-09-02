@@ -25,6 +25,7 @@ export function addEvent(dom, eventType, eventHandler) {
 /**
  * 不管点什么按钮，触发什么事件，最终执行的都是这个方法
  * 在合成事件里，状态的更新是批量的
+ * 绑定了一个事件在document上
  * @param {*} event 原生的事件对象
  */
 function dispatchEvent(event) {
@@ -37,6 +38,8 @@ function dispatchEvent(event) {
   // 合成事件
   let syntheticEvent = createSyntheticEvent(event)
 
+  // 当有点击时，会一层层往上找，观察是否有_store这个属性，有则取出该对象对应的eventType函数，然后传入合成的event
+  // 一层层往上找，直到冒泡为止
   let currentTarget = target
   while (currentTarget) {
     let { _store } = currentTarget
@@ -50,6 +53,7 @@ function dispatchEvent(event) {
 }
 
 // 生成合成事件
+// 将event的值全部放入syntheticEvent里面，然后更改里面的部分方法，做到兼容
 function createSyntheticEvent(event) {
   let syntheticEvent = { nativeEvent: event }
   for (let key in event) {

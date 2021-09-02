@@ -22,7 +22,7 @@ class Updater {
     this.emitUpdate()
   }
   // 触发更新 状态和属性变化都可能会执行这个方法
-  emitUpdate = (nextProps) => {
+  emitUpdate = (nextProps ) => {
     this.nextProps = nextProps
     if (updateQueue.isBatchingUpdate) {
       updateQueue.updaters.push(this)

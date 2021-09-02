@@ -1,4 +1,4 @@
-import { REACT_FORWARD_REF, REACT_TEXT } from "./constant"
+import { REACT_FORWARD_REF, REACT_TEXT, REACT_FRAGMENT, MOVE, PLACEMENT, DELETE } from "./constant"
 import { addEvent } from './event'
 function render(vdom, parentDOM) {
   const newDom = createDom(vdom)
@@ -20,6 +20,9 @@ export function createDom(vdom) {
   if (type === REACT_TEXT) {
     dom = document.createTextNode(props.content)
   }
+  else if (type === REACT_FRAGMENT) {
+    dom = document.createDocumentFragment()
+  }
   else if (type && type.$$typeof === REACT_FORWARD_REF) {
     return mountForwardComponent(vdom) // 渲染有ref的函数组件
   }
@@ -37,7 +40,8 @@ export function createDom(vdom) {
     updateProps(dom, {}, props)
     const child = props.children
     if (typeof child === 'object' && child.type) {
-      render(props.children, dom)
+      child._mountIndex = 0 // 独生子
+      render(child, dom)
     } else if (Array.isArray(child)) {
       reconcileChildren(child, dom)
     }
@@ -90,7 +94,10 @@ function mountFunctionComponent(vdom) {
 }
 
 function reconcileChildren(childrenVdom, parentDOM) {
-  childrenVdom.forEach(v => render(v, parentDOM))
+  childrenVdom.forEach((childVdom, index) => {
+    childVdom._mountIndex = index
+    render(childVdom, parentDOM)
+  })
 }
 
 function updateProps(dom, oldProps, newProps) {
@@ -105,7 +112,7 @@ function updateProps(dom, oldProps, newProps) {
       }
     } else if (key.startsWith('on')) { // 绑定事件
       addEvent(dom, key.toLocaleLowerCase(), newProps[key]) // 合成事件
-      // dom[key.toLocaleLowerCase()] = newProps[key] 
+      // dom[key.toxLocaleLowerCase()] = newProps[key] 
     } else {
       dom[key] = newProps[key]
     }
@@ -171,23 +178,22 @@ function updateElement(oldVdom, newVdom) { // 文本节点
       currentDOM.textContent = newVdom.props.content // 更新文本节点的内容
     }
     // 更新div或者span等原生dom，复用老的dom节点
-  } else if (typeof oldVdom.type === 'string') {
+  } else if (oldVdom.type === REACT_FRAGMENT) {
+    let currentDOM = newVdom.dom = findDOM(oldVdom)
+    updateChildren(currentDOM, oldVdom.props.children, newVdom.props.children)
+  }
+
+  else if (typeof oldVdom.type === 'string') {
     let currentDOM = newVdom.dom = findDOM(oldVdom) // 获取老的真实DOM，准备复用
     updateProps(currentDOM, oldVdom.props, newVdom.props)
     updateChildren(currentDOM, oldVdom.props.children, newVdom.props.children)
     // 类组件和函数式组件
   } else if (typeof oldVdom.type === 'function') {
-<<<<<<< HEAD
-    // 类组件
-    if (oldVdom.type.isReactComponent) {
-      newVdom.classInstance = oldVdom.classInstance
-=======
     if (oldVdom.type.isReactComponent) {
       updateClassComponent(oldVdom, newVdom)
     } else {
       // 函数组件
       updateFunctionComponent(oldVdom, newVdom)
->>>>>>> 5e8e7abde1abbe619ba5cee7d58ac2c478ba7d9a
     }
   }
 }
@@ -210,15 +216,95 @@ function updateFunctionComponent(oldVdom, newVdom) {
   newVdom.oldRenderVdom = newRenderVDOM
 }
 // 更新子组件
+// 实现完成的domdiff算法
 function updateChildren(parentDOM, oldVChildren, newVChildren) {
   let oldChildren = Array.isArray(oldVChildren) ? oldVChildren : oldVChildren ? [oldVChildren] : []
   let newChildren = Array.isArray(newVChildren) ? newVChildren : newVChildren ? [newVChildren] : []
   let maxChildrenLength = Math.max(oldChildren.length, newChildren.length)
-  for (let i = 0; i < maxChildrenLength - 1; ++i) {
-    // 视图取出当前节点的下一个，最近的弟弟真实DOM
-    let nextVdom = oldVChildren.find((item, index) => index > i && item && findDOM(item))
-    compareTwoVdom(parentDOM, oldChildren[i], newChildren[i], findDOM(nextVdom))
+  // key方法对比
+  // 省略了type方法对比
+  let lastPlaceIndex = 0 // 上一个不需要移动的老DOM节点的索引
+  let oldChildMap = {} // 旧child索引
+  let patch = [] // 对字段进行操作
+  oldChildren.forEach((oldVChild, index) => {
+    oldVChild._mountIndex = index
+    let oldKey = oldVChild.key || index
+    oldChildMap[oldKey] = oldVChild
+  })
+
+  newChildren.forEach((newVChild, index) => {
+    newVChild._mountIndex = index
+    const newKey = newVChild.key || index
+    const oldVChild = oldChildMap[newKey]
+    if (oldVChild) {
+      if (newVChild.key)
+        console.log(`更新${newVChild.key}`)
+      updateElement(oldVChild, newVChild)
+      if (oldVChild._mountIndex < lastPlaceIndex) {
+        patch.push({
+          fromIndex: oldVChild._mountIndex,
+          type: MOVE,
+          oldVChild,
+          newVChild,
+          toIndex: index
+        })
+      }
+      delete oldChildMap[newKey]
+      lastPlaceIndex = Math.max(lastPlaceIndex, oldVChild._mountIndex)
+    } else {
+      // 没有找到，就是插入
+      patch.push({
+        type: PLACEMENT,
+        newVChild,
+        toIndex: index
+      })
+    }
+  })
+  // 剩余的old Child需要删除和move的一起删除，move的后面再加上
+  const moveChildrens = patch.filter((i) => i.type === MOVE).map(i => i.oldVChild)
+  Object.values(oldChildMap).concat(moveChildrens).forEach((oldVChild) => {
+    // 直接在dom上删除该元素
+    const oldDom = findDOM(oldVChild)
+    oldDom.parentNode.removeChild(oldDom)
+    // patch.push({
+    //   type: DELETE,
+    //   oldChild: oldChildMap[key],
+    //   fromIndex: oldChildMap[key]._mountIndex
+    // })
+  })
+
+  console.log(patch)
+  if (patch.length) {
+    // 对元素进行操作
+    patch.forEach((item) => {
+      const { fromIndex, toIndex, type, oldVChild, newVChild } = item
+      const childNodes = parentDOM.children // 找到目前的子集
+      if (type === PLACEMENT) {
+        const newDOM = createDom(newVChild) // 拿到新的dom插入
+        const childDOM = childNodes[toIndex]
+        if (childDOM) {
+          parentDOM.insertBefore(newDOM, childDOM)
+        } else {
+          parentDOM.appendChild(newDOM)
+        }
+      } else if (type === MOVE) {
+        let oldDOM = findDOM(oldVChild)
+        const childDOM = childNodes[toIndex]
+        if (childDOM) {
+          parentDOM.insertBefore(oldDOM, childDOM)
+        } else {
+          parentDOM.appendChild(oldDOM)
+        }
+      }
+    })
   }
+
+  // 旧算法，一一对比
+  // for (let i = 0; i < maxChildrenLength - 1; ++i) {
+  //   // 视图取出当前节点的下一个，最近的弟弟真实DOM
+  //   let nextVdom = oldVChildren.find((item, index) => index > i && item && findDOM(item))
+  //   compareTwoVdom(parentDOM, oldChildren[i], newChildren[i], findDOM(nextVdom))
+  // }
 }
 
 /**
