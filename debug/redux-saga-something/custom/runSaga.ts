@@ -6,23 +6,36 @@
 import { immediately } from './scheduler';
 import proc from './proc';
 import { stdChannel } from './channel';
+import nextSagaId from './uid';
+import { identity } from './utils';
+import { MulticastChannel } from './channel';
 
 export type EnvType = {
-  channel: unknown;
+  channel: MulticastChannel;
+  finalizeRunEffect: Function;
+  dispatch: Function;
 };
 
 function runSaga(
-  { channel = stdChannel() },
+  { channel = stdChannel(), dispatch }: any,
   saga: GeneratorFunction,
   ...args: unknown[]
 ) {
   const iterator = saga(...args);
 
-  const env: EnvType = { channel };
+  const effectId = nextSagaId();
+
+  /**
+   * finalizeRunEffect 函数在 env.effectMiddlewares 存在时会有其他操作, 这里暂时不去了解
+   * 默认 identity 就是原样返回, 没有做任何操作
+   */
+  const finalizeRunEffect = identity;
+
+  const env: EnvType = { channel, finalizeRunEffect, dispatch };
 
   return immediately(() => {
     // const task = proc(iterator);
-    const task = proc(env, iterator);
+    const task = proc(env, iterator, effectId);
   });
 }
 

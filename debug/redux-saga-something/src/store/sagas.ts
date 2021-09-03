@@ -1,5 +1,12 @@
-// import { call, put, take, takeEvery, takeLatest } from 'redux-saga/effects';
-import { take, put } from '../../custom/effects';
+import {
+  call,
+  put,
+  take,
+  takeEvery,
+  takeLatest,
+  fork,
+} from 'redux-saga/effects';
+// import { take, put } from '../../custom/effects';
 
 async function asyncafterSometimes(delay = 1000) {
   await new Promise((resolve) => {
@@ -17,24 +24,29 @@ import {
 
 // 真正处理副作用的是这些 worker-saga
 function* asyncAdd() {
-  // yield take(ASYNC_ACTION_ADD);
-  yield call(asyncafterSometimes);
+  // yield call(asyncafterSometimes);
+  yield take(ASYNC_ACTION_ADD);
   yield put({ type: ACTION_ADD });
 }
 
 function* asyncMinus() {
-  // yield take(ASYNC_ACTION_MINUS);
-  yield call(asyncafterSometimes);
+  // yield call(asyncafterSometimes);
   yield put({ type: ACTION_MINUS });
 }
 
 // root-saga 作为 watcher 存在
 function* mySaga() {
-  yield take(ASYNC_ACTION_ADD);
+  yield fork(asyncAdd);
+
+  yield take(ASYNC_ACTION_MINUS);
   yield put({ type: ACTION_MINUS });
-  yield 3;
-  yield 4;
-  yield 5;
+
+  // yield takeEvery(ASYNC_ACTION_ADD, asyncAdd);
+  // yield takeEvery(ASYNC_ACTION_MINUS, asyncMinus);
+  // yield take(ASYNC_ACTION_ADD);
+  // yield put({ type: ACTION_ADD });
+  // yield take(ASYNC_ACTION_MINUS);
+  // yield put({ type: ACTION_MINUS });
 }
 
 export default mySaga;
