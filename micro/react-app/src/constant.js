@@ -14,3 +14,6 @@ export const DELETE = 'DELETION'
 export const REACT_PROVIDER = Symbol('react.provider')
 // context consumers
 export const REACT_CONTEXT = Symbol('react.context')
+// memo
+export const REACT_MEMO = Symbol('react.memo')
+

@@ -1,7 +1,7 @@
 
 import { Component } from './Component'
-import { REACT_ELEMENT, REACT_FORWARD_REF, REACT_FRAGMENT, REACT_CONTEXT, REACT_PROVIDER } from './constant'
-import { wrapToVdom } from './utils'
+import { REACT_ELEMENT, REACT_FORWARD_REF, REACT_FRAGMENT, REACT_CONTEXT, REACT_PROVIDER, REACT_MEMO } from './constant'
+import { wrapToVdom, shallowEquals } from './utils'
 
 function createElement(type, config, children) {
   let ref // 可以通过ref引用此元素
@@ -48,6 +48,21 @@ function createContext() {
   }
   return context
 }
+// 函数组件和类组件更新
+class PureComponent extends Component {
+  shouldComponentUpdate(nextProps, nextState) {
+    // 如果全相等，则不更新
+    return !shallowEquals(this.props, nextProps) || !shallowEquals(this.state, nextState)
+  }
+}
+
+function memo(type, compare = shallowEquals) {
+  return {
+    $$typeof: REACT_MEMO,
+    type,
+    compare
+  }
+}
 
 const React = {
   createElement,
@@ -55,6 +70,8 @@ const React = {
   createRef,
   forwardRef,
   Fragment: REACT_FRAGMENT, // Fragment其实就是一个Symbol
-  createContext
+  createContext,
+  PureComponent,
+  memo
 }
 export default React

@@ -1,4 +1,4 @@
-import { REACT_FORWARD_REF, REACT_TEXT, REACT_FRAGMENT, MOVE, PLACEMENT, DELETE, REACT_PROVIDER, REACT_CONTEXT } from "./constant"
+import { REACT_FORWARD_REF, REACT_TEXT, REACT_FRAGMENT, MOVE, PLACEMENT, DELETE, REACT_PROVIDER, REACT_CONTEXT, REACT_MEMO } from "./constant"
 import { addEvent } from './event'
 function render(vdom, parentDOM) {
   const newDom = createDom(vdom)
@@ -9,6 +9,7 @@ function render(vdom, parentDOM) {
       newDom._componentDidMount()
     }
   }
+  // return vdom
 }
 
 export function createDom(vdom) {
@@ -22,6 +23,9 @@ export function createDom(vdom) {
   }
   else if (type === REACT_FRAGMENT) {
     dom = document.createDocumentFragment()
+  }
+  else if (type && type.$$typeof === REACT_MEMO) {
+    return mountMemo(vdom)
   }
   else if (type && type.$$typeof === REACT_PROVIDER) {
     return mountProvider(vdom)
@@ -60,6 +64,14 @@ export function createDom(vdom) {
   return dom
 }
 
+// memo渲染
+function mountMemo(vdom) {
+  const { type, props } = vdom
+  const renderVdom = type.type(props)
+  vdom.oldRenderVdom = renderVdom // 用于findDOM
+  vdom.prevProps = props // 在vdom下，记录上一次的属性对象
+  return createDom(renderVdom)
+}
 
 // provider渲染
 function mountProvider(vdom) {
@@ -101,6 +113,9 @@ function mountClassComponent(vdom) {
 
   classInstance.oldRenderVdom = vdom.oldRenderVdom = renderdom
   let dom = createDom(renderdom)
+  if (!dom) {
+    return
+  }
   // 在dom上挂载实例，方便后面调用对应方法
   dom.classInstance = classInstance
   if (classInstance.componentDidMount) {
@@ -211,6 +226,10 @@ function updateElement(oldVdom, newVdom) {
   } else if (oldVdom.type && oldVdom.type.$$typeof === REACT_CONTEXT) {
     updateContext(oldVdom, newVdom)
   }
+  // 更新memo
+  else if (oldVdom.type && oldVdom.type.$$typeof === REACT_MEMO) {
+    updateMemo(oldVdom, newVdom)
+  }
   // 文本节点
   else if (oldVdom.type === REACT_TEXT) {
     if (oldVdom.props.content !== newVdom.props.content) {
@@ -236,6 +255,26 @@ function updateElement(oldVdom, newVdom) {
       updateFunctionComponent(oldVdom, newVdom)
     }
   }
+}
+
+// 更新memo
+function updateMemo(oldVdom, newVdom) {
+  const { prevProps, type } = oldVdom
+  const { props: newProps, type: newType } = newVdom
+  if (type.compare(prevProps, newProps)) {
+    newVdom.prevProps = oldVdom.prevProps
+    newVdom.oldRenderVdom = oldVdom.oldRenderVdom
+    return;
+  } else {
+    const currentDom = findDOM(oldVdom)
+    const parentNode = currentDom.parentNode
+    let renderVdom = newType.type(newProps)
+
+    compareTwoVdom(parentNode, oldVdom.oldRenderVdom, renderVdom)
+    newVdom.prevProps = newVdom.props
+    newVdom.oldRenderVdom = renderVdom
+  }
+
 }
 // 更新provider
 function updateProvider(oldVdom, newVdom) {
@@ -335,7 +374,6 @@ function updateChildren(parentDOM, oldVChildren, newVChildren) {
     // })
   })
 
-  console.log(patch)
   if (patch.length) {
     // 对元素进行操作
     patch.forEach((item) => {
@@ -417,7 +455,8 @@ export function findDOM(vdom) {
 }
 
 const ReactDom = {
-  render
+  render,
+  createPortal: render
 }
 
 export default ReactDom
