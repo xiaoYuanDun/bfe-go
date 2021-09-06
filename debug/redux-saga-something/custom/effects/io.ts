@@ -13,6 +13,37 @@ const makeEffect = (type: string, payload: unknown) => ({
 });
 
 /**
+ * 这个方法仅用来把不同的入参处理成统一的格式,
+ * 因为 fork 方法支持多种写法:
+ *   1. fork(fn, ...args)
+ *   2. fork([context, fn], ...args)
+ *   3. fork({context, fn}, ...args)
+ */
+function getFnCallDescriptor(fnDescriptor, args) {
+  let context = null;
+  let fn;
+
+  if (is.func(fnDescriptor)) {
+    fn = fnDescriptor;
+  } else {
+    if (is.array(fnDescriptor)) {
+      [context, fn] = fnDescriptor;
+    } else {
+      ({ context, fn } = fnDescriptor);
+    }
+
+    if (context && is.string(fn) && is.func(context[fn])) {
+      fn = context[fn];
+    }
+  }
+
+  return { context, fn, args };
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
+
+/**
  * take 的一般用法是: yield take('XXX_ACTION')
  */
 const take = (patternOrChannel = '*') => {
@@ -34,6 +65,13 @@ const put = (channel: any, action?: Action) => {
     channel = undefined; // `undefined` instead of `null` to make default parameter work
   }
   return makeEffect(effectTypes.PUT, { channel, action });
+};
+
+/**
+ * fork 一个子 saga, 不会阻塞当前 saga 执行
+ */
+const fork = (fnDescriptor, ...args) => {
+  return makeEffect(effectTypes.FORK, getFnCallDescriptor(fnDescriptor, args));
 };
 
 export { take, put };

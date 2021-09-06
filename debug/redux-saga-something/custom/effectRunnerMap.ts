@@ -7,6 +7,30 @@ import { EnvType } from './runSaga';
 import * as is from './is';
 import matcher from './matcher';
 import { asap } from './scheduler';
+import { immediately } from './scheduler';
+import proc from './proc';
+import { current as currentEffectId } from './uid';
+
+/**
+ * 生成子 fork 的执行主体:
+ *   fn === generator -> iterator
+ *   TODO -> 其他类型
+ */
+function createTaskIterator({ context, fn, args }) {
+  try {
+    const result = fn.apply(context, args);
+
+    // 暂时只支持 fn === generator 的情况
+    if (is.iterator(result)) {
+      return result;
+    }
+  } catch (err) {
+    //  TODO
+  }
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 function runTakeEffect(
   env: EnvType,
@@ -45,7 +69,33 @@ function runPutEffect(env: EnvType, { channel, action }: any, cb: Function) {
   });
 }
 
-function runForkEffect() {}
+function runForkEffect(
+  env: EnvType,
+  { context, fn, args, detached }: any, // fork 的指定 effect 格式
+  cb: Function,
+  { task: parent }: any
+) {
+  const taskIterator = createTaskIterator({ context, fn, args });
+
+  immediately(() => {
+    /**
+     * 直接从全局变量读取 currentEffectId, 因为 fork 一定是从父 saga 得到的
+     * detached 为真时, 由于 spawn 出来的子 saga 和父进程没有决议上的联系, 所以他本省就是一个根 saga
+     */
+    const child = proc(env, taskIterator, currentEffectId, detached);
+
+    // TODO 暂时不处理 detached 的情况, fork -> attached; spawn -> detached
+    if (child.isRunning()) {
+      parent.queue.addTask(child);
+      cb(child);
+    } else if (child.isAborted()) {
+      parent.queue.abort(child.error());
+    } else {
+      cb(child);
+    }
+  });
+  // Fork effects are non cancellables
+}
 
 const effectRunnerMap = {
   [effectTypes.TAKE]: runTakeEffect,

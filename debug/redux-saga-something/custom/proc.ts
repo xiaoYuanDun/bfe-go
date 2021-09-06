@@ -12,10 +12,41 @@ import nextEffectId from './uid';
 import { IO } from './symbols';
 import effectRunnerMap from './effectRunnerMap';
 import { AllTypeSharp } from './effects/effectTypes';
+import { TASK_STATUS } from './task-status';
+import newTask, { TaskSharp } from './newTask';
 
-function proc(env: EnvType, iterator: Generator<any>, parentEffectId: number) {
+function proc(
+  env: EnvType,
+  iterator: Generator<any>,
+  parentEffectId: number,
+  isRoot: boolean
+) {
   // finalizeRunEffect 默认是 v => v, 所以这里得到的 finalRunEffect 实际上就是 runEffect
   const finalRunEffect = env.finalizeRunEffect(runEffect);
+
+  // 创建一个 '主任务' 用来追踪主流程, 这里暂时省略了 meta, cancel 属性
+  const mainTask: TaskSharp = { status: TASK_STATUS.RUNNING };
+
+  /**
+   * 一个 generator 会得到:
+   *   一个对应的 iterator 对象(generator())
+   *   一个任务描述对象(task)
+   *   一个主任务对象(包含在 task 中)
+   *
+   * 这里是, 给当前的 generator 声称要一个对应的任务描述对象(task), 一个任务描述对象的包含了他的主任务和所有由它 fork 的子任务
+   */
+  const task = newTask(env, mainTask, parentEffectId, isRoot);
+
+  // 暂存一些执行变量
+  const executingContext = { task };
+
+  next();
+
+  // then return the task descriptor to the caller
+  return task;
+
+  // ---------------------------------------------------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------------------------------------------------
 
   /**
    * saga 的核心依赖于 生成器, 而 next 方法就是调用每一次 yield 向下执行的关键
@@ -61,14 +92,13 @@ function proc(env: EnvType, iterator: Generator<any>, parentEffectId: number) {
     // 属于副作用类型
     if (effect && effect[IO]) {
       const effectRunner = effectRunnerMap[effect.type as AllTypeSharp];
-      effectRunner(env, effect.payload, currCb);
+      effectRunner(env, effect.payload, currCb, executingContext);
     }
   }
 
   // -----------------
   // ----- start -----
   // -----------------
-  next();
 }
 
 export default proc;

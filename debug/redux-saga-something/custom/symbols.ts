@@ -12,3 +12,5 @@ export const MULTICAST = createSymbol('MULTICAST');
 
 // channel 使用的 match 函数标识 (验证 action.type 和 taker 是否匹配的匹配规则函数)
 export const MATCH = createSymbol('MATCH');
+
+export const TASK = createSymbol('TASK');

@@ -12,6 +12,8 @@ export const func = (f: any) => typeof f === 'function';
 
 export const array = Array.isArray;
 
+export const iterator = (it) => it && func(it.next) && func(it.throw);
+
 export const stringableFunc = (f: any) =>
   func(f) && f.hasOwnProperty('toString');
 
@@ -34,7 +36,6 @@ export const pattern = (pat: any): any =>
 
 // export const object = obj => obj && !array(obj) && typeof obj === 'object'
 // export const promise = p => p && func(p.then)
-// export const iterator = it => it && func(it.next) && func(it.throw)
 // export const iterable = it => (it && func(Symbol) ? func(it[Symbol.iterator]) : array(it))
 // export const task = t => t && t[TASK]
 // export const sagaAction = a => Boolean(a && a[SAGA_ACTION])
