@@ -95,10 +95,6 @@ function proc(
       effectRunner(env, effect.payload, currCb, executingContext);
     }
   }
-
-  // -----------------
-  // ----- start -----
-  // -----------------
 }
 
 export default proc;

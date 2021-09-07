@@ -87,7 +87,93 @@ saga 提供的 effect 生产函数和 middleware 处理逻辑是成对作用的,
 
 #### fork
 
-`fork` 不会阻塞,
+`fork` 不会阻塞
+
+一个 saga 只有在以下情况才会执行完毕:
+
+1. 使用终结指令结束自身执行(如 return, throws)
+2. 它的所有 attached forks 都执行完毕(原文表达是 terminated, 和其行为更贴近)
+
+因为它的行为和**并行 effect(任务并行执行; 父任务要等待所有子任务决议后才算完成)**很相似, 所有大部分情况下他们是可以互相变化的, 如:
+
+```js
+// 使用 fork
+function* fetchAll() {
+  const task1 = yield fork(fetchResource, 'users');
+  const task2 = yield fork(fetchResource, 'comments');
+  yield delay(1000);
+}
+
+// 使用 all
+function* fetchAll() {
+  yield all([
+    call(fetchResource, 'users'), // task1
+    call(fetchResource, 'comments'), // task2,
+    delay(1000),
+  ]);
+}
+
+function* main() {
+  yield call(fetchAll);
+}
+```
+
+注意, 因为 fork 也是一个副作用 effect, 所以它的处理逻辑也是被集成在 `effectRunnerMap` 中
+每个独立的 saga 都会被执行一次 proc, 生成一个 task, 而每个 saga 的副作用处理都在 `digestEffect` 中开启, 每次调用 digestEffect, 都会对全局的任务 ID 做 ++ 操作,
+
+看一下内部的 `runEffect(effect, effectId, currCb)` 方法:
+
+```js
+// .....
+if (is.promise(effect)) {
+  resolvePromise(effect, currCb);
+} else if (is.iterator(effect)) {
+  // 可以看到, 如果在这里开启一个 saga, 会使用递增之后的任务ID作为 parentEffectId
+  // resolve iterator
+  proc(env, effect, task.context, effectId, meta, /* isRoot */ false, currCb);
+} else if (effect && effect[IO]) {
+  const effectRunner = effectRunnerMap[effect.type];
+  effectRunner(env, effect.payload, currCb, executingContext);
+} else {
+  // anything else returned as is
+  currCb(effect);
+}
+```
+
+#### takeEvery
+
+可以理解为一个无限循环的 `take`, 首先 `takeEvery` 不会阻塞执行, 所有要先 fork 一个子任务, 保证非阻塞, 其次 `takeEvery` 可以监听每次特定 ACTION 的派发, 所以这里使用一个死循环, 在每次处理完一个任务后, 重新监听这个 ACTION
+
+注意, 这里处理子任务的 effect 为什么也要用 fork 呢?
+如果子任务是异步任务或者需要一定的执行时间, 再短时间内多次派发此 ACTION 的话, 第一个子任务处理期间的所有 ACTION 都不会被监听到, 因为使用 call 会阻塞执行, 阻塞期间并没有新的 ACTION 监听被添加到 channel 中(因为阻塞, 在本次执行完毕前, 不会到达下一次 take)
+
+```js
+function* rootSaga() {
+  // yield takeEvery(ACTION_XXX, asyncGenerator);
+
+  // takeEvery 的底层实现(实际并没有用到 ES6 原生生成器语法)
+  yield fork(function* () {
+    while (true) {
+      yield take(ACTION_XXX);
+      yield fork(asyncGenerator);
+    }
+  });
+}
+```
+
+takeEvery 方法内部并没有使用 ES6 的 generator 语法, 而是通过实现 '迭代器协议', 自己构建了一个迭代器对象, 来模拟生成器的行为, 通过交替切换 `{ done: false, value: { type: TAKE }}`, `{ done: false, value: { type: FORK }}` 来实现永不停止的迭代器对象, 模拟 takeEvery 永远监听的效果
+
+`takeEvery(XXX_ACTION, func)` 会 fork 一个辅助函数, 里面含有自定义迭代器对象, 因为 fork 之后的 task 会初始化子生成器, 继续向下调用执行(.next), 而自定义 .next 方法首先会返回 `{ done: false, value: { type: TAKE }}`, digestEffect 会把他加入 channel 中监听, 然后挂起, 让出执行权, 然后主流程执行完毕(如果主流程米有其他阻塞 effect 的话, 那么此时主流程就已经 **terminated** 了), 整个初始化阶段全部完毕
+
+这时, 由用户或程序派发一个 ACTION, 被 saga 中间件捕获, 交给 channel 处理(`channel.put(action)`), 如果匹配到是 takers 里的监听函数, 就取消这个函数监听, 紧接着执行这个监听回调(被 TAKE 挂起的迭代器的 next 方法), 对应的迭代器对象恢复执行, 然后自定义 .next 方法返回 `{ done: false, value: { type: FORK }}`, 接着执行这个 forked-task 的生成器的内部逻辑(proc), 不管内部逻辑是什么都不会阻塞我们的自定义迭代器的执行逻辑(因为它是被 fork 出来的), 而且它内部的逻辑最终会是否会成功 terminated 都不会影响其他任务, 然后这个 forked-task 执行 cb 回调(自定义迭代器的 .next), 它接着返回 `{ done: false, value: { type: TAKE }}`, 从而使得 channel 重新订阅一次 XXX_ACTION, 然后又挂起, 让出执行权
+
+就这样来回循环, 每次派发 ACTION 都会 fork 出一个新的 task, 他们之间不会互相影响
+
+初始化:
+takeEvery.next() --> channel.take(ACTION) --> 挂起, 等待 ACTION
+
+ACTION 派发:
+dispatch(ACTION) --> channel.put(ACTION) --> taker.cancel() --> takeEvery.next() --> channel.take(ACTION) --> 挂起, 等待 ACTION
 
 ### TODO
 
@@ -107,6 +193,4 @@ saga 提供的 effect 生产函数和 middleware 处理逻辑是成对作用的,
 
 fork 的作用在表现形式上和 promise 有点像, fork 一个子 saga 或者 effect 后, 他会立即执行, 且不会阻塞当前 saga(有可能是 rootSata, 也有可能是 childSaga), 但是 fork 后的表达式是否决议, 影响着当前 saga 是否可以决议,
 
-<!-- #### takeEvery
-
-`takeEvery` 可以理解为一个无限循环的 `take` -->
+yield 支持 generator

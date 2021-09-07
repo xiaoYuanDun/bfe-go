@@ -19,7 +19,7 @@ const makeEffect = (type: string, payload: unknown) => ({
  *   2. fork([context, fn], ...args)
  *   3. fork({context, fn}, ...args)
  */
-function getFnCallDescriptor(fnDescriptor, args) {
+function getFnCallDescriptor(fnDescriptor: any, args: any) {
   let context = null;
   let fn;
 
@@ -70,8 +70,8 @@ const put = (channel: any, action?: Action) => {
 /**
  * fork 一个子 saga, 不会阻塞当前 saga 执行
  */
-const fork = (fnDescriptor, ...args) => {
+const fork = (fnDescriptor: any, ...args: any) => {
   return makeEffect(effectTypes.FORK, getFnCallDescriptor(fnDescriptor, args));
 };
 
-export { take, put };
+export { take, put, fork };

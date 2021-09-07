@@ -39,3 +39,37 @@ export function remove(array: any[], item: any) {
     array.splice(index, 1);
   }
 }
+
+/**
+ * 没有意义的空函数, 用来填充默认值或占位
+ */
+export let noop = () => {};
+
+const kThrow = (err: Error) => {
+  throw err;
+};
+
+const kReturn = (value: any) => ({ value, done: true });
+
+/**
+ * 这里是模拟 生成器(generator) 的 迭代器对象(generator()) 的行为
+ * 同时满足 '可迭代协议([Symbol.iterator])' 和 '迭代器协议(next, {value,done})'
+ */
+export function makeIterator(
+  next: Function,
+  thro: Function = kThrow,
+  name = 'iterator'
+) {
+  const iterator: any = {
+    meta: { name },
+    next,
+    throw: thro,
+    return: kReturn,
+    isSagaIterator: true,
+  };
+
+  if (typeof Symbol !== 'undefined') {
+    iterator[Symbol.iterator] = () => iterator;
+  }
+  return iterator;
+}

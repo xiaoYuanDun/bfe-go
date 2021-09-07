@@ -1,1 +1,1 @@
-export { take, put } from './io';
+export { take, put, fork } from './io';

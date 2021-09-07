@@ -1,6 +1,7 @@
 import { EnvType } from './runSaga';
 import { TASK_STATUS } from './task-status';
 import { TASK } from './symbols';
+import forkQueue from './forkQueue';
 
 export type TaskSharp = {
   status: TASK_STATUS;
@@ -13,6 +14,17 @@ export default function newTask(
   isRoot: boolean
 ) {
   let status = TASK_STATUS.RUNNING;
+  // let taskError;
+
+  const queue = forkQueue(
+    mainTask,
+    function onAbort() {
+      // cancelledDueToErrorTasks.push(...queue.getTasks().map(t => t.meta.name))
+    },
+    end
+  );
+
+  function end() {}
 
   const task = {
     [TASK]: true,
@@ -21,7 +33,7 @@ export default function newTask(
     isRoot,
     // context,
     // joiners: [],
-    // queue,
+    queue,
 
     // // methods
     // cancel,

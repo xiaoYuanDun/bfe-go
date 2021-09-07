@@ -30,6 +30,8 @@ export const pattern = (pat: any): any =>
     func(pat) ||
     (array(pat) && pat.every(pattern)));
 
+export const channel = (ch: any) => ch && func(ch.take) && func(ch.close);
+
 // import { TASK, MULTICAST, IO, SAGA_ACTION } from '@redux-saga/symbols'
 
 // export const number = n => typeof n === 'number'
@@ -41,7 +43,6 @@ export const pattern = (pat: any): any =>
 // export const sagaAction = a => Boolean(a && a[SAGA_ACTION])
 // export const observable = ob => ob && func(ob.subscribe)
 // export const buffer = buf => buf && func(buf.isEmpty) && func(buf.take) && func(buf.put)
-// export const channel = ch => ch && func(ch.take) && func(ch.close)
 
 // export const multicast = ch => channel(ch) && ch[MULTICAST]
 // export const effect = eff => eff && eff[IO]

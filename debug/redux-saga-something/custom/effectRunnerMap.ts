@@ -16,7 +16,7 @@ import { current as currentEffectId } from './uid';
  *   fn === generator -> iterator
  *   TODO -> 其他类型
  */
-function createTaskIterator({ context, fn, args }) {
+function createTaskIterator({ context, fn, args }: any) {
   try {
     const result = fn.apply(context, args);
 
@@ -84,13 +84,20 @@ function runForkEffect(
      */
     const child = proc(env, taskIterator, currentEffectId, detached);
 
-    // TODO 暂时不处理 detached 的情况, fork -> attached; spawn -> detached
+    /**
+     * TODO 暂时不处理 detached 的情况, fork -> attached; spawn -> detached
+     *
+     * 一个 task 的默认 status 是 RUNNING, 这时把 forkTask(子任务) 推入父 task 的任务队列(queue)
+     * 然后继续执行回调, 不阻塞
+     */
     if (child.isRunning()) {
       parent.queue.addTask(child);
       cb(child);
-    } else if (child.isAborted()) {
-      parent.queue.abort(child.error());
-    } else {
+    }
+    // else if (child.isAborted()) {
+    //   parent.queue.abort(child.error());
+    // }
+    else {
       cb(child);
     }
   });
