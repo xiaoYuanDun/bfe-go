@@ -1,6 +1,21 @@
 import { REACT_FORWARD_REF, REACT_TEXT, REACT_FRAGMENT, MOVE, PLACEMENT, DELETE, REACT_PROVIDER, REACT_CONTEXT, REACT_MEMO } from "./constant"
 import { addEvent } from './event'
+
+// 创建一个全局变量存放数据，每一项代表一个useState,在源码里的状态是存放在当前节点的fiber里面的，源码里用的是单向链表
+let hookState = []
+// 从零开始，依次递增
+let hookIndex = 0
+let scheduleUpdate
+
 function render(vdom, parentDOM) {
+  mount(vdom, parentDOM)
+  // return vdom
+  scheduleUpdate = () => {
+    hookIndex = 0
+    compareTwoVdom(parentDOM, vdom, vdom)
+  }
+}
+function mount(vdom, parentDOM) {
   const newDom = createDom(vdom)
   if (newDom) {
     parentDOM.appendChild(newDom)
@@ -9,7 +24,6 @@ function render(vdom, parentDOM) {
       newDom._componentDidMount()
     }
   }
-  // return vdom
 }
 
 export function createDom(vdom) {
@@ -232,7 +246,7 @@ function updateElement(oldVdom, newVdom) {
   }
   // 文本节点
   else if (oldVdom.type === REACT_TEXT) {
-    if (oldVdom.props.content !== newVdom.props.content) {
+    if (oldVdom.props && newVdom.props && oldVdom.props.content !== newVdom.props.content) {
       const currentDOM = newVdom.dom = findDOM(oldVdom) // 获取老的真实DOM，准备复用
       currentDOM.textContent = newVdom.props.content // 更新文本节点的内容
     }
@@ -446,12 +460,141 @@ function unMountVdom(vdom) {
   currentDOM.parentNode.removeChild(currentDOM)
 }
 
+export function useReducer(reducer, initialState) {
+  hookState[hookIndex] = hookState[hookIndex] || initialState
+  let currentIndex = hookIndex
+  function dispatch(action) {
+    let data = typeof action === 'function' ? action(hookState[currentIndex]) : action
+    hookState[currentIndex] = reducer ? reducer(hookState[currentIndex], data) : data
+    // 状态更新后要执行调度更新任务
+    scheduleUpdate()
+  }
+  return [hookState[hookIndex++], dispatch]
+}
+
+// hooks useState其实就是useReducer的语法糖
+export function useState(initialValue) {
+  return useReducer(null, initialValue)
+  // hookState[hookIndex] = hookState[hookIndex] || initialValue
+  // let currentIndex = hookIndex
+  // function setState(value) {
+  //   hookState[currentIndex] = value
+  //   // 状态更新后要执行调度更新任务
+  //   scheduleUpdate()
+  // }
+  // return [hookState[hookIndex++], setState]
+
+}
+
+export function useCallback(callback, deps) {
+  if (hookState[hookIndex]) {
+    const [lastCallback, lastDeps] = hookState[hookIndex]
+    const same = lastDeps.every((item, index) => {
+      return item === deps[index]
+    })
+    if (same) {
+      hookIndex++
+      return lastCallback
+    } else {
+      hookState[hookIndex++] = [callback, deps]
+      return callback
+    }
+  } else {
+    // 初始化状态
+    hookState[hookIndex++] = [callback, deps]
+    return callback
+  }
+}
+
+export function useEffect(fn, deps) {
+  if (hookState[hookIndex]) {
+    const [lastDestroy, lastDeps] = hookState[hookIndex]
+
+    let same = lastDeps && lastDeps.every((item, index) => item === deps[index])
+    if (same) {
+      hookIndex++
+    } else {
+      // 如果有任何一个值不一样，则执行上一个销毁函数
+      lastDestroy && lastDestroy()
+      // 开启一个新的宏任务
+      setTimeout(() => {
+        const destroy = fn()
+        hookState[hookIndex++] = [destroy, deps]
+      })
+    }
+  } else {
+    setTimeout(() => {
+      const destroy = fn()
+      hookState[hookIndex++] = [destroy, deps]
+    })
+  }
+}
+
+export function useLayoutEffect(fn, deps) {
+  if (hookState[hookIndex]) {
+    const [lastDestroy, lastDeps] = hookState[hookIndex]
+
+    let same = lastDeps && lastDeps.every((item, index) => item === deps[index])
+    if (same) {
+      hookIndex++
+    } else {
+      // 如果有任何一个值不一样，则执行上一个销毁函数
+      lastDestroy && lastDestroy()
+      // 加入微任务队列
+      queueMicrotask(() => {
+        const destroy = fn()
+        hookState[hookIndex++] = [destroy, deps]
+      })
+    }
+  } else {
+    queueMicrotask(() => {
+      const destroy = fn()
+      hookState[hookIndex++] = [destroy, deps]
+    })
+  }
+}
+
+export function useMemo(fn, deps) {
+  if (hookState[hookIndex]) {
+    const [lastData, lastDeps] = hookState[hookIndex]
+    const same = lastDeps && lastDeps.every((item, index) => {
+      return item === deps[index]
+    })
+    if (same) {
+      hookIndex++
+      return lastData
+    } else {
+      const newData = fn()
+      hookState[hookIndex++] = [newData, deps]
+      return newData
+    }
+  } else {
+    // 初始化状态
+    const data = fn()
+    hookState[hookIndex++] = [data, deps]
+    return data
+  }
+}
+
 export function findDOM(vdom) {
   if (vdom.dom) {
     return vdom.dom
   } else {
     return findDOM(vdom.oldRenderVdom)
   }
+}
+
+export function useContext(context) {
+  return context._currentValue
+}
+
+export function useRef(initialvalue) {
+  const value = hookState[hookIndex] || { current: initialvalue }
+  return value
+}
+
+export function useImperativeHandle(ref, handler) {
+  ref.current = handler()
 }
 
 const ReactDom = {

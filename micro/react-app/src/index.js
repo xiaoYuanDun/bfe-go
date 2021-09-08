@@ -1,29 +1,32 @@
 import React from './react'
-import ReactDom from './react-dom'
+import ReactDom, { useEffect, useState, useRef, useImperativeHandle } from './react-dom'
 
-class TestComponent extends React.Component {
-  render() {
-    return <div>
-      sss
-      <Dialog>模态框</Dialog>
-    </div>
-  }
+function Child(props, ref) {
+  const inputRef = useRef()
+  // 只给父组件提供需要的方法，对方法进行限制
+  useImperativeHandle(ref, () => {
+    return {
+      focus () {
+        inputRef.current.focus()
+      }
+    }
+  })
+  return <input ref={inputRef} />
 }
 
-class Dialog extends React.Component {
-  constructor(props) {
-    super(props)
-    this.node = document.createElement('div')
-    document.body.appendChild(this.node)
+const ForwardChild = React.forwardRef(Child)
+
+function InputButton() {
+  const ref = useRef()
+  const handleClick = () => {
+    ref.current.focus()
+    // ref.current.remove()
   }
-  componentWillUnmount() {
-    document.body.removeChild(this.node)
-  }
-  render() {
-    return ReactDom.createPortal(<div>
-      {this.props.children}
-    </div>, this.node)
-  }
+  return <div>
+    <ForwardChild ref={ref} />
+    <button onClick={handleClick}>聚焦</button>
+  </div>
 }
 
-ReactDom.render(<TestComponent />, document.getElementById('root'))
+
+ReactDom.render(<InputButton />, document.getElementById('root'))

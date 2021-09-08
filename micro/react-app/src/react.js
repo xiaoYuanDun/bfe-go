@@ -64,6 +64,8 @@ function memo(type, compare = shallowEquals) {
   }
 }
 
+
+
 const React = {
   createElement,
   Component,
