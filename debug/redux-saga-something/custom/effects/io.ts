@@ -1,5 +1,5 @@
 import { Action } from 'redux';
-import { IO } from '../symbols';
+import { IO, CANCEL, SELF_CANCELLATION } from '../symbols';
 import * as effectTypes from './effectTypes';
 import * as is from '../is';
 
@@ -70,8 +70,27 @@ const put = (channel: any, action?: Action) => {
 /**
  * fork 一个子 saga, 不会阻塞当前 saga 执行
  */
-const fork = (fnDescriptor: any, ...args: any) => {
-  return makeEffect(effectTypes.FORK, getFnCallDescriptor(fnDescriptor, args));
+const fork = (fnDescriptor: any, ...args: any) =>
+  makeEffect(effectTypes.FORK, getFnCallDescriptor(fnDescriptor, args));
+
+/**
+ * 提供一个工具方法, 阻塞执行, 演示 ms 后继续执行
+ * 此方法使用定时器实现, 同时把清除定时器的方法挂载到 symbol.CANCEL 上
+ */
+const delay = (ms: number, val = true) => {
+  let timeoutId: any;
+  const promise: any = new Promise((resolve) => {
+    timeoutId = setTimeout(resolve, ms, val);
+  });
+
+  promise[CANCEL] = () => {
+    clearTimeout(timeoutId);
+  };
+
+  return promise;
 };
 
-export { take, put, fork };
+export const cancel = (taskOrTasks = SELF_CANCELLATION) =>
+  makeEffect(effectTypes.CANCEL, taskOrTasks);
+
+export { take, put, fork, delay };

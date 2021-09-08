@@ -10,6 +10,8 @@ import { asap } from './scheduler';
 import { immediately } from './scheduler';
 import proc from './proc';
 import { current as currentEffectId } from './uid';
+import { SELF_CANCELLATION } from './symbols';
+import { TaskSharp } from './newTask';
 
 /**
  * 生成子 fork 的执行主体:
@@ -26,6 +28,12 @@ function createTaskIterator({ context, fn, args }: any) {
     }
   } catch (err) {
     //  TODO
+  }
+}
+
+function cancelSingleTask(taskToCancel: TaskSharp) {
+  if (taskToCancel.isRunning()) {
+    taskToCancel.cancel();
   }
 }
 
@@ -104,10 +112,30 @@ function runForkEffect(
   // Fork effects are non cancellables
 }
 
+function runCancelEffect(
+  env: EnvType,
+  taskOrTasks: any,
+  cb: Function,
+  { task }: any
+) {
+  console.log('-----');
+  cancelSingleTask(taskOrTasks);
+  // if (taskOrTasks === SELF_CANCELLATION) {
+  //   cancelSingleTask(task);
+  // } else if (is.array(taskOrTasks)) {
+  //   taskOrTasks.forEach(cancelSingleTask);
+  // } else {
+  //   cancelSingleTask(taskOrTasks);
+  // }
+  cb();
+  // cancel effects are non cancellables
+}
+
 const effectRunnerMap = {
   [effectTypes.TAKE]: runTakeEffect,
   [effectTypes.PUT]: runPutEffect,
   [effectTypes.FORK]: runForkEffect,
+  [effectTypes.CANCEL]: runCancelEffect,
 };
 
 export default effectRunnerMap;

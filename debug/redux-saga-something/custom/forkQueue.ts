@@ -13,42 +13,65 @@
  *
  */
 
-import { TaskSharp } from './newTask';
+import { MainTaskSharp } from './newTask';
 import { noop, remove } from './utils';
 
-export default function forkQueue(mainTask: TaskSharp, onAbort, cont) {
-  let tasks = [];
-  let result;
+export default function forkQueue(mainTask: MainTaskSharp, onAbort, cont) {
+  /**
+   * 一个 forkQueue 记录了当前 task 的 mainTask 和 所有的 forkedTasks
+   * tasks: [mainTask, forked_0, forked_1, ..., forked_n]
+   */
+  let tasks: any = [];
+  let result: any;
   let completed = false;
 
   addTask(mainTask);
 
+  // function abort(err: Error) {
+  //   onAbort();
+  //   cancelAll();
+  //   cont(err, true);
+  // }
+
   function addTask(task: any) {
     tasks.push(task);
-    // task.cont = (res, isErr) => {
-    //   if (completed) {
-    //     return;
-    //   }
+    task.cont = (res: any, isErr: boolean) => {
+      if (completed) {
+        return;
+      }
 
-    //   remove(tasks, task);
-    //   task.cont = noop;
-    //   if (isErr) {
-    //     abort(res);
-    //   } else {
-    //     if (task === mainTask) {
-    //       result = res;
-    //     }
-    //     if (!tasks.length) {
-    //       completed = true;
-    //       cont(result);
-    //     }
-    //   }
-    // };
+      remove(tasks, task);
+      task.cont = noop;
+      if (isErr) {
+        // TODO
+        // abort(res);
+      } else {
+        if (task === mainTask) {
+          result = res;
+        }
+        if (!tasks.length) {
+          completed = true;
+          cont(result);
+        }
+      }
+    };
+  }
+
+  function cancelAll() {
+    if (completed) {
+      return;
+    }
+    completed = true;
+    tasks.forEach((t: any) => {
+      t.cont = noop;
+      t.cancel();
+    });
+    tasks = [];
   }
 
   return {
     addTask,
-    //     cancelAll,
+    cancelAll,
     //     abort,
     //     getTasks,
   };

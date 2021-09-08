@@ -1,9 +1,13 @@
+/**
+ * 配合 takeEvery, 构建一个实现了 '迭代器协议' 的对象
+ */
+
 import { makeIterator } from '../utils';
 import * as is from '../is';
 
 export default function fsmIterator(
-  fsm: any, // { q1: Function; q2: Function }
-  startState: any, // 'q1' | 'q2' | {},
+  fsm: any, // { q1: Function; q2: Function, q3: Function }
+  startState: any, // 'q1' | 'q2' | 'q3' | {},
   name: string
 ) {
   let stateUpdater: any;

@@ -8,8 +8,14 @@
 //   actionChannel,
 //   delay,
 // } from 'redux-saga/effects';
-import { take, put, fork } from '../../custom/effects';
-import { takeEvery } from '../../custom/io-helpers';
+import {
+  take,
+  put,
+  fork,
+  delay,
+  takeEvery,
+  takeLatest,
+} from '../../custom/effects';
 
 async function asyncafterSometimes(delay = 1000) {
   await new Promise((resolve) => {
@@ -28,28 +34,26 @@ import {
 // 真正处理副作用的是这些 worker-saga
 function* asyncAdd() {
   // yield take(ASYNC_ACTION_ADD);
-  // yield call(asyncafterSometimes);
+  yield delay(1000);
   yield put({ type: ACTION_ADD });
 }
 
 function* asyncMinus() {
   // yield take(ASYNC_ACTION_MINUS);
-  // yield call(asyncafterSometimes);
+  yield fork(subMinus);
+  yield delay(1000);
   yield put({ type: ACTION_MINUS });
 }
 
-function* foo() {
-  while (1) {
-    console.log(1);
-    yield take(ASYNC_ACTION_ADD);
-    yield put({ type: ACTION_ADD });
-  }
+function* subMinus() {
+  yield delay(1000);
+  yield put({ type: ACTION_MINUS });
 }
 
 // root-saga 作为 watcher 存在
 function* mySaga() {
-  yield takeEvery(ASYNC_ACTION_ADD, asyncAdd);
-  // yield takeEvery(ASYNC_ACTION_MINUS, asyncMinus);
+  // yield takeEvery(ASYNC_ACTION_ADD, asyncAdd);
+  yield takeLatest(ASYNC_ACTION_MINUS, asyncMinus);
 }
 
 export default mySaga;

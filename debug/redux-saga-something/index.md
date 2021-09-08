@@ -175,6 +175,12 @@ takeEvery.next() --> channel.take(ACTION) --> 挂起, 等待 ACTION
 ACTION 派发:
 dispatch(ACTION) --> channel.put(ACTION) --> taker.cancel() --> takeEvery.next() --> channel.take(ACTION) --> 挂起, 等待 ACTION
 
+#### takeLatest
+
+和 `takeEvery` 类似, 也是非阻塞监听每一次派发, 但是区别是: 不会每次都走处理逻辑, 在子任务执行期间(有可能是异步任务)如果有新的派发, 则会取消上一次处理逻辑, 重新开始一个子任务, 始终保持执行最新的派发
+
+#### delay
+
 ### TODO
 
 #### call

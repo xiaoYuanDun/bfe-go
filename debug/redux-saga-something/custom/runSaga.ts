@@ -34,7 +34,7 @@ function runSaga(
   const env: EnvType = { channel, finalizeRunEffect, dispatch };
 
   return immediately(() => {
-    const task = proc(env, iterator, effectId, true);
+    const task = proc(env, iterator, effectId, true, undefined);
   });
 }
 

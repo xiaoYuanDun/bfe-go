@@ -1,3 +1,6 @@
+import { fork } from './effects';
+import { takeEveryHelper, takeLatestHelper } from './sagaHelpers';
+
 /**
  *
  * 本质上, takeEvery 就是构建无限循环的 take:
@@ -26,18 +29,37 @@
  *
  * 那么除了直接编写一个无限循环的生成器, 还可以使用更底层, 更符合生成器本质的方式来实现, 就是构建自定义的 next 和 返回值来表现'迭代行为'
  *
- *
- *
  */
-
-import { fork, take } from './effects';
-import { takeEveryHelper } from './sagaHelpers';
-
 export function takeEvery(
   patternOrChannel: any,
   worker: Function,
   ...args: any
 ) {
-  console.log('takeevery');
   return fork(takeEveryHelper, patternOrChannel, worker, ...args);
+}
+
+/**
+ *
+ * yield takeLatest(ACTION_XXX, asyncGenerator)
+ *
+ * yield fork(function* () {
+ *   let lastTask
+ *   while(1) {
+ *     const task = yield take(ACTION_XXX);
+ *     if(lastTask) {
+ *       yield cancel(lastTask)
+ *     }
+ *     lastTask = yield fork(asyncGenerator);
+ *   }
+ * })
+ *
+ * 整体思路和普通函数防抖一样, 都是在新派发到来时, 判断一下上次的任务是否还在进行, 是否需要取消
+ *
+ */
+export function takeLatest(
+  patternOrChannel: any,
+  worker: Function,
+  ...args: any
+) {
+  return fork(takeLatestHelper, patternOrChannel, worker, ...args);
 }

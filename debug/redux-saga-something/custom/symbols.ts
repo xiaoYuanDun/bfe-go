@@ -13,4 +13,14 @@ export const MULTICAST = createSymbol('MULTICAST');
 // channel 使用的 match 函数标识 (验证 action.type 和 taker 是否匹配的匹配规则函数)
 export const MATCH = createSymbol('MATCH');
 
+// 通过 newTask 的到的任务对象的标识
 export const TASK = createSymbol('TASK');
+
+// delay 有用到, 用于挂载定时器取消函数
+export const CANCEL = createSymbol('CANCEL_PROMISE');
+
+// effect/cancel 中取消副作用的标识
+export const SELF_CANCELLATION = createSymbol('SELF_CANCELLATION');
+
+// 一个 TASK 因为取消而结束的标识
+export const TASK_CANCEL = createSymbol('TASK_CANCEL');

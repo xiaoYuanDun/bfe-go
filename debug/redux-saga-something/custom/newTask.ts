@@ -1,19 +1,33 @@
 import { EnvType } from './runSaga';
 import { TASK_STATUS } from './task-status';
-import { TASK } from './symbols';
+import { TASK, TASK_CANCEL } from './symbols';
 import forkQueue from './forkQueue';
+import { noop } from './utils';
+
+export type MainTaskSharp = {
+  status: TASK_STATUS;
+  cancel: Function;
+};
 
 export type TaskSharp = {
-  status: TASK_STATUS;
+  id: number;
+  isRoot: boolean;
+  queue: any;
+  isRunning: Function;
+  isAborted: Function;
+  cont: Function;
+  cancel: Function;
 };
 
 export default function newTask(
   env: EnvType,
-  mainTask: TaskSharp,
+  mainTask: MainTaskSharp,
   parentEffectId: number,
-  isRoot: boolean
+  isRoot: boolean,
+  cont = noop
 ) {
   let status = TASK_STATUS.RUNNING;
+  let taskResult;
   // let taskError;
 
   const queue = forkQueue(
@@ -24,9 +38,36 @@ export default function newTask(
     end
   );
 
-  function end() {}
+  /**
+   * 结束当前任务, '取消' 动作会向当前 task(parentTask) 的整个执行上下文传递
+   * 对于已经 terminated 或 已经取消的任务来说, '取消' 不做任何动作
+   *
+   * 因为 queue 是一个 task 组成的队列, queue.cancelAll() 内部会调用每个 task 的 cancel
+   * 这样就形成了向下的递归调用, 知道整个调用栈的 task 全部都 cancel
+   */
+  function cancel() {
+    if (status === TASK_STATUS.RUNNING) {
+      status = TASK_STATUS.CANCELLED;
+      queue.cancelAll();
+      end(TASK_CANCEL, false);
+    }
+  }
 
-  const task = {
+  function end(result: any, isErr: boolean) {
+    // 这时 task 的状态有可能是: RUNNING / CANCELLED
+    // TODO 这里感觉没啥意义啊, 如果 result === TASK_CANCEL, 说明一定是 cancel 触发的, 在这之前 status 已经被设置为 CANCELLED 了
+    if (!isErr) {
+      if (result === TASK_CANCEL) {
+        status = TASK_STATUS.CANCELLED;
+      }
+      taskResult = result;
+    }
+
+    // TODO 这里默认应该是个空函数, 没有实际意义
+    task.cont(result, isErr);
+  }
+
+  const task: TaskSharp = {
     [TASK]: true,
     id: parentEffectId,
     // meta,
@@ -36,8 +77,8 @@ export default function newTask(
     queue,
 
     // // methods
-    // cancel,
-    // cont,
+    cancel,
+    cont,
     // end,
     // setContext,
     // toPromise,

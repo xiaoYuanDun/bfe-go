@@ -1,3 +1,5 @@
+import { TASK_CANCEL } from './symbols';
+
 export const identity = (v: unknown) => v;
 
 /**
@@ -73,3 +75,8 @@ export function makeIterator(
   }
   return iterator;
 }
+
+/**
+ * 用于判断下一步 .next 是否应该执行 取消/终止(it.return()) 动作
+ */
+export const shouldCancel = (res: any) => res === TASK_CANCEL;

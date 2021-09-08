@@ -12,7 +12,9 @@ export const func = (f: any) => typeof f === 'function';
 
 export const array = Array.isArray;
 
-export const iterator = (it) => it && func(it.next) && func(it.throw);
+export const iterator = (it: any) => it && func(it.next) && func(it.throw);
+
+export const promise = (p: any) => p && func(p.then);
 
 export const stringableFunc = (f: any) =>
   func(f) && f.hasOwnProperty('toString');
@@ -37,7 +39,7 @@ export const channel = (ch: any) => ch && func(ch.take) && func(ch.close);
 // export const number = n => typeof n === 'number'
 
 // export const object = obj => obj && !array(obj) && typeof obj === 'object'
-// export const promise = p => p && func(p.then)
+
 // export const iterable = it => (it && func(Symbol) ? func(it[Symbol.iterator]) : array(it))
 // export const task = t => t && t[TASK]
 // export const sagaAction = a => Boolean(a && a[SAGA_ACTION])
