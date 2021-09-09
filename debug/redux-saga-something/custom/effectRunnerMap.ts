@@ -118,17 +118,12 @@ function runCancelEffect(
   cb: Function,
   { task }: any
 ) {
-  console.log('-----');
-  cancelSingleTask(taskOrTasks);
-  // if (taskOrTasks === SELF_CANCELLATION) {
-  //   cancelSingleTask(task);
-  // } else if (is.array(taskOrTasks)) {
-  //   taskOrTasks.forEach(cancelSingleTask);
-  // } else {
-  //   cancelSingleTask(taskOrTasks);
-  // }
+  if (taskOrTasks === SELF_CANCELLATION) {
+    cancelSingleTask(task);
+  } else {
+    cancelSingleTask(taskOrTasks);
+  }
   cb();
-  // cancel effects are non cancellables
 }
 
 const effectRunnerMap = {

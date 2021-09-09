@@ -82,6 +82,11 @@ function proc(
       } else if (shouldCancel(args)) {
         // effect.cancel 会使用 TASK_CANCEL 为参数调用 next 方法, 接收到此标识表示需要提前取消 task
         mainTask.status = TASK_STATUS.CANCELLED;
+
+        // TODO 我理解这里是为了处理 在途的promise, 待确定, 这里比较乱
+        console.log('next.cancel');
+        next.cancel();
+
         result = is.func(iterator.return)
           ? iterator.return(TASK_CANCEL)
           : { done: true, value: TASK_CANCEL };
@@ -105,36 +110,24 @@ function proc(
     // 为这次任务打上自增标识
     const effectId = nextEffectId();
 
-    /**
-     * 完成回调 和 取消回调, 是互斥的
-     * 因为我们无法取消一个已经完成的 effect, 也无法完成一个已经取消的 effect
-     */
-    let effectSettled: any;
-
     function currCb(res?: unknown) {
-      if (effectSettled) {
-        return;
-      }
-      effectSettled = true;
-      cb.cancel = noop; // defensive measure
-
       // 这个 cb 实际上就是 next 方法
       cb(res);
     }
 
-    // currCb.cancel = noop;
+    /**
+     * 注意这里, 每个 副作用(yield 后面接的值), 都需要在自己的 '流程控制回调(这里就是 currCb)' 上面挂载 '取消' 逻辑
+     * 当 task itself 或 parent task 被 '取消' 时, 用于取消自身的任务, 并向下传递 '取消操作(cancellation)'
+     * 副作用有可能是:
+     *   1. 普通副作用(from makeEffect)
+     *   2. promise: delay 产生的延时 promise, 在当前任务取消后, 需要被清除, 所以 resolvePromise 中有赋值 cancel function
+     */
+    currCb.cancel = noop;
 
-    // TODO 这里有点懵了, 先给个初始值, currCb 中又给了个 noop
-    // cb.cancel = () => {
-    //   // prevents cancelling an already completed effect
-    //   if (effectSettled) {
-    //     return;
-    //   }
-    //   effectSettled = true;
-
-    //   currCb.cancel(); // propagates cancel downward
-    //   currCb.cancel = noop; // defensive measure
-    // };
+    cb.cancel = () => {
+      currCb.cancel();
+      currCb.cancel = noop;
+    };
 
     finalRunEffect(effect, effectId, currCb);
   }

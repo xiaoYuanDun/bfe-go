@@ -5,6 +5,7 @@ import {
   ACTION_MINUS,
   ASYNC_ACTION_ADD,
   ASYNC_ACTION_MINUS,
+  CANCEL_ADD,
 } from './store/actions';
 
 const App: FC = () => {
@@ -24,6 +25,8 @@ const App: FC = () => {
       <button onClick={() => dispatch({ type: ASYNC_ACTION_MINUS })}>
         async minus
       </button>
+      <br />
+      <button onClick={() => dispatch({ type: CANCEL_ADD })}>cancel</button>
     </div>
   );
 };

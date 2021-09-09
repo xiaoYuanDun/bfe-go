@@ -179,6 +179,73 @@ dispatch(ACTION) --> channel.put(ACTION) --> taker.cancel() --> takeEvery.next()
 
 和 `takeEvery` 类似, 也是非阻塞监听每一次派发, 但是区别是: 不会每次都走处理逻辑, 在子任务执行期间(有可能是异步任务)如果有新的派发, 则会取消上一次处理逻辑, 重新开始一个子任务, 始终保持执行最新的派发
 
+#### cancel
+
+一个 task 的 cancel, 最终是调用所属 queue 的 cancelAll 方法, 会遍历 queue 所有 task 并调用每个 task 的 cancel (嘿, 燃起来了, 开始递归了)
+
+注意要使用 cancel, 需要要给 cancel 指定一个 task 参数, 表示需要被取消的任务, **取消** 完成后会继续在主流程中向下执行, 如果不指定 task, cancel.effect 会赋值一个 `SELF_CANCELLATION` 表示 需要取消当前 task 自己
+
+`cancel` 过程中, 首先取消被指定的 task, 然后向下递归的取消其所有子 task
+
+在调试 `cancel` 时, **cancellation 如何向下传递** 这里有点懵, 这里记录一下
+
+首先明确一下, saga 主流程有 同步/异步 两种执行模式:
+
+1. 同步执行时, 实际上是不需要 cancel 的, 因为执行到 cancel 这里时, 所有之前的任务都已经完成, 之后的任务还没有开始, 没有取消的意义
+2. 着重说一下异步执行(也是 cancel 的重点使用场景), 我们通过 yield 生成一些 effect 时, 他们可能包含(fork 异步 task)或本身(delay)就是异步操作,
+   当他们的异步任务正在进行时, 如果调用了 `yield cancel(task?)`, 那么 saga 是如何取消在途的任务的呢?
+
+   有两个地方需要被取消: task(生成器主执行流程, 这里的**主流程**及指当前生成器的主流程, 不特指指根生成器) 和 effect(在途副作用)
+   task 会使用 queue.cancelAll, 上面已经讨论过了
+   effect 的取消函数(若需要, 比如 promise 就需要, put 就不需要), 会在每一次执行 runEffect 是挂载到 next 的 cancel 属性上, 注意, 生成器每次向下执行一步, 就会调用一次 runEffect, 而每次 runEffect 的执行, 都会根据当前 effect 的类型来更新 `next.cancel` 属性, 看看下面的代码:
+
+```js
+function* mySaga() {
+  console.log('start ...');
+  yield fork(function* () {
+    yield delay(2000);
+    console.log('after 2s');
+
+    yield delay(3000);
+    console.log('after 3s');
+  });
+  yield fork(function* () {
+    yield delay(10000);
+    console.log('after 10s');
+  });
+
+  yield take(CANCEL_ADD);
+  yield cancel();
+}
+```
+
+rootTask fork 了两个 子 task:
+
+在 forked_01 中, 它对应的 task 只包含一个 queue: [mainTask], 而它的第一个副作用的取消函数会被挂载到它自己的 proc 的执行上下文的 next 上, 这是该任务挂起
+
+在 forked_02 中, 它对应的 task 同样也只包含一个 queue: [mainTask], 它的副作用也一样, 被挂载到它的 next.cancel 上
+
+这时 '取消操作' 可能会有四种情况(这里统一指取消根 saga 的 rootTask):
+
+1. 如果 2s 前执行取消, 则有两个在途的 promise(forked_01 的 delay(2000), forked_02 的 delay(10000)), take 后面的 cancel 被激活后, 首先返回一个 cancelEffect 对象, 该对象被发往 runEffect, 最终进入 runCancelEffect, 从 rootTask 开始执行 cancel 操作, rootTask 的 mainTask 调用 `next(TASK_CANCEL)` 后, 生成器会得知需要终止自己的执行, 在调用 it.return() 的同时, 还会执行 next 方法上挂载的 cancel(有印象吗?在每次 runEffect 都会更新这个属性), 保证在途的 promise 可以被提前终止
+
+2. 如果 2s 之后, 5s 之前执行取消, 则有两个在途的 promise(forked_01 的 delay(3000), forked_02 的 delay(10000)), 而且因为 delay(2000) 执行完毕后, forked_01 会继续向下执行一步, 会触发一次 runEffect, 更新 next.cancel 的值为 delay(3000) 的取消函数(看到了吗? 同一时间, 一个 task 的 next 方法上, 只会有一个 cancel 方法, 就是该 task 的在途 effect 对用的 cancel 方法), 这时 take 后的 cancel 被激活后, 和上面讲的一样, 都是先返回一个 cancelEffect 对象, ...(和上面一样)
+
+3. 5s 后, 10s 前 执行取消, 只剩一个在途的 promise(forked_02 的 delay(10000)), forked_01 在执行完本身的逻辑后, 处于 **terminated** 状态, 从 rootTask 被删除, 这时 take 后的 cancel 被激活后, 和上面的也一样, 不赘述了
+
+4. 10s 后, 没有在途的 effect, 执行取消不会进行任何有意义的操作
+
+总结一下: saga 再运行时, 针对异步任务和子任务, 都会把他们的 **副作用取消函数** 挂载到自己的 next 方法上, 保证在自己或者父任务在执行取消时, 可以及时的取消在途的副作用, 这个 **副作用取消函数** 会在每次 .next 的时候被及时更新, 我们在取消任务时, 只需要关注 **当前 task 的在途 effect**即可, 因为一个 task 只能有一个在途的 effect, 如过有多个那就属于 fork 了, 属于另一个 task 的范围了。
+
+对于一个 task 的 **完整 cancellation** 包括:
+
+1. 结束自己的生成器执行流程
+2. 取消在途的副作用
+
+一个完整的 'cancellation' 会从指定的 task 开始, 递归的执行上述过程, 终结 目标 task 和他的所有 子 task
+
+todo 自定义 delay 无法及时取消
+
 #### delay
 
 ### TODO

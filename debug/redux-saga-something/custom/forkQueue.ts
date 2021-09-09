@@ -16,7 +16,7 @@
 import { MainTaskSharp } from './newTask';
 import { noop, remove } from './utils';
 
-export default function forkQueue(mainTask: MainTaskSharp, onAbort, cont) {
+export default function forkQueue(mainTask: MainTaskSharp) {
   /**
    * 一个 forkQueue 记录了当前 task 的 mainTask 和 所有的 forkedTasks
    * tasks: [mainTask, forked_0, forked_1, ..., forked_n]
@@ -27,33 +27,11 @@ export default function forkQueue(mainTask: MainTaskSharp, onAbort, cont) {
 
   addTask(mainTask);
 
-  // function abort(err: Error) {
-  //   onAbort();
-  //   cancelAll();
-  //   cont(err, true);
-  // }
-
   function addTask(task: any) {
     tasks.push(task);
+    // TODO  这里 cont 的赋值, 意义是什么?
     task.cont = (res: any, isErr: boolean) => {
-      if (completed) {
-        return;
-      }
-
-      remove(tasks, task);
-      task.cont = noop;
-      if (isErr) {
-        // TODO
-        // abort(res);
-      } else {
-        if (task === mainTask) {
-          result = res;
-        }
-        if (!tasks.length) {
-          completed = true;
-          cont(result);
-        }
-      }
+      //  ...
     };
   }
 
@@ -63,7 +41,8 @@ export default function forkQueue(mainTask: MainTaskSharp, onAbort, cont) {
     }
     completed = true;
     tasks.forEach((t: any) => {
-      t.cont = noop;
+      // TODO  取消时把 cont 置为空函数, 没看懂, 在 addTask 的时候不要赋值不就行了吗
+      // t.cont = noop;
       t.cancel();
     });
     tasks = [];
