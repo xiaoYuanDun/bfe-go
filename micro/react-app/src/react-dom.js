@@ -110,14 +110,18 @@ function mountContext(vdom) {
 // 类组件渲染
 function mountClassComponent(vdom) {
   const { type: ClassComponent, props, ref } = vdom
-  const classInstance = new ClassComponent(props)
+
+  // 有上下文contxt时需要赋值到类实例的context上
+  let context = ClassComponent.contextType ? ClassComponent.contextType._currentValue : undefined
+  if (context) {
+    classInstance.context = context
+  }
+  // 为了初始化能获取得到context， react-redux里面使用
+  const classInstance = new ClassComponent(props, context)
   if (ref) { // 类组件的ref就是类本身
     ref.current = classInstance
   }
-  // 有上下文contxt时需要赋值到类实例的context上
-  if (ClassComponent.contextType) {
-    classInstance.context = ClassComponent.contextType._currentValue
-  }
+
   if (classInstance.componentWillMount) {
     classInstance.componentWillMount()
   }
@@ -589,7 +593,7 @@ export function useContext(context) {
 }
 
 export function useRef(initialvalue) {
-  const value = hookState[hookIndex] || { current: initialvalue }
+  const value = hookState[hookIndex++] || { current: initialvalue }
   return value
 }
 

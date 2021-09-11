@@ -2,31 +2,23 @@ import React from 'react'
 import store from '../store'
 import bindActionCreators from '../redux/bindActionCreator'
 import actions1 from '../store/actions/counter1'
+import { connect, connectHooks } from '../react-redux'
 
 const boundCreators = bindActionCreators(actions1, store.dispatch)
 
-console.log(boundCreators)
 
-export default class Counter extends React.Component {
-    constructor(props) {
-        super(props)
-        this.state = {
-            number: store.getState().counter1.number
-        }
-    }
-    componentDidMount() {
-        store.subscribe(() => {
-            this.setState({
-                number: store.getState().counter1.number
-            })
-        })
-    }
+class Counter extends React.Component {
     render() {
-        console.log('render counter1')
+        const { number, add1, minus1 } = this.props
         return <div>
-            {this.state.number}
-            <button onClick={boundCreators.add1}>+</button>
-            <button onClick={boundCreators.minus1}>-</button>
+            {number}
+            <button onClick={add1}>+</button>
+            <button onClick={minus1}>-</button>
         </div>
     }
 }
+
+const mapStateToProps = (state) => state.counter1
+
+
+export default connectHooks(mapStateToProps, actions1)(Counter)

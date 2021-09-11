@@ -18,12 +18,15 @@ export default function createStore(reducer, initialState) {
     }
     function subscribe(listen) {
         listeners.push(listen)
+        return () => {
+            listeners = listeners.filter((i) => i !== listen)
+        }
     }
     // 初始化时，会调用一次，防止state没有值
     dispatch({
         type: '@@REDUXINIT'
     })
-    
+
     return {
         getState, // 用来获取当前仓库的状态
         dispatch, // 向仓库派发动作
