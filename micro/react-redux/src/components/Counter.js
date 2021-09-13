@@ -9,11 +9,14 @@ const boundCreators = bindActionCreators(actions1, store.dispatch)
 
 class Counter extends React.Component {
     render() {
-        const { number, add1, minus1 } = this.props
+        const { number, add1, minus1, ThunkAdd, PromiseAdd, PromiseAdd2 } = this.props
         return <div>
             {number}
             <button onClick={add1}>+</button>
             <button onClick={minus1}>-</button>
+            <button onClick={ThunkAdd}>-</button>
+            <button onClick={PromiseAdd}>-</button>
+            <button onClick={PromiseAdd2}>+</button>
         </div>
     }
 }

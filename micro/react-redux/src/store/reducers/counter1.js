@@ -5,6 +5,7 @@ let initialState = {
 }
 
 function counter1(state = initialState, action) {
+    console.log(action)
     switch (action.type) {
         case actionTypes.ADD1:
             return {

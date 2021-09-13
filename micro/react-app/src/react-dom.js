@@ -100,7 +100,7 @@ function mountProvider(vdom) {
 // consumer渲染
 function mountContext(vdom) {
   const { type, props } = vdom
-  const vdomfn = props.children //函数式组件用consumer， 为一个函数
+  const vdomfn = props.children //函数式组件用consumer， 为一个函数 （value） => { return <div></div>}
   const context = type._context
   const renderVdom = vdomfn(context._currentValue)
   vdom.oldRenderVdom = renderVdom
