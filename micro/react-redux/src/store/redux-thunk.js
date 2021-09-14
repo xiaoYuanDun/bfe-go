@@ -2,7 +2,6 @@
 export function reduxThunk({ getState, dispatch }) {
     return function (next) { // 调用下一个中间件 没有的话 next = dispatch方法
         return function (action) { // 这个就是改造后的dispatch
-            debugger
             if (typeof action === 'function') {
                 return action(dispatch)
             } else {
