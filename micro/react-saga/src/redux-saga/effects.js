@@ -57,3 +57,28 @@ export function cps(fn, ...args) {
         args
     }
 }
+
+// all 所有任务执行完再执行下面的
+export function all(effects) {
+    return {
+        type: effectTypes.ALL,
+        effects
+    }
+}
+
+// 取消任务执行
+export function cancel(task) {
+    return {
+        type: effectTypes.CANCEL,
+        task
+    }
+}
+
+// delay函数
+function delayP(ms) {
+    return new Promise((resolve) => {
+        setTimeout(resolve, ms)
+    })
+}
+
+export const delay = call.bind(null, delayP)

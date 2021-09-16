@@ -9,5 +9,10 @@ export default {
         return {
             type: actionTypes.ADD
         }
+    },
+    cancelAdd: () => {
+        return {
+            type: actionTypes.CANCEL_ADD
+        }
     }
 }
