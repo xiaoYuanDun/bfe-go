@@ -2,6 +2,8 @@ import { updateQueue } from "./Component"
 
 /**
  * 实现合成事件或者事件委托
+ * 在每一个dom上放入store对象，将事件放在里面，检测document是否绑定了on事件，没有则绑定，然后合成事件
+ * document发生点击时，逐层检测是否该该层dom是否有store属性，有则触发
  * @param {*} dom 绑定事件的dom元素
  * @param {*} eventType 事件类型
  * @param {*} eventHandler 事件的处理函数

@@ -593,8 +593,11 @@ export function useContext(context) {
 }
 
 export function useRef(initialvalue) {
-  const value = hookState[hookIndex++] || { current: initialvalue }
-  return value
+  if (!hookState[hookIndex]) {
+    hookState[hookIndex] = { current: initialvalue }
+  }
+  return hookState[hookIndex++]
+
 }
 
 export function useImperativeHandle(ref, handler) {
