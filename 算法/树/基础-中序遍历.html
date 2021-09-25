@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      {
+        function TreeNode(val, left, right) {
+          this.val = val === undefined ? 0 : val;
+          this.left = left === undefined ? null : left;
+          this.right = right === undefined ? null : right;
+        }
+
+        // 用例1
+        const n1 = new TreeNode(1);
+        const n2 = new TreeNode(2);
+        const n3 = new TreeNode(3);
+        const n4 = new TreeNode(4);
+        const n5 = new TreeNode(5);
+        const n6 = new TreeNode(6);
+        const n7 = new TreeNode(7);
+
+        n1.left = n2;
+        n1.right = n3;
+        n2.left = n4;
+        // n4.left = n7;
+        n3.left = n5;
+        // n3.right = n6;
+        // n2.right = n6;
+        // n6.left = n7;
+
+        // 递归
+        // 看似和前序遍历一致, 但是比前序稍微多了一些逻辑判断
+        // 前序输出时, 不用关心当前节点的状态, 只要遍历到, 输出当前节点的值即可
+        // 因为当前节点本身既是当前根节点, 又是上层节点的左右子节点
+        // 不会出现重复输出的情况
+        var inorderTraversal = function (_root) {
+          function dfs(root) {
+            if (!root.left) {
+              res.push(root.val);
+            } else {
+              dfs(root.left);
+              res.push(root.val);
+            }
+            if (root.right) dfs(root.right);
+          }
+
+          const res = [];
+          if (!!_root) dfs(_root);
+          return res;
+        };
+
+        // 改进一下 dfs 的逻辑
+        // 非空判断全部放在统一的判断逻辑中, 这种做法会在每个叶子节点多调用两次 dfs, 分别是: dfs(左叶子=null), dfs(右叶子=null)
+        // 但是逻辑变得非常清晰
+        var inorderTraversal = function (_root) {
+          function dfs(root) {
+            if (!root) return;
+            dfs(root.left);
+            res.push(root.val);
+            dfs(root.right);
+          }
+
+          const res = [];
+          if (!!_root) dfs(_root);
+          return res;
+        };
+
+        // 迭代 - 1
+        // 根据中序的特点, 每个子树的根节点可能会被操作多次, 这里用一个 visited 变量来判断是否被操作过
+        var inorderTraversal = function (root) {
+          const stack = root ? [{ node: root, visited: 0 }] : [];
+          const res = [];
+          while (stack.length) {
+            const { node, visited } = stack.pop();
+
+            if (visited) {
+              res.push(node.val);
+              continue;
+            }
+
+            if (node.right) stack.push({ node: node.right });
+            stack.push({ node, visited: 1 });
+            if (node.left) stack.push({ node: node.left });
+          }
+          return res;
+        };
+
+        // 迭代 - 2
+        // 上面的迭代方式, 会对子树根节点进行多次操作, 而且需要额外的变量来辅助, 这里换一种迭代条件
+        // 大致梳理一下这里的逻辑:
+        // 1. 首先拿到遍历根节点的所有左子树, 一直到叶子节点
+        // 2. 这时栈是所有左子树的节点构成的, 开始从栈顶弹出节点(回溯)
+        // 3. 若遍历到的节点存在右节点(右子树), 则对其右节点做第一步相同的逻辑操作, 这可以保证左子树节点一直处于栈顶(若存在)
+        // tips: 可以学习一下这种写法, 很简洁  while ((item = stack.pop())) { ... }
+        var inorderTraversal = function (root) {
+          if (!root) return [];
+          const res = [];
+          const stack = [root];
+
+          let left = root.left;
+          while (left) {
+            stack.push(left);
+            left = left.left;
+          }
+
+          let item;
+          while ((item = stack.pop())) {
+            res.push(item.val);
+
+            let r = item.right;
+            while (r) {
+              stack.push(r);
+              r = r.left;
+            }
+          }
+          return res;
+        };
+
+        // 迭代 - 2 - 逻辑改进
+        // 这里的循环条件非常巧妙, 从根节点开始, 若存在左侧节点就入栈
+        // 一直到没有左侧节点, 开始弹出栈顶节点, 取值, 然后到了关键步骤: 'item = item.right'
+        // 这里的 item 只是个临时指针, 方便递归左子树入栈, 同时判断是否需要执行同样的操作
+        // 这个看起来比上一种优雅多了, 没有多余的特殊判断, 全都用统一的逻辑来处理
+        var inorderTraversal = function (root) {
+          if (!root) return [];
+          const res = [];
+          const stack = [];
+
+          let item = root;
+          while (item || stack.length) {
+            while (item) {
+              stack.push(item);
+              item = item.left;
+            }
+            item = stack.pop();
+            res.push(item.val);
+            item = item.right;
+          }
+          return res;
+        };
+
+        const res = inorderTraversal(n1);
+        console.log(res);
+      }
+    </script>
+  </head>
+
+  <body>
+    <div>基础的遍历: 中序遍历</div>
+
+    <p>
+      值得注意的是，中序遍历一个二叉查找树（BST）的结果是一个有序数组，利用这个性质有些题目可以得到简化，
+      比如<a
+        href="https://leetcode-cn.com/problems/kth-smallest-element-in-a-bst/"
+        >230</a
+      >
+      <a href="https://leetcode-cn.com/problems/validate-binary-search-tree/"
+        >98</a
+      >
+    </p>
+  </body>
+</html>

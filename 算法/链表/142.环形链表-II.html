@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+  <script>
+    {
+      function ListNode(val, next) {
+        this.val = val === undefined ? 0 : val;
+        this.next = next === undefined ? null : next;
+      }
+
+      //  用例1
+      const n1 = new ListNode(1)
+      const n2 = new ListNode(2)
+      // const n3 = new ListNode(3)
+
+      n1.next = n2
+      // n2.next = n3
+      // n3.next = n2
+
+
+
+      // 我的脑子已经驾驭不住了
+      // 难点全部是数学推导, 我已经炸了
+      var detectCycle = function (head) {
+
+        // 快慢指针同时从 head 开始前进
+        let fast = slow = head
+        while (1) {
+          if (fast === null || fast.next === null) return null
+          fast = fast.next.next
+          slow = slow.next
+          // 判断条件放在最后是为了兼容处理刚开始 slow = fast = head 的情况, 避免造成误判
+          if (fast === slow) break
+        }
+        // 设从 head 到换入口的步数为 a, 绕环一圈需要 b 步, 
+        // 当快慢指针第一次相遇时, 快指针走了慢指针步数的2倍, 快指针比慢指针多走了 n*b
+        // f = 2s, f = s + n*b
+        // 可推导出, s = n*b, 即相遇时, 慢指针走了 n 个绕环步数
+        // 又因为每次慢指针到达环入口节点是走的步数是 a + n*b, 可以得出第一次相遇时, 慢指针再走 a 步就会到达环入口节点
+        // 这是把快指针置为 head, 同时一次只走一步, 此时 f = 0, s = n*b
+        // 那么下一个相遇的时机是什么呢? 可以看出来是: 
+        // f = 0 + a = a, 
+        // s = n*b + a
+        // 且这是这个相遇的节点一定是环入口节点, 因为 a, a + n*b 满足环入口公式: a + n*b
+
+        fast = head
+        while (fast !== slow) {
+          fast = fast.next
+          slow = slow.next
+        }
+
+        return fast
+      };
+
+      const res = detectCycle(n1)
+      console.log(res)
+
+    }
+  </script>
+</head>
+
+<body>
+  <div>给定一个链表，返回链表开始入环的第一个节点。 如果链表无环，则返回 null。
+
+    为了表示给定链表中的环，我们使用整数 pos 来表示链表尾连接到链表中的位置（索引从 0 开始）。 如果 pos 是 -1，则在该链表中没有环。注意，pos 仅仅是用于标识环的情况，并不会作为参数传递到函数中。
+
+    说明：不允许修改给定的链表。
+  </div>
+  <p>tips:</p>
+  <p>进阶: 你能用 O(1)（即，常量）内存解决此问题吗？</p>
+  <p>O(1) 方法的难点全部集中在数学推导, 关键能想清楚这个数理关系才可以, 不然完全做不出来</p>
+  <a href="https://leetcode-cn.com/problems/linked-list-cycle-ii/">传送门</a>
+</body>
+
+</html>

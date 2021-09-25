@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      {
+        function TreeNode(val, left, right) {
+          this.val = val === undefined ? 0 : val;
+          this.left = left === undefined ? null : left;
+          this.right = right === undefined ? null : right;
+        }
+
+        // 用例1
+        const n1 = new TreeNode(1);
+        const n2 = new TreeNode(2);
+        const n3 = new TreeNode(3);
+        const n4 = new TreeNode(4);
+        const n5 = new TreeNode(5);
+        const n6 = new TreeNode(6);
+        const n7 = new TreeNode(7);
+
+        n1.left = n2;
+        n1.right = n3;
+        n2.left = n4;
+        n4.left = n7;
+        n3.left = n5;
+        n3.right = n6;
+
+        // 基础递归方法 - dfs
+        var preorderTraversal = function (root) {
+          const res = [];
+
+          function dfs(_root) {
+            if (!_root) return;
+            res.push(_root.val);
+            if (_root.left) dfs(_root.left);
+            if (_root.right) dfs(_root.right);
+          }
+
+          dfs(root);
+          return res;
+        };
+
+        // 迭代方式 - dfs
+        // 实际上这里的迭代也可以算是递归的一种, 只不过这里我们维护了一个 '节点栈'(stack), 而递归时运行环境帮我们提供了 '调用栈'
+        var preorderTraversal = function (root) {
+          // 这里的 stack 要模拟栈的行为模式
+          const stack = root ? [root] : [];
+          const res = [];
+          let node;
+          while (stack.length) {
+            node = stack.pop();
+            if (!!node.right) stack.push(node.right);
+            if (!!node.left) stack.push(node.left);
+            res.push(node.val);
+          }
+          return res;
+        };
+
+        const res = preorderTraversal(n1);
+        console.log(res);
+      }
+    </script>
+  </head>
+
+  <body>
+    <div>基础的遍历: 前序遍历</div>
+    <!-- <p>tips:</p>
+    <p>{一些自己的理解}</p> -->
+    <!-- <a href="{地址}">传送门</a> -->
+  </body>
+</html>

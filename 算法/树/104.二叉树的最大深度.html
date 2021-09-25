@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      {
+        function TreeNode(val, left, right) {
+          this.val = val === undefined ? 0 : val;
+          this.left = left === undefined ? null : left;
+          this.right = right === undefined ? null : right;
+        }
+
+        // 用例1
+        const n1 = new TreeNode(3);
+        const n2 = new TreeNode(9);
+        const n3 = new TreeNode(20);
+        const n4 = new TreeNode(15);
+        const n5 = new TreeNode(7);
+
+        n1.left = n2;
+        n1.right = n3;
+        n3.left = n4;
+        n3.right = n5;
+
+        // BFS
+        var maxDepth = function (root) {
+          const stack = root ? [root] : [];
+          let level = 0;
+
+          while (stack.length) {
+            let len = stack.length;
+            for (let i = 0; i < len; i++) {
+              temp = stack.shift();
+              if (temp.left) stack.push(temp.left);
+              if (temp.right) stack.push(temp.right);
+            }
+            level++;
+          }
+          return level;
+        };
+
+        const res = pathSum(maxDepth);
+        console.log(res);
+      }
+    </script>
+  </head>
+
+  <body>
+    <div>
+      输入一棵二叉树和一个整数，打印出二叉树中节点值的和为输入整数的所有路径。从树的根节点开始往下一直到叶节点所经过的节点形成一条路径。
+    </div>
+    <p>tips:</p>
+    <p>{一些自己的理解}</p>
+    <a
+      href="https://leetcode-cn.com/problems/er-cha-shu-zhong-he-wei-mou-yi-zhi-de-lu-jing-lcof/"
+      >传送门</a
+    >
+  </body>
+</html>

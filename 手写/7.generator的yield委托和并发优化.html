@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      {
+        // 新的 async/await 默认行为
+        async function run() {
+          console.log('start...');
+          const start = Date.now();
+          await new Promise((resolve) => {
+            setTimeout(resolve, 1000);
+          });
+          console.log(Date.now() - start);
+          await new Promise((resolve) => {
+            setTimeout(resolve, 1000);
+          });
+          console.log(Date.now() - start);
+          await new Promise((resolve) => {
+            setTimeout(resolve, 1000);
+          });
+
+          console.log(Date.now() - start);
+        }
+
+        // run();
+
+        // ----------------------------------------
+        function* run2() {
+          try {
+            console.log('start...');
+            const start = Date.now();
+            yield new Promise((resolve) => {
+              setTimeout(resolve, 1000);
+            });
+            console.log(Date.now() - start);
+            yield new Promise((resolve, reject) => {
+              setTimeout(reject, 1000);
+            });
+            console.log(Date.now() - start);
+            yield new Promise((resolve) => {
+              setTimeout(resolve, 1000);
+            });
+            console.log(Date.now() - start);
+          } catch (e) {
+            console.log(e);
+          }
+        }
+
+        function runGen(generator) {
+          const args = [].slice.call(arguments, 1);
+          const gen = generator.apply(this, args);
+
+          function handleNext(nextVal) {
+            const result = gen.next(nextVal);
+            if (result.done) {
+              return result.value;
+            }
+            return Promise.resolve(result.value).then(handleNext, (err) => {
+              // 两种抛出异常的方式都可以, 但是通过 gen 抛出, 没有调用栈信息
+              // gen.throw(err)
+              throw new Error(err);
+            });
+          }
+
+          return Promise.resolve().then(handleNext);
+        }
+
+        // runGen(run2);
+
+        function* foo1() {
+          console.log('start...');
+          const start = Date.now();
+
+          const a1 = yield new Promise((resolve) => {
+            setTimeout(() => {
+              resolve(111);
+              console.log(Date.now() - start, 111);
+            }, 1000);
+          });
+          console.log('--');
+
+          const a2 = yield new Promise((resolve, reject) => {
+            setTimeout(() => {
+              resolve(222);
+              console.log(Date.now() - start, 222);
+            }, 2000);
+          });
+          console.log('--');
+
+          const a3 = yield new Promise((resolve) => {
+            setTimeout(() => {
+              resolve(333);
+              console.log(Date.now() - start, 333);
+            }, 3000);
+          });
+          console.log('--');
+
+          console.log(a1 + a2 + a3);
+          return a1 + a2 + a3;
+        }
+
+        function* fooOptimize() {
+          console.log('start...');
+          const start = Date.now();
+
+          const p1 = new Promise((resolve) => {
+            setTimeout(() => {
+              resolve(111);
+              console.log(Date.now() - start, 111);
+            }, 1000);
+          });
+          const p2 = new Promise((resolve, reject) => {
+            setTimeout(() => {
+              resolve(222);
+              console.log(Date.now() - start, 222);
+            }, 2000);
+          });
+          const p3 = new Promise((resolve) => {
+            setTimeout(() => {
+              resolve(333);
+              console.log(Date.now() - start, 333);
+            }, 3000);
+          });
+
+          const a1 = yield p3;
+          console.log('--');
+          const a2 = yield p2;
+          console.log('--');
+          const a3 = yield p1;
+          console.log('--');
+
+          console.log(a1 + a2 + a3);
+          return a1 + a2 + a3;
+        }
+
+        // runGen(foo1);
+        // runGen(fooOptimize);
+
+        // 生成器内部嵌套生成器
+        function* out() {
+          console.log('out start ...');
+          yield new Promise((resolve) => {
+            setTimeout(() => {
+              resolve(111);
+              console.log(111);
+            }, 1000);
+          });
+          yield new Promise((resolve) => {
+            setTimeout(() => {
+              resolve(222);
+              console.log(222);
+            }, 1000);
+          });
+
+          // ----- 重点部分 -----
+
+          // 手动委托
+          // yield runGen(inner);
+
+          // yield 委托
+          yield* inner();
+
+          yield new Promise((resolve, reject) => {
+            setTimeout(() => {
+              resolve(333);
+              console.log(333);
+            }, 1000);
+          });
+          yield new Promise((resolve, reject) => {
+            setTimeout(() => {
+              resolve(444);
+              console.log(444);
+            }, 1000);
+          });
+          console.log('out start ...');
+        }
+        function* inner() {
+          console.log('inner start ...');
+          yield new Promise((resolve) => {
+            setTimeout(() => {
+              resolve(555);
+              console.log(555);
+            }, 1000);
+          });
+
+          yield new Promise((resolve, reject) => {
+            setTimeout(() => {
+              resolve(666);
+              console.log(666);
+            }, 1000);
+          });
+          console.log('inner end ...');
+        }
+
+        // runGen(inner);
+        // runGen(out);
+
+        // ----------------------------------------
+
+        //  生成器的嵌套
+        function* foo3(val) {
+          if (val > 1) {
+            val = yield* foo3(val - 1);
+          }
+          return yield new Promise((resolve) => {
+            setTimeout(() => {
+              console.log(val * 2);
+              resolve(val * 2);
+            }, 1000);
+          });
+        }
+
+        runGen(foo3, 3);
+      }
+    </script>
+  </head>
+  <body>
+    <p>把 promise 的异步操作分离出 yield 逻辑</p>
+  </body>
+</html>

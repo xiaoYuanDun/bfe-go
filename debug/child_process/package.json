@@ -1,0 +1,9 @@
+{
+  "name": "child_process_test",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "dev": "node ./src/index.js"
+  }
+}

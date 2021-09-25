@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      {
+        function* foo() {
+          let count = 0;
+          let x = yield 2;
+          count++;
+          let y = yield x * count;
+          return y;
+        }
+
+        const gen = foo();
+
+        console.log('step1 ', gen.next());
+        console.log('step2 ', gen.next(10));
+        console.log('step3 ', gen.next(2));
+        console.log('step4 ', gen.next());
+        console.log('step5 ', gen.next());
+
+        function step(generator) {
+          const gen = generator();
+          let res = {};
+          return function () {
+            if (!res.done) {
+              res = gen.next(arguments.length === 0 ? res.value : arguments);
+              return res;
+            } else {
+              res = { value: undefined, done: true };
+            }
+            return res;
+          };
+        }
+
+        const callOnce = step(foo);
+
+        console.log(callOnce());
+        console.log(callOnce(10));
+        console.log(callOnce(2));
+        console.log(callOnce());
+        console.log(callOnce());
+      }
+    </script>
+
+  </head>
+  <body>
+    <p>generator 的辅助函数, 调用一次执行一次 next 方法</p>
+  </body>
+</html>

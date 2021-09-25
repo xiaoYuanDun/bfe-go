@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      {
+        function ListNode(val, next) {
+          this.val = val === undefined ? 0 : val;
+          this.next = next === undefined ? null : next;
+        }
+
+        // 用例1
+        const n1 = new ListNode(-1);
+        const n2 = new ListNode(5);
+        const n3 = new ListNode(3);
+        const n4 = new ListNode(4);
+        const n5 = new ListNode(0);
+        // const n6 = new ListNode(7);
+
+        n1.next = n2;
+        n2.next = n3;
+        n3.next = n4;
+        n4.next = n5;
+        // n5.next = n6;
+
+        // left, right 必须保证有序
+        var mergeTwoLink = function (left, right) {
+          const start = new ListNode('start');
+          let cur = start;
+          while (!!left && !!right) {
+            if (left.val <= right.val) {
+              cur.next = left;
+              cur = cur.next;
+              left = left.next;
+            } else {
+              cur.next = right;
+              right = right.next;
+              cur = cur.next;
+            }
+          }
+          cur.next = left === null ? right : left;
+          return start.next;
+        };
+
+        // var sortList = function (head) {
+        //   // 计算总长度
+        //   let node = head;
+        //   let length = 0;
+        //   while (!!node) {
+        //     node = node.next;
+        //     length++;
+        //   }
+
+        //   let subLen = 1;
+        //   const dummyHead = new ListNode('');
+        //   dummyHead.next = head;
+
+        //   // 每一次遍历链表, 都要合并 2 个长度为 len 的子链表
+        //   for (let len = subLen; len < length; len *= 2) {
+        //     let pre = dummyHead;
+        //     let cur = dummyHead.next;
+
+        //     while (!!cur) {
+        //       // 要合并的 2 个子链表的头指针: h1, h2
+        //       let h1 = cur;
+        //       let h2;
+        //       // 默认长度, 用来控制/判断, 生成子链表的过程
+        //       let l1 = 1;
+        //       let l2 = 1;
+
+        //       // 生成过程中有可能出现 cur === null 的情况
+        //       // 表示全部链表也遍历完毕, 但子链表长度不足 len, 这时直接返回这个长度不足的子链表
+        //       // 这里不用判断 cur.next 是否存
+        //       // 因为这是一个新的子链表生成过程, 且是左侧子链表, 若存在 cur.next === null 的情况, 根本就不会进入这次循环
+        //       while (!!cur && l1 < len) {
+        //         cur = cur.next;
+        //         l1++;
+        //       }
+
+        //       // 右侧子链表的头节点就在 cur 的下一个, cur 当前指向左侧子链表的尾节点
+        //       h2 = cur.next;
+        //       // 切断 左侧子链表尾节点 和 右侧子链表头节点 的联系
+        //       cur.next = null;
+        //       // cur 移到 h2, 继续构建右侧子链表, 逻辑和上面一样
+        //       cur = h2;
+        //       // 这里需要多判断一个 cur.next 是否存在
+        //       // 若 cur.next 不存在, 那么当前节点就是总链表中的最后一个节点, 执行 while 会将指针指向 null, 导致后面报错
+        //       while (!!cur && !!cur.next && l2 < len) {
+        //         cur = cur.next;
+        //         l2++;
+        //       }
+
+        //       let next = null;
+        //       // cur 存在表示不是尾结点, 可以为 cur.next 赋值, 否则 null.next 会报错
+        //       // 这里处理的不太好, 感觉逻辑有些不清晰
+        //       if (!!cur) {
+        //         next = cur.next;
+        //         cur.next = null;
+        //       }
+
+        //       // 上一个 pre 指针的 .next 指向排序后的子链表
+        //       pre.next = mergeTwoLink(h1, h2);
+
+        //       // 移动 pre 到下一次构建的前一个节点, 建立 pre 到 下一次构建的沟节点的联系, 移动 cur 到新的头节点
+        //       while (!!pre.next) {
+        //         pre = pre.next;
+        //       }
+        //       pre.next = next;
+        //       cur = next;
+        //     }
+        //   }
+        //   return dummyHead.next;
+        // };
+
+        // 试着调整一下逻辑, 感觉上个写的有点啰嗦
+        // 构建子链表的时候, 使用了 for 循环, 把 l1, l2 这两个变量范围缩小了, 语义/逻辑 更清晰
+        var sortList = function (head) {
+          let node = head;
+          let length = 0;
+          while (!!node) {
+            node = node.next;
+            length++;
+          }
+
+          const dummyHead = new ListNode('');
+          dummyHead.next = head;
+
+          for (let subLen = 1; subLen < length; subLen *= 2) {
+            let pre = dummyHead;
+            let cur = dummyHead.next;
+
+            while (!!cur) {
+              let h1 = cur;
+              let h2;
+              for (let i = 1; i < subLen && !!cur && !!cur.next; i++) {
+                cur = cur.next;
+              }
+
+              h2 = cur.next;
+              cur.next = null;
+              cur = h2;
+              for (let i = 1; i < subLen && !!cur && !!cur.next; i++) {
+                cur = cur.next;
+              }
+
+              let next = null;
+              if (!!cur) {
+                next = cur.next;
+                cur.next = null;
+              }
+
+              pre.next = mergeTwoLink(h1, h2);
+
+              while (!!pre.next) {
+                pre = pre.next;
+              }
+              pre.next = next;
+              cur = next;
+            }
+          }
+          return dummyHead.next;
+        };
+
+        const res = sortList(n1);
+        console.log(res);
+      }
+    </script>
+  </head>
+
+  <body>
+    <div>
+      给你链表的头结点 head ，请将其按 升序 排列并返回 排序后的链表 。 进阶：
+      你可以在 O(n log n) 时间复杂度和常数级空间复杂度下，对链表进行排序吗？  
+    </div>
+    <p>tips:</p>
+    <p>这道题比较复杂, 用到了 归并排序, 有序链表的合并</p>
+    <p>
+      大概说一下归并排序, 大体分为递归和迭代两种, 递归是先把大链表拆分, 再合并,
+      额外的 N(logN) 的空间复杂度(递归调用栈)
+    </p>
+    <p>
+      进阶要求空间复杂度降到 O(1) 即不能使用额外的辅助空间, 所以考虑用迭代,
+      从小向大的合并实现归并
+    </p>
+    <p>
+      关于 '归并排序' 的时间复杂度问题, 有点困扰, 假设链表有 N 个节点,
+      那么归并排序时, 一共会生成 logN 层的树结构(虚拟的),
+      而每层需要合并的节点总数是一样的, 都是 N,
+      又因为合并两个有序链表的事件复杂度是 O(N), N 是两个有序链表的总长度,
+      那么得出结论: 合并 logN 层一共需要 NlogN 时间, 而且无论是递归还是迭代,
+      这个 O(NlogN) 是不变的
+    </p>
+    <p>关于分别以链表和数组为数据结构时, 空间复杂度的问题:</p>
+    <p>因为数组主要开辟额外的空间来一一对应排序后的数组, 所以空间复杂度 O(N)</p>
+    <p>
+      但是链表可以通过改变指针调整位置, 所以不用 O(N) 这么大的空间复杂度,
+      限制它的主要是调用栈的空间大小(会被拆分出多少层), 所以它的空间复杂度为
+      O(logN), 而且还可以通过从底向上合并避免这个问题, 空间复杂度可以优化到 O(1)
+    </p>
+    <a href="https://www.zhihu.com/question/38101141">关于时间复杂度</a>
+    <a href="https://leetcode-cn.com/problems/sort-list/">传送门</a>
+  </body>
+</html>

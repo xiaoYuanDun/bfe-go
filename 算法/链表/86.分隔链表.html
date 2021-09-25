@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      {
+        function ListNode(val, next) {
+          this.val = val === undefined ? 0 : val;
+          this.next = next === undefined ? null : next;
+        }
+
+        const n1 = new ListNode(1);
+        // const n2 = new ListNode(2);
+        const n2 = new ListNode(4);
+        const n3 = new ListNode(3);
+        const n4 = new ListNode(2);
+        const n5 = new ListNode(5);
+        const n6 = new ListNode(2);
+
+        n1.next = n2;
+        n2.next = n3;
+        n3.next = n4;
+        n4.next = n5;
+        n5.next = n6;
+
+        // 太TM丑陋了
+        // var partition = function (head, x) {
+        //   // 长度 0 | 1 ,特殊处理
+        //   if (head === null || head.next === null) {
+        //     return head;
+        //   }
+
+        //   const start = new ListNode('');
+        //   start.next = head;
+
+        //   // 计算首尾指针
+        //   let headIndex = head.val >= x ? start : head;
+        //   let tailIndex = head;
+
+        //   let cur = head.next;
+
+        //   while (cur !== null) {
+        //     next = cur.next;
+        //     // 头部插入, 头指针后移, 检验头尾指针合法性(头指针必须在尾指针前)
+        //     if (cur.val < x) {
+        //       const same = headIndex === tailIndex;
+        //       temp = headIndex.next;
+        //       headIndex.next = cur;
+        //       cur.next = temp;
+        //       headIndex = cur;
+        //       // 这里是一个特殊情况, 对应的输入是: [1, 1], 2 ,具体看执行结果, 是因为 '头指针移动到尾指针之后' 造成的
+        //       if (same) {
+        //         tailIndex = cur;
+        //       }
+        //       // 尾部插入, 尾指针后移, 清空末尾 .next 指向, 避免循环引用
+        //     } else if (cur.val >= x) {
+        //       tailIndex.next = cur;
+        //       tailIndex = tailIndex.next;
+        //       tailIndex.next = null;
+        //     }
+        //     cur = next;
+        //   }
+        //   tailIndex.next = null;
+
+        //   return start.next;
+        // };
+
+        // 改进一下
+        // 使用两个链表分别表示:
+        // 1. 比 x 小的
+        // 2. 比 x 大的
+        // 遍历链表, 往对应的子链表中添加节点即可, 遍历完拼接两个链表即可
+        var partition = function (head, x) {
+          let smallCur = (smallHead = new ListNode('small'));
+          let largeCur = (largeHead = new ListNode('head'));
+
+          while (head !== null) {
+            next = head.next;
+            if (head.val < x) {
+              smallCur = smallCur.next = head;
+            } else {
+              largeCur = largeCur.next = head;
+            }
+            head = next;
+          }
+          largeCur.next = null;
+          smallCur.next = largeHead.next;
+
+          return smallHead.next;
+        };
+
+        const res = partition(n1, 3);
+        console.log(res);
+      }
+    </script>
+  </head>
+
+  <body>
+    <div>
+      给你一个链表的头节点 head 和一个特定值 x ，请你对链表进行分隔，使得所有
+      小于 x 的节点都出现在 大于或等于 x 的节点之前。 你应当 保留
+      两个分区中每个节点的初始相对位置。
+    </div>
+    <p>tips:</p>
+    <p>注意这里有要求分区内节点相对位置不变</p>
+    <a href="https://leetcode-cn.com/problems/partition-list/">传送门</a>
+  </body>
+</html>
