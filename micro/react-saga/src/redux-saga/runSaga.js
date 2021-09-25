@@ -40,7 +40,7 @@ function runSaga(env, saga, callback) {
                         case effectTypes.FORK:
                             let forkTask = runSaga(env, effect.saga)
                             next(forkTask)
-                            break
+                            break 
                         case effectTypes.CALL:
                             effect.fn(...effect.args).then(next)
                             break
