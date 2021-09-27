@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      {
+        // 内部常驻变量
+        const MAX = Symbol('max');
+        const CACHE = Symbol('cache');
+        const LENGTH = Symbol('length');
+
+        class LRUCache {
+          constructor(options) {
+            if (typeof options === 'number') {
+              options = { max: options };
+            }
+            if (!options) {
+              options = {};
+            }
+
+            this[MAX] = options.max || Infinity;
+          }
+
+          reset() {
+            // hash of items by key
+            this[CACHE] = new Map();
+
+            // list of items in order of use recency
+            this[LRU_LIST] = new Yallist();
+            this[LENGTH] = 0; // length of items in the list
+          }
+        }
+
+        const cache = new LRUCache();
+      }
+    </script>
+  </head>
+  <body>
+    <div>LRU 缓存淘汰算法</div>
+    <p>github 上一个 stars 数较多的实现</p>
+    <a href="https://github.com/isaacs/node-lru-cache/blob/master/index.js"
+      >传送门</a
+    >
+  </body>
+</html>

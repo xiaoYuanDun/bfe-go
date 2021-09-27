@@ -12,10 +12,70 @@
           this.val = val === undefined ? 0 : val;
           this.next = next === undefined ? null : next;
         }
+
+        // 普通缓存, 来一个缓存一个, 使用一个简单 hash 结构就可以实现, 超出限制长度, 就移除最早的缓存值, 不管当前值是否为常用值(最近出现过)
+        // LRU, 相较于普通缓存, 具有优先级的概念
+        function LRU_implementation(len) {
+          let dummy = new ListNode('');
+          let maxLen = len;
+          let curLen = 0;
+
+          // 最新的插入头部, 若达到最大数量限制, 先从链表尾移除一个
+          function set(val) {
+            if (curLen >= maxLen) removeTail();
+            if (!dummy.next) {
+              dummy.next = new ListNode(val);
+            } else {
+              const newNode = new ListNode(val);
+              newNode.next = dummy.next;
+              dummy.next = newNode;
+            }
+            curLen++;
+          }
+
+          function get(val) {
+            let pre = dummy;
+            let cur = dummy.next;
+            while (cur) {
+              if (cur.val === val) break;
+              pre = cur;
+              cur = cur.next;
+            }
+
+            // 命中缓存, 从链表中的旧位置取出当前节点, 放到链表头部
+            if (cur) {
+              pre.next = cur.next;
+              cur.next = dummy.next;
+              dummy.next = cur;
+              return cur.val;
+            }
+          }
+
+          // 移除链表最后一个节点
+          function removeTail() {
+            let pre = dummy;
+            let cur = dummy.next;
+            while (cur) {
+              if (!cur.next) break;
+              pre = cur;
+              cur = cur.next;
+            }
+            pre.next = cur.next;
+            cur.next = null;
+            cur = null;
+          }
+
+          return {
+            set,
+            get,
+          };
+        }
+
+        const LRU_cache = LRU_implementation(2);
+        window.LRU_cache = LRU_cache;
       }
     </script>
   </head>
-
   <body>
     <div>LRU 缓存淘汰算法</div>
     <p>
