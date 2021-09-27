@@ -1,0 +1,22 @@
+{
+  "name": "webpack-flow-debug",
+  "version": "1.0.0",
+  "description": "",
+  "build": "webpack",
+  "scripts": {
+    "build": "webpack"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@babel/generator": "^7.14.8",
+    "@babel/parser": "^7.14.8",
+    "@babel/traverse": "^7.14.8",
+    "tapable": "^2.2.0",
+    "webpack": "^5.45.1",
+    "webpack-cli": "^4.7.2"
+  },
+  "devDependencies": {
+    "babel-types": "^6.26.0"
+  }
+}
