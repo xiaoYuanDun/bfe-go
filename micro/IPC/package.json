@@ -1,0 +1,15 @@
+{
+  "name": "ipc-test",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "egg": "^2.30.0",
+    "egg-cluster": "^1.27.0",
+    "egg-scripts": "^2.15.1"
+  },
+  "scripts": {
+    "start": "eggctl start --daemon",
+    "stop": "eggctl stop"
+  }
+}
