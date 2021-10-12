@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      {
+        /**
+         *
+         * 求最大回文串, 是一定要遍历所有的组合的, 如一个字符串是 'abcd', 那么需要遍历的所有结果集是:
+         * [a, ab, abc, abcd, b, bc, bcd, c, cd, d]
+         * 那 abc(dp[0][2]) 举例, 判断他是否为回文时, 需要知道 dp[2][2] 是否为回文串, s[0] 与 s[2] 是否相等
+         * 这里 dp[2][2] 足够简单, 我们可以轻松得出答案, 如此反复, 可以得到状态转移公式: dp[i, j] = dp[i+1, j-1] && s[i] === s[j]
+         *
+         * 这里的状态边界条件是:
+         * 1. 子串 s 长度为1, 一定是回文串
+         * 2. 子串 s 长度为2, 判断 s[0] 与 s[1] 是否相等
+         *
+         * 其他情况, 直接套用状态转移公式
+         *
+         */
+
+        var longestPalindrome = function (s) {
+          let res = s[0];
+
+          if (s.length === 1) return res;
+
+          let dp = [];
+          for (let i = s.length - 1; i >= 0; i--) {
+            dp[i] = [];
+            for (let j = i; j < s.length; j++) {
+              if (i === j) {
+                dp[i][j] = true;
+              } else if (i + 1 === j) {
+                dp[i][j] = s[i] === s[j];
+              } else {
+                dp[i][j] = dp[i + 1][j - 1] && s[i] === s[j];
+              }
+
+              if (dp[i][j] && j - i + 1 >= res.length) {
+                res = s.slice(i, j + 1);
+              }
+            }
+          }
+
+          return res;
+        };
+
+        const res = longestPalindrome('aacabdkacaa');
+        console.log('res', res);
+      }
+    </script>
+  </head>
+  <body>
+    <div>5. 最长回文子串</div>
+    <p>
+      给你一个字符串 s，找到 s 中最长的回文子串。 示例 1： 输入：s = "babad"
+      输出："bab" 解释："aba" 同样是符合题意的答案。 示例 2： 输入：s = "cbbd"
+      输出："bb" 示例 3： 输入：s = "a" 输出："a" 示例 4： 输入：s = "ac"
+      输出："a" 提示： 1 <= s.length <= 1000 s
+      仅由数字和英文字母（大写和/或小写）组成
+    </p>
+    <p>
+      一点自己的理解: DP实际上算是一种暴力算法, 要求取得所有可能的值,
+      从中选择出最优解, 只不过有了状态转移的帮助,
+      我们在求大集合的解时可以利用小集合的结果,
+      小集合求解继续拆分为更小集合的问题, 这样一直到集合的解足够简单,
+      然后向上依赖解决大集合的问题
+    </p>
+    <a href="https://leetcode-cn.com/problems/longest-palindromic-substring/"
+      >传送门</a
+    >
+  </body>
+</html>
