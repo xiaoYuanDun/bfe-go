@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      {
+        /**
+         *  这里在 for 循环中只要命中, 就直接返回, 不用遍历所有情况
+         *  state 从 0 开始, 表示刚开始时, 没有选中任何一个数字
+         */
+        var canIWin = function (maxChoosableInteger, desiredTotal) {
+          if (maxChoosableInteger >= desiredTotal) return true;
+
+          const sum = (maxChoosableInteger * (maxChoosableInteger + 1)) / 2;
+          if (sum < desiredTotal) return false;
+
+          const dp = {};
+          const judge = (state, total) => {
+            for (let i = 1; i <= maxChoosableInteger; i++) {
+              const curState = 1 << i;
+              // 已经被选择过
+              if (curState & state) continue;
+              // 选择当前 i, 就可以直接获胜
+              if (i >= total) return (dp[state] = true);
+              // 不能马上获胜时, 判断剩余子集能否获胜, 子集如果不能获胜, 则子集肯定获胜(除了都不获胜的情况)
+              if (!judge(curState | state, total - i))
+                return (dp[state] = true);
+            }
+            return (dp[state] = false);
+          };
+
+          return judge(0, desiredTotal);
+        };
+
+        const res = canIWin(10, 11);
+        console.log(res);
+      }
+    </script>
+  </head>
+  <body>
+    <div>464.can I win</div>
+    <p>tips:</p>
+    <p>状压DP</p>
+    <a href="https://leetcode-cn.com/problems/can-i-win/">传送门</a>
+  </body>
+</html>

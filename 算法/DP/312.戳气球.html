@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      {
+        var maxCoins = function (nums) {
+          const newNums = [1, ...nums, 1];
+          const len = newNums.length;
+          const dp = new Array(len).fill(0).map((_) => new Array(len).fill(0));
+
+          for (let i = len - 3; i >= 0; i--) {
+            for (let j = i + 2; j <= len - 1; j++) {
+              for (let k = i + 1; k < j; k++) {
+                dp[i][j] = Math.max(
+                  dp[i][j],
+                  dp[i][k] + dp[k][j] + newNums[i] * newNums[k] * newNums[j]
+                );
+              }
+            }
+          }
+
+          return dp[0][len - 1];
+        };
+
+        const res = maxCoins([3, 1, 5, 8]);
+        console.log(res);
+      }
+    </script>
+  </head>
+  <body>
+    <div>312.戳气球</div>
+    <p>tips:</p>
+    <p>
+      区间DP, 关键就是枚举每个区间的中间点k, 计算每个区间中, 不同k所对应的最优解
+    </p>
+    <a href=" ">传送门</a>
+  </body>
+</html>
