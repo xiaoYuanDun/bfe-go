@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      {
+        var rob = function (nums) {
+          const dp = [0];
+          const len = nums.length;
+
+          for (let i = 1; i < len + 1; i++) {
+            if (i === 1) {
+              dp[i] = nums[i - 1];
+            } else if (i === 2) {
+              dp[i] = Math.max(nums[i - 1], nums[i - 2]);
+            } else {
+              dp[i] = Math.max(nums[i - 1] + dp[i - 2], dp[i - 1]);
+            }
+          }
+
+          return dp[len];
+        };
+
+        const res = rob([1, 2, 3, 1]);
+        console.log(res);
+      }
+    </script>
+  </head>
+  <body>
+    <div>198.打家劫舍</div>
+    <p></p>
+    <p>tips:</p>
+    <a href="https://leetcode-cn.com/problems/house-robber/">传送门</a>
+  </body>
+</html>

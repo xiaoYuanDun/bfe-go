@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      {
+        /**
+         * 只关注第 i 天结束后的两种状态
+         *
+         * 第 i 天结束后, 不持有股票 --> dp[i][0], 不持有股票有两种可能:
+         *   1. 当天卖出了, dp[i][0] = price[i] + dp[i-1][1]
+         *   2. 昨天也不持股, dp[i][0] = dp[i-1][0]
+         *
+         * 第 i 天结束后, 持有股票 --> dp[i][0], 持有股票有两种可能:
+         *   1. 当天买的, 当天可以买, 意味着前一天一定没有卖出操作, 否则会冻结,  dp[i][1] = dp[i-2][0] - price[i]
+         *   2. 从前一天继承来的, dp[i][1] = dp[i-1][1]
+         */
+
+        var maxProfit = function (prices) {
+          const len = prices.length;
+          const dp = new Array(len).fill(0).map((_) => []);
+          dp[0][0] = 0;
+          dp[0][1] = -prices[0];
+
+          for (let i = 1; i < len; i++) {
+            dp[i][0] = Math.max(prices[i] + dp[i - 1][1], dp[i - 1][0]);
+            dp[i][1] = Math.max(
+              (dp[i][1] = (dp[i - 2] || [0])[0] - prices[i]),
+              dp[i - 1][1]
+            );
+          }
+          return dp[len - 1][0];
+        };
+
+        const res = maxProfit([1, 2]);
+        // const res = maxProfit([1, 2, 3, 0, 2]);
+        console.log(res);
+      }
+    </script>
+  </head>
+  <body>
+    <div>309.最佳买卖时机</div>
+    <a
+      href="https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-with-cooldown/"
+      >传送门</a
+    >
+  </body>
+</html>

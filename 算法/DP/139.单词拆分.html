@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      {
+        /**
+         *  这道题还是转义方程, 想的不是很明白, 而且状态定义应该使用简单的 dp[i] 表示 从0到i 这种
+         *  而且注意, 一般 DP 的临界点的值都是很重要的, 是从简到难的根本
+         *  像这里的 dp[0], 按照我的想法应该是 dp[0] = 0, 表示空字符不匹配, 但实际上应该是 dp[0] = 1
+         *  感觉有点反直觉, 还是要多练习
+         *
+         *  在每个子字符串中, 枚举所有可能的节点k, 检查 dp[k] 和 sub(k, len-k) 的匹配情况, 就完成了状态转移
+         */
+        var wordBreak = function (s, wordDict) {
+          const len = s.length;
+          const dp = [true];
+
+          for (let i = 1; i < len + 1; i++) {
+            for (let k = 0; k < i; k++) {
+              dp[i] = dp[k] && wordDict.includes(s.substr(k, i - k));
+              if (dp[i]) break;
+            }
+          }
+          return dp[len];
+        };
+
+        const res = wordBreak('leetcode', ['leet', 'code']);
+        console.log(res);
+      }
+    </script>
+  </head>
+  <body>
+    <div>139.单词拆分</div>
+    <p>tips:</p>
+    <p>关键点还是转移方程: dp[i] = dp[i-1] + check([i, i+1, ...])</p>
+    <a href="https://leetcode-cn.com/problems/word-break/">传送门</a>
+  </body>
+</html>
