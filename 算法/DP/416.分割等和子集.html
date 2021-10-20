@@ -7,7 +7,53 @@
     <title>Document</title>
     <script>
       {
-        const res = maxProfit([1, 2]);
+        /**
+         * 有几个不可分割的特殊条件:
+         *   1. 数组小于2(0, 1), 一定不可分割
+         *   2. 数组总和为奇数, 一定不可分割
+         *
+         *  定义 dp 数组, dp[i][j] 表示在 [0 ~ i] 的区间内任取元素, 是否 '可以' 装满容量为 j 的背包
+         *    注意初始化时, 对于任意 0 <= i <= length, 都有 dp[i][0] = true, 因为容量为 0 的背包不需要装任何元素都是成立的
+         *
+         *  这里说一下, 关于取不取第 i 个物品的一些思考
+         *    当进行到 dp[i][j] 时, 如果 nums[i] < j, 则选不选这个物品都可以
+         *      如果选择, 那么就转移到选择 i 之前的 dp, dp[i][j] = dp[i - 1][j - nums[i]];
+         *      如果不选择, 直接排除 i 即可, dp[i][j] = dp[i - 1][j]
+         */
+        var canPartition = function (nums) {
+          if (nums.length < 2) return false;
+
+          let sum = 0;
+          for (const num of nums) {
+            sum += num;
+          }
+          if (sum % 2 === 1) return false;
+
+          const target = sum / 2;
+
+          const dp = new Array(nums.length)
+            .fill(0)
+            .map((_) => new Array(target + 1).fill(0).map((_) => false));
+
+          for (let i = 0; i < nums.length; i++) {
+            for (let j = 0; j <= target; j++) {
+              if (j === 0) {
+                dp[i][j] = true;
+              } else if (j === nums[i]) {
+                dp[i][j] = true;
+              } else if (j > nums[i] && i > 0) {
+                // j > nums[i], 表示选择了当前物品 i 不能满足需求, 所以我们查看一下选择了当前 i 之前的背包状态, 是怎么样的
+                // 选择 i 之前(不选择 i): i -> i-1, 排除第 i 个物品, j -> j-num[i], 从背包中减去 i 占用的空间
+                dp[i][j] = dp[i - 1][j - nums[i]] || dp[i - 1][j];
+              } else if (j < nums[i] && i > 0) {
+                // j < nums[i], 表示仅选择当前项, 背包就已经溢出了, 所以我们保持背包大小不变, 同时不选择 i, 同理, 排除i: i -> i-1
+                dp[i][j] = dp[i - 1][j];
+              }
+            }
+          }
+          return dp[nums.length - 1][target];
+        };
+        const res = canPartition([2, 2, 1, 1]);
         console.log(res);
       }
     </script>

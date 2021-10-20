@@ -7,7 +7,22 @@
     <title>Document</title>
     <script>
       {
-        const res = maxProfit([1, 2]);
+        /**
+         *  定义 dp[i] 表示总金额为 i 时, 最多有多少种组合
+         */
+        var change = function (amount, coins) {
+          const dp = [0];
+          for (let i = 1; i <= amount; i++) {
+            dp[i] = -Infinity;
+            for (const coin of coins) {
+              if (i >= coin) {
+                dp[i] = Math.max(dp[i], dp[i - coin] + 1);
+              }
+            }
+          }
+          return dp[amount];
+        };
+        const res = change(5, [1, 2, 5]);
         console.log(res);
       }
     </script>
