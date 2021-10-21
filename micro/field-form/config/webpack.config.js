@@ -11,6 +11,7 @@ module.exports = {
   resolve: {
     extensions: ['.tsx', '.ts', '.jsx', '.js'],
   },
+  devtool: 'source-map',
   plugins: [
     new HtmlWebpackPlugin({
       //  模板位置

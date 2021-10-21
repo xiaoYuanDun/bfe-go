@@ -5266,7 +5266,7 @@ rc-field-form@^1.21.2:
     async-validator "^4.0.2"
     rc-util "^5.8.0"
 
-rc-util@^5.8.0:
+rc-util@^5.14.0, rc-util@^5.8.0:
   version "5.14.0"
   resolved "http://192.168.0.202:4873/rc-util/-/rc-util-5.14.0.tgz#52c650e27570c2c47f7936c7d32eaec5212492a8"
   integrity sha1-UsZQ4nVwwsR/eTbH0y6uxSEkkqg=

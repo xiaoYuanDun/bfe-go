@@ -1,25 +1,50 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import Form, { Field } from 'rc-field-form';
-const ele = (
-  <Form
-    onFinish={values => {
-      console.log('Finish:', values);
-    }}
-  >
-    <Field name="username">
-      <input placeholder="Username" />
-    </Field>
-    <br />
+import Form, { Field } from './es';
 
-    <Field name="password">
-      <input placeholder="Password" />
-    </Field>
-    <br />
-    <button>Submit</button>
-  </Form>
-);
+const Ele = () => {
+  const [form] = Form.useForm();
+
+  console.log('render once ...');
+  return (
+    <>
+      <Form form={form}>
+        <Field name="name">
+          <input placeholder="name" />
+        </Field>
+        <br />
+
+        <Field name="pwd">
+          <input placeholder="pwd" />
+        </Field>
+        <br />
+
+        <Field name="age">
+          <input placeholder="age" />
+        </Field>
+        <br />
+        <button>Submit</button>
+      </Form>
+
+      <button
+        onClick={() => {
+          console.log(form.getFieldsValue());
+        }}
+      >
+        console form
+      </button>
+
+      <button
+        onClick={() => {
+          console.log(form.getFieldsValue(['age']));
+        }}
+      >
+        console age
+      </button>
+    </>
+  );
+};
 
 // import Form, { Field } from './src/index';
 
@@ -36,4 +61,4 @@ const ele = (
 //   </Form>
 // );
 
-ReactDOM.render(ele, document.getElementById('root'));
+ReactDOM.render(<Ele />, document.getElementById('root'));

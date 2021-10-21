@@ -30,6 +30,7 @@
     "core-js": "^3.13.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "rc-field-form": "^1.21.2"
+    "rc-field-form": "^1.21.2",
+    "rc-util": "^5.14.0"
   }
 }

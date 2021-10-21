@@ -28,6 +28,7 @@ const InternalForm = forwardRef<FormInstance, FormProps>(FieldForm) as <Values =
 type InternalForm = typeof InternalForm;
 
 interface RefForm extends InternalForm {
+  // 提供多表单间共享数据的能力, 可以通过 formName 来区分和选择, 而非手动构建多个 form 实例
   // FormProvider: typeof FormProvider;
   // Field: typeof Field;
   // List: typeof List;
