@@ -1,6 +1,6 @@
 import React, { useContext, FC, Component } from 'react';
 
-import FieldContext from './FieldContext';
+import FieldContext, { HOOK_MARK } from './FieldContext';
 import { InternalFormInstance, NamePath, InternalNamePath } from './interface';
 import { getNamePath } from './utils/valueUtil';
 
@@ -8,10 +8,12 @@ import { getNamePath } from './utils/valueUtil';
 export interface InternalFieldProps<Values = any> {
   fieldContext?: InternalFormInstance;
   name?: InternalNamePath;
+  initialValue?: any;
 }
 
 // 对外的 WrapperField 的 props
-export interface FieldProps<Values = any> {
+export interface FieldProps<Values = any>
+  extends Omit<InternalFieldProps, 'name' | 'fieldContext'> {
   name?: NamePath;
 
   /**
@@ -31,33 +33,44 @@ export interface FieldState {
 class Field extends Component<InternalFieldProps, FieldState> implements FieldEntity {
   //   public static contextType = FieldContext;
 
+  private mounted = false;
+
+  // ============================== Subscriptions ==============================
   constructor(props: InternalFieldProps) {
     super(props);
-    console.log('field construsted ....');
+
+    // Register on init, 把 Field 的 key-val 到 store 中
+    if (props.fieldContext) {
+      const { getInternalHooks }: InternalFormInstance = props.fieldContext;
+      const { initEntityValue } = getInternalHooks(HOOK_MARK);
+      initEntityValue(this);
+    }
   }
 
-  // Only return validate child node. If invalidate, will do nothing about field.
-  public getOnlyChild = (
-    children: React.ReactNode,
-    //   | ((control: ChildProps, meta: Meta, context: FormInstance) => React.ReactNode),
-  ): { child: React.ReactNode | null; isFunction: boolean } => {
-    // Support render props
-    if (typeof children === 'function') {
-      const meta = this.getMeta();
+  public componentDidMount() {
+    const { /*shouldUpdate,*/ fieldContext } = this.props;
 
-      return {
-        ...this.getOnlyChild(children(this.getControlled(), meta, this.props.fieldContext)),
-        isFunction: true,
-      };
+    this.mounted = true;
+
+    // Register on init
+    if (fieldContext) {
+      const { getInternalHooks }: InternalFormInstance = fieldContext;
+      const { registerField } = getInternalHooks(HOOK_MARK);
+      this.cancelRegisterFunc = registerField(this);
     }
 
-    // Filed element only
-    const childList = toChildrenArray(children);
-    if (childList.length !== 1 || !React.isValidElement(childList[0])) {
-      return { child: childList, isFunction: false };
+    // One more render for component in case fields not ready
+    if (shouldUpdate === true) {
+      this.reRender();
     }
+  }
 
-    return { child: childList[0], isFunction: false };
+  // ================================== Utils ==================================
+  public getNamePath = (): InternalNamePath => {
+    const { name, fieldContext } = this.props;
+    const { prefixName = [] }: InternalFormInstance = fieldContext; // prefixName 是 List 传递过来的, 暂时不考虑
+
+    return name !== undefined ? [...prefixName, ...name] : [];
   };
 
   render() {
@@ -71,14 +84,11 @@ const WrapperField: FC<FieldProps> = ({ name, ...restProps }) => {
 
   const namePath = name !== undefined ? getNamePath(name) : undefined;
 
-  // 不知道, 这里 key 的默认值为什么是 'keep'
   let key: string = 'keep';
   if (!restProps.isListField) {
     key = `_${(namePath || []).join('_')}`;
   }
   // TODO, namePath 需要兼容处理 Form.List 的情况, 这里暂时不处理
-
-  console.log('fieldContext', fieldContext);
 
   return <Field key={key} name={namePath} {...restProps} fieldContext={fieldContext} />;
 };

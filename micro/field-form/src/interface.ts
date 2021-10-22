@@ -13,22 +13,41 @@ export type Store = Record<string, StoreValue>;
  *
  */
 export interface FormInstance<Values = any> {
-  getFieldsValue(): Values;
-  // getFieldsValue(nameList: NamePath[] | true, filterFunc?: (meta: Meta) => boolean)
+  // getFieldsValue(): Values;
+  // getFieldsValue(nameList: NamePath[] | true, filterFunc?: (meta: Meta) => boolean);
 
-  // getInternalHooks 方法加入了常量 HOOK_MARK 用于忽略用户误操作, 因为它属于内部方法, 不对外暴露
+  // 加入了常量 HOOK_MARK 用于忽略用户误操作, 因为它属于内部方法, 不对外暴露
   getInternalHooks: (secret: string) => InternalHooks | null;
+
+  setFields: (fields: FieldData[]) => void;
 }
 
 /**
  * FormStore.getForm 的返回值类型, getForm 最终是返回一个新的 formStore 实例
  * 为什么不直接用 FormInstance 呢? TODO
  */
-export type InternalFormInstance = Omit<FormInstance, ''> & {};
+export type InternalFormInstance = Omit<FormInstance, ''> & {
+  /**
+   * Passed by field context props
+   * 只在 List 中被初始化
+   */
+  prefixName?: InternalNamePath;
+};
 
 // ======================== Field ========================
 export interface FieldEntity {
   getNamePath: () => InternalNamePath;
+  props: {
+    name?: NamePath;
+    // rules?: Rule[];
+    // dependencies?: NamePath[];
+    initialValue?: any;
+  };
+  onStoreChange: (
+    store: Store,
+    namePathList: InternalNamePath[] | null,
+    info: ValuedNotifyInfo,
+  ) => void;
 }
 
 export type InvalidateFieldEntity = { INVALIDATE_NAME_PATH: InternalNamePath };
@@ -55,6 +74,9 @@ export interface InternalHooks {
   setCallbacks: (callbacks: Callbacks) => void;
   setPreserve: (preserve: boolean) => void;
   setInitialValues: (initialValues: Store, init: boolean) => void;
+  useSubscribe: (subscribable: boolean) => void;
+  initEntityValue: (entity: FieldEntity) => void;
+  registerField: (entity: FieldEntity) => () => void;
 }
 
 export interface Callbacks<Values = any> {
@@ -72,3 +94,43 @@ export interface ValidateErrorEntity<Values = any> {
   errorFields: { name: InternalNamePath; errors: string[] }[];
   outOfDate: boolean;
 }
+
+// ======================== Info ========================
+// TODO, info 使用意义没看明白
+interface ValueUpdateInfo {
+  type: 'valueUpdate';
+  source: 'internal' | 'external';
+}
+
+interface ValidateFinishInfo {
+  type: 'validateFinish';
+}
+
+interface ResetInfo {
+  type: 'reset';
+}
+
+interface SetFieldInfo {
+  type: 'setField';
+  data: FieldData;
+}
+
+interface DependenciesUpdateInfo {
+  type: 'dependenciesUpdate';
+  /**
+   * Contains all the related `InternalNamePath[]`.
+   * a <- b <- c : change `a`
+   * relatedFields=[a, b, c]
+   */
+  relatedFields: InternalNamePath[];
+}
+
+export type NotifyInfo = SetFieldInfo;
+// | ValueUpdateInfo
+// | ValidateFinishInfo
+// | ResetInfo
+// | DependenciesUpdateInfo;
+
+export type ValuedNotifyInfo = NotifyInfo & {
+  store: Store;
+};

@@ -12,6 +12,7 @@ import { FormInstance, ValidateMessages, Callbacks, FieldData, Store } from './i
 import useForm from './useForm';
 import FieldContext, { HOOK_MARK } from './FieldContext';
 import FormContext from './FormContext';
+import { isSimilar } from './utils/valueUtil';
 
 type BaseFormProps = FormHTMLAttributes<HTMLFormElement>;
 /**
@@ -21,8 +22,8 @@ type BaseFormProps = FormHTMLAttributes<HTMLFormElement>;
  * validateMessages, 在 form 层面上统一定义错误提示信息
  * preserve, 字段被移除时, 是否保留已存在的字段值
  * initialValues, 初始化值, 只会生效一次
- *
- *
+ * fields, 表单域配置, 官方并不推荐使用这种方式, 而是使用 <Field>{...}</Field>
+ * validateTrigger, form 层面上统一设置验证触发时机
  *
  */
 export interface FormProps<Values = any> extends BaseFormProps, Callbacks {
@@ -31,6 +32,8 @@ export interface FormProps<Values = any> extends BaseFormProps, Callbacks {
   validateMessages?: ValidateMessages;
   preserve?: boolean;
   initialValues?: Store;
+  fields?: FieldData[];
+  validateTrigger?: string | string[] | false;
 }
 
 const Form: ForwardRefRenderFunction<FormInstance, FormProps> = ({
@@ -44,6 +47,8 @@ const Form: ForwardRefRenderFunction<FormInstance, FormProps> = ({
   onFinishFailed,
   preserve,
   initialValues,
+  fields,
+  validateTrigger,
   children,
   ...restProps
 }) =>
@@ -57,7 +62,8 @@ const Form: ForwardRefRenderFunction<FormInstance, FormProps> = ({
 
     const [formInstance] = useForm(form);
 
-    const { setValidateMessages, setCallbacks, setPreserve, setInitialValues } =
+    // 因为这些属于组件内部变量方法, 所以需要使用特定的key(HOOK_MARK) 来调用 getInternalHooks 得到, 而不是直接挂载到 form 上
+    const { setValidateMessages, setCallbacks, setPreserve, setInitialValues, useSubscribe } =
       formInstance.getInternalHooks(HOOK_MARK);
 
     // Register form into Context
@@ -110,9 +116,27 @@ const Form: ForwardRefRenderFunction<FormInstance, FormProps> = ({
       // childrenNode = children(values, formInstance);
     }
 
-    // formStore 全局状态
-    const formContextValue = useMemo(() => ({ ...formInstance }), [formInstance]);
+    // TODO why??
+    // Not use subscribe when using render props
+    useSubscribe(!childrenRenderProps);
 
+    // Listen if fields provided. We use ref to save prev data here to avoid additional render
+    const prevFieldsRef = React.useRef<FieldData[] | undefined>();
+    React.useEffect(() => {
+      // 浅比较, 前后 fields 对象, 注意这里的 setFields 不是内部hook, 所以是直接从 form 上拿的, 而非通过调用 getInternalHooks 得到
+      if (!isSimilar(prevFieldsRef.current || [], fields || [])) {
+        formInstance.setFields(fields || []);
+      }
+      prevFieldsRef.current = fields;
+    }, [fields, formInstance]);
+
+    // 把 formStore 和 validateTrigger 包装成一个新的 context, 向下提供
+    const formContextValue = useMemo(
+      () => ({ ...formInstance, validateTrigger }),
+      [formInstance, validateTrigger],
+    );
+
+    // 注意这里赋值的是哪一个 context (FieldContext), 这是后面判断 Field 使用是否合法的关键前置步骤
     const wrapperNode = (
       <FieldContext.Provider value={formContextValue}>{childrenNode}</FieldContext.Provider>
     );
