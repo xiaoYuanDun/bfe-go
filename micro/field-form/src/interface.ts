@@ -19,7 +19,7 @@ export interface FormInstance<Values = any> {
   // 加入了常量 HOOK_MARK 用于忽略用户误操作, 因为它属于内部方法, 不对外暴露
   getInternalHooks: (secret: string) => InternalHooks | null;
 
-  setFields: (fields: FieldData[]) => void;
+  // setFields: (fields: FieldData[]) => void;
 }
 
 /**
