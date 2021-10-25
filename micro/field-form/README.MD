@@ -30,8 +30,15 @@ const wrapperNode = (
 
 对外暴露的不是 Field 自己, 而是一个包裹组件 `WrapperField`, 在内部处理了一下 Field 需要用到的 key(生成规则: `'_' + (name || []).join('_')`), 同时向下传递 `fieldContext`
 
+这里在着重说一下 Field 的初始化逻辑, 因为一个 Field 组件里包含了当前表单项的所有信息, 且源码中的 Field 使用 classComponent 编写, 所以可以通过 this 轻松引用到
+
 1. 判断当前 Field 是够在正确的位置(Form 内部)
-2. 注册 Field, 把 `name-value` 对应关系绑定到 form.store 上
+2. 初始化 Field 值, `initEntityValue(this)`, 把 `name-value` 对应关系初始化到 form.store 上(如果 Field 上存在 initialValue 的话), 注意这一步仅仅是简单向 formInstance 里写入初始表单值
+3. `registerField(this)` 是直接把当前 Field 实例推到 `fieldEntities` 数组中进行管理, 同时注册当前 Field 还会生成一个卸载函数 `cancelRegister`, 用来从 `fieldEntities` 移除自身, 并且做一些和 `preserve` 相关的收尾逻辑, `cancelRegister` 会在当前 Field 卸载时(componentWillUnmount)被调用
+
+截止目前, 已经还原了 Form, Field, useForm 的基本初始化逻辑, 下面看下 Field 是如何把每次的值变换反馈到 formInstance 的
+
+### Field 与 Form 的绑定
 
 ### TODO
 

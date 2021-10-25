@@ -1,7 +1,7 @@
 import React, { useContext, FC, Component } from 'react';
 
 import FieldContext, { HOOK_MARK } from './FieldContext';
-import { InternalFormInstance, NamePath, InternalNamePath } from './interface';
+import { InternalFormInstance, NamePath, InternalNamePath, FieldEntity } from './interface';
 import { getNamePath } from './utils/valueUtil';
 
 // 内部 Field/ClassComponent 的 props
@@ -9,6 +9,9 @@ export interface InternalFieldProps<Values = any> {
   fieldContext?: InternalFormInstance;
   name?: InternalNamePath;
   initialValue?: any;
+  preserve?: boolean;
+  /** @private Passed by Form.List props. Do not use since it will break by path check. */
+  isListField?: boolean;
 }
 
 // 对外的 WrapperField 的 props
@@ -23,9 +26,6 @@ export interface FieldProps<Values = any>
   isListField?: boolean;
 }
 
-// 这里规定了 Field 必须实现的属性
-export interface FieldEntity {}
-
 export interface FieldState {
   //   resetCount: number;
 }
@@ -35,6 +35,12 @@ class Field extends Component<InternalFieldProps, FieldState> implements FieldEn
 
   private mounted = false;
 
+  private cancelRegisterFunc: (
+    isListField?: boolean,
+    preserve?: boolean,
+    namePath?: InternalNamePath,
+  ) => void | null = null;
+
   // ============================== Subscriptions ==============================
   constructor(props: InternalFieldProps) {
     super(props);
@@ -43,26 +49,41 @@ class Field extends Component<InternalFieldProps, FieldState> implements FieldEn
     if (props.fieldContext) {
       const { getInternalHooks }: InternalFormInstance = props.fieldContext;
       const { initEntityValue } = getInternalHooks(HOOK_MARK);
+
       initEntityValue(this);
     }
   }
 
   public componentDidMount() {
     const { /*shouldUpdate,*/ fieldContext } = this.props;
-
     this.mounted = true;
-
     // Register on init
     if (fieldContext) {
       const { getInternalHooks }: InternalFormInstance = fieldContext;
       const { registerField } = getInternalHooks(HOOK_MARK);
       this.cancelRegisterFunc = registerField(this);
     }
-
+    // TODO
     // One more render for component in case fields not ready
-    if (shouldUpdate === true) {
-      this.reRender();
+    // if (shouldUpdate === true) {
+    //   this.reRender();
+    // }
+  }
+
+  public cancelRegister = () => {
+    const { preserve, isListField, name } = this.props;
+    // 调用前, 验证 cancelRegisterFunc 存在性
+    if (this.cancelRegisterFunc) {
+      this.cancelRegisterFunc(isListField, preserve, getNamePath(name));
     }
+    this.cancelRegisterFunc = null;
+  };
+
+  public componentWillUnmount() {
+    this.cancelRegister();
+    // TODO
+    // this.triggerMetaEvent(true);
+    this.mounted = false;
   }
 
   // ================================== Utils ==================================

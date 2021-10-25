@@ -13,8 +13,8 @@ export type Store = Record<string, StoreValue>;
  *
  */
 export interface FormInstance<Values = any> {
-  // getFieldsValue(): Values;
-  // getFieldsValue(nameList: NamePath[] | true, filterFunc?: (meta: Meta) => boolean);
+  getFieldsValue(): Values;
+  getFieldsValue(nameList: NamePath[] | true, filterFunc?: (meta: Meta) => boolean);
 
   // 加入了常量 HOOK_MARK 用于忽略用户误操作, 因为它属于内部方法, 不对外暴露
   getInternalHooks: (secret: string) => InternalHooks | null;
@@ -43,11 +43,11 @@ export interface FieldEntity {
     // dependencies?: NamePath[];
     initialValue?: any;
   };
-  onStoreChange: (
-    store: Store,
-    namePathList: InternalNamePath[] | null,
-    info: ValuedNotifyInfo,
-  ) => void;
+  // onStoreChange: (
+  //   store: Store,
+  //   namePathList: InternalNamePath[] | null,
+  //   info: ValuedNotifyInfo,
+  // ) => void;
 }
 
 export type InvalidateFieldEntity = { INVALIDATE_NAME_PATH: InternalNamePath };

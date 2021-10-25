@@ -10,15 +10,22 @@ import {
   ValidateMessages,
   Callbacks,
   Store,
-  FieldData,
   InternalNamePath,
   NotifyInfo,
-  ValuedNotifyInfo,
   NamePath,
   Meta,
+  InvalidateFieldEntity,
 } from './interface';
 
-import { setValues, getValue, setValue, getNamePath } from './utils/valueUtil';
+import {
+  setValues,
+  getValue,
+  setValue,
+  getNamePath,
+  matchNamePath,
+  cloneByNamePathList,
+} from './utils/valueUtil';
+import NameMap from './utils/NameMap';
 
 /**
  *  form数据对象的类
@@ -48,9 +55,9 @@ class FormStore {
   private forceRootUpdate: () => void;
 
   public getForm = (): InternalFormInstance => ({
-    // getFieldsValue: this.getFieldsValue,
+    getFieldsValue: this.getFieldsValue,
     getInternalHooks: this.getInternalHooks,
-    setFields: this.setFields,
+    // setFields: this.setFields,
   });
 
   // ======================== Internal Hooks ========================
@@ -146,6 +153,13 @@ class FormStore {
   //   });
   // };
 
+  private getFieldValue = (name: NamePath) => {
+    this.warningUnhooked();
+
+    const namePath: InternalNamePath = getNamePath(name);
+    return getValue(this.store, namePath);
+  };
+
   private getFieldsValue = (nameList?: NamePath[] | true, filterFunc?: (meta: Meta) => boolean) => {
     this.warningUnhooked();
 
@@ -155,53 +169,81 @@ class FormStore {
     }
 
     // TODO, 这里的逻辑暂时先不看
-    // // 没有按照数组规范传递 nameList 会被置为 null, 返回全量 formFields 数据
-    // const fieldEntities = this.getFieldEntitiesForNamePathList(
-    //   Array.isArray(nameList) ? nameList : null,
-    // );
+    // 没有按照数组规范传递 nameList 会被置为 null, 返回全量 formFields 数据
+    const fieldEntities = this.getFieldEntitiesForNamePathList(
+      Array.isArray(nameList) ? nameList : null,
+    );
 
-    // const filteredNameList: NamePath[] = [];
-    // fieldEntities.forEach((entity: FieldEntity | InvalidateFieldEntity) => {
-    //   const namePath =
-    //     'INVALIDATE_NAME_PATH' in entity ? entity.INVALIDATE_NAME_PATH : entity.getNamePath();
+    const filteredNameList: NamePath[] = [];
+    fieldEntities.forEach((entity: FieldEntity | InvalidateFieldEntity) => {
+      const namePath =
+        'INVALIDATE_NAME_PATH' in entity ? entity.INVALIDATE_NAME_PATH : entity.getNamePath();
 
-    //   // Ignore when it's a list item and not specific the namePath,
-    //   // since parent field is already take in count
-    //   if (!nameList && (entity as FieldEntity).isListField?.()) {
-    //     return;
-    //   }
+      // TODO, List 相关逻辑暂时不看
+      // Ignore when it's a list item and not specific the namePath,
+      // since parent field is already take in count
+      // if (!nameList && (entity as FieldEntity).isListField?.()) {
+      //   return;
+      // }
 
-    //   if (!filterFunc) {
-    //     filteredNameList.push(namePath);
-    //   } else {
-    //     const meta: Meta = 'getMeta' in entity ? entity.getMeta() : null;
-    //     if (filterFunc(meta)) {
-    //       filteredNameList.push(namePath);
-    //     }
-    //   }
-    // });
-
-    // return cloneByNamePathList(this.store, filteredNameList.map(getNamePath));
+      if (!filterFunc) {
+        filteredNameList.push(namePath);
+      } else {
+        // TODO, filterFunc 逻辑暂时不看
+        // const meta: Meta = 'getMeta' in entity ? entity.getMeta() : null;
+        // if (filterFunc(meta)) {
+        //   filteredNameList.push(namePath);
+        // }
+      }
+    });
+    /**
+     * 最终得到的 filteredNameList 实际上并没有过滤任何不存在的 key
+     * 比如, 表单项里只有 ['name', 'age'] 两个表单项, 但是 nameList 却提供了 ['sex', 'money']
+     * 最终得到: { sex: undefined, money: undefined }
+     * 个人觉得, 不存在的表单项应该直接被过滤, 上面应该返回一个 {} 才对
+     *
+     * 还有另一个问题:
+     * 仅考虑 Field, nameList 类型是 ['xx_0', 'xx_1', ...]
+     * 1. 通过 Array.array 做个简单的类型验证和转换
+     * 2. getFieldEntitiesForNamePathList, 得到这些 keys 对应的 Field 实体(若不存在, 返回 { INVALIDATE_NAME_PATH: [xx_x] })
+     * 3. 然后遍历 nameList, 找到每个 name 对应的 Field, 从 Field 实体中拿到 namePath
+     * 最后到的是一个包装过的数组: ['xx_0', 'xx_1', ...] ---> [['xx_0'], ['xx_1'], ...]
+     * 个人认为不需要这么复杂的操作, 直接一个 filter + map 就可以解决
+     *
+     * 暂时不知道是不是为了兼容 List 才这么做, 打个 TODO
+     */
+    return cloneByNamePathList(this.store, filteredNameList.map(getNamePath));
   };
 
-  // private getFieldEntitiesForNamePathList = (
-  //   nameList?: NamePath[],
-  // ): (FieldEntity | InvalidateFieldEntity)[] => {
-  //   if (!nameList) {
-  //     return this.getFieldEntities(true);
-  //   }
-  //   // const cache = this.getFieldsMap(true);
-  //   // return nameList.map(name => {
-  //   //   const namePath = getNamePath(name);
-  //   //   return cache.get(namePath) || { INVALIDATE_NAME_PATH: getNamePath(name) };
-  //   // });
-  // };
+  private getFieldsMap = (pure: boolean = false) => {
+    const cache: NameMap<FieldEntity> = new NameMap();
+    this.getFieldEntities(pure).forEach(field => {
+      const namePath = field.getNamePath();
+      cache.set(namePath, field);
+    });
+    return cache;
+  };
+
+  private getFieldEntitiesForNamePathList = (
+    nameList?: NamePath[],
+  ): (FieldEntity | InvalidateFieldEntity)[] => {
+    if (!nameList) {
+      return this.getFieldEntities(true);
+    }
+    // this.fieldEntities 是使用数组维护 fields, 这里把他转成一个 Map(KV结构)
+    const cache = this.getFieldsMap(true);
+    return nameList.map(name => {
+      const namePath = getNamePath(name);
+      return cache.get(namePath) || { INVALIDATE_NAME_PATH: getNamePath(name) };
+    });
+  };
 
   private getFieldEntities = (pure: boolean = false) => {
     if (!pure) {
       return this.fieldEntities;
     }
-    // return this.fieldEntities.filter(field => field.getNamePath().length);
+    // TODO, 不知道什么情况下会出现 namePath 数组为空的情况???
+    return this.fieldEntities.filter(field => field.getNamePath().length);
   };
 
   // =========================== Observer ===========================
@@ -228,17 +270,17 @@ class FormStore {
     info: NotifyInfo,
   ) => {
     // TODO, subscribable 的意义是?? 只知道 children 是 renderProps 模式时, subscribable 为 false
-    if (this.subscribable) {
-      const mergedInfo: ValuedNotifyInfo = {
-        ...info,
-        store: this.getFieldsValue(true),
-      };
-      this.getFieldEntities().forEach(({ onStoreChange }) => {
-        onStoreChange(prevStore, namePathList, mergedInfo);
-      });
-    } else {
-      this.forceRootUpdate();
-    }
+    // if (this.subscribable) {
+    //   const mergedInfo: ValuedNotifyInfo = {
+    //     ...info,
+    //     store: this.getFieldsValue(true),
+    //   };
+    //   this.getFieldEntities().forEach(({ onStoreChange }) => {
+    //     onStoreChange(prevStore, namePathList, mergedInfo);
+    //   });
+    // } else {
+    //   this.forceRootUpdate();
+    // }
   };
 
   private registerField = (entity: FieldEntity) => {
@@ -255,8 +297,36 @@ class FormStore {
       //   });
     }
 
-    return () => {
-      console.log('un-register', entity.getNamePath);
+    // 解除当前表单项的注册绑定, 并且处理对应 value
+    return (isListField?: boolean, preserve?: boolean, subNamePath: InternalNamePath = []) => {
+      this.fieldEntities = this.fieldEntities.filter(item => item !== entity); // 排除自身
+
+      // Field, Form 都可以设置 preserve, 可以把 Form 层面的看成全局兜底默认值, 在 Field 自身没有特别设置时, 使用全局设置(default: true)
+      const mergedPreserve = preserve !== undefined ? preserve : this.preserve;
+
+      // TODO, 其他逻辑暂时不细看
+      // 如果删除字段不需要保留已有属性值, 且不是 ListField, 那么要把对应的 value 值为初始值(initialValue / initialValues[xxx])
+      if (mergedPreserve === false && (!isListField || subNamePath.length > 1)) {
+        const namePath = entity.getNamePath();
+
+        // 从 initialValues 中得到当前表单项的初始值
+        const defaultValue = isListField ? undefined : getValue(this.initialValues, namePath);
+
+        if (
+          namePath.length && // 是个有效的 key
+          this.getFieldValue(namePath) !== defaultValue && // 不等于初始值才有重置的必要
+          // 新的 fields 中没有当前 namePath, 表示这个表单项被剔除, 所以: Only reset when no namePath exist
+          this.fieldEntities.every(field => !matchNamePath(field.getNamePath(), namePath))
+        ) {
+          /**
+           * setValue 第四个参数为 true 时, 对象层级大于1层且新值为 undefined 时, 这个属性会被删除, 如删除 'age':
+           * 处于不同层级, 表现形式也不同
+           * { name: 'xiaoMing', age: 17 } ---> { name: 'xiaoMing', age: undefined }
+           * { person: { name: 'xiaoMing', age: 17 } } ---> { person: { name: 'xiaoMing' } }
+           */
+          this.store = setValue(this.store, namePath, defaultValue, true);
+        }
+      }
     };
   };
 }

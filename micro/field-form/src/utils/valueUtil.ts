@@ -26,6 +26,21 @@ export function setValue(
   return newStore;
 }
 
+/**
+ * 判断两个数组的值是够全部相等
+ */
+export function matchNamePath(
+  namePath: InternalNamePath,
+  changedNamePath: InternalNamePath | null,
+) {
+  // 长度不同, 一定不相等
+  if (!namePath || !changedNamePath || namePath.length !== changedNamePath.length) {
+    return false;
+  }
+  // 长度相等, 按照索引遍历比较每一项的值是否相等, 所有值都相等才算相等
+  return namePath.every((nameUnit, i) => changedNamePath[i] === nameUnit);
+}
+
 function isObject(obj: StoreValue) {
   return typeof obj === 'object' && obj !== null && Object.getPrototypeOf(obj) === Object.prototype;
 }
@@ -96,4 +111,18 @@ export function isSimilar(source: SimilarObject, target: SimilarObject) {
     }
     return sourceValue === targetValue;
   });
+}
+
+/**
+ * 根据提供的 namePathList, 从 store 找出对应的值, 写入新对象 newStore
+ * 即使没有值, 也会写入 undefined
+ */
+export function cloneByNamePathList(store: Store, namePathList: InternalNamePath[]): Store {
+  let newStore = {};
+  namePathList.forEach(namePath => {
+    const value = getValue(store, namePath);
+    newStore = setValue(newStore, namePath, value);
+  });
+
+  return newStore;
 }
