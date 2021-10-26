@@ -48,7 +48,7 @@ const Form: ForwardRefRenderFunction<FormInstance, FormProps> = ({
   preserve,
   initialValues,
   fields,
-  validateTrigger,
+  validateTrigger = 'onChange',
   children,
   ...restProps
 }) =>

@@ -40,6 +40,14 @@ const wrapperNode = (
 
 ### Field 与 Form 的绑定
 
+在使用过程中, 仅仅把表单组件放在 Field 中间, 就可以实现 onChange 的绑定关系, 无需手动添加, 这是如何实现的呢?
+
+Field 拿到 children 后, 会在内部调用 cloneElement 重新构造子元素, 同时构建 onChange 等控制属性, 把他们作为 props 传入新的 ReactElement, 源码中是在`getControlled` 中来构建这些控制属性的
+
+Field 中默认的 trigger 是 onChange 事件, 如果用户在 props 中提供了 onChange, 那这个 onChange 会被保留引用, 在处理完内部 dispath 逻辑后, 在调用这个 originOnChange 时间, 有点像 React 和 singleSPA 的事件代理,
+
+每次 Field 触发 onChange 事件, 回收先调用 dispatch 一个 **updateValue** 的 action, 在 formInstance 内部调用 `updateValue` 更新 store 内的表单值, 然后是 notifyObservers 逻辑(这个后面单独讲), 然后就是调用所有 Field 的 onStoreChange, 由每个 Field 自己判断是否需要 re-render, 如果需要, 就触发 `forceRender` 重新渲染本身, 而下次继续构造 Field 的时候(`React.cloneElement(child, getControlled(child.props))`), 直接从 formInstance 中就可以拿到最新的值, 基本上一个完整的更新逻辑就完成了
+
 ### TODO
 
 Field 代码量比较大, 梳理清楚再更新下面的

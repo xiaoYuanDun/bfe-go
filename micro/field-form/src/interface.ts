@@ -4,6 +4,8 @@ export type NamePath = string | number | InternalNamePath;
 export type StoreValue = any;
 export type Store = Record<string, StoreValue>;
 
+export type EventArgs = any[];
+
 // ======================== form 数据实体 ========================
 /**
  * form 数据实体, 管理当前 form 的全局状态
@@ -32,7 +34,23 @@ export type InternalFormInstance = Omit<FormInstance, ''> & {
    * 只在 List 中被初始化
    */
   prefixName?: InternalNamePath;
+
+  validateTrigger?: string | string[] | false;
 };
+
+interface UpdateAction {
+  type: 'updateValue';
+  namePath: InternalNamePath;
+  value: StoreValue;
+}
+
+interface ValidateAction {
+  type: 'validateField';
+  namePath: InternalNamePath;
+  triggerName: string;
+}
+
+export type ReducerAction = UpdateAction | ValidateAction;
 
 // ======================== Field ========================
 export interface FieldEntity {
@@ -77,6 +95,7 @@ export interface InternalHooks {
   useSubscribe: (subscribable: boolean) => void;
   initEntityValue: (entity: FieldEntity) => void;
   registerField: (entity: FieldEntity) => () => void;
+  dispatch: (action: ReducerAction) => void;
 }
 
 export interface Callbacks<Values = any> {

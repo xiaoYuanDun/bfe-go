@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 
-// import Form, { Field } from './es';
-import Form, { Field } from './src';
+import Form, { Field } from './es';
+// import Form, { Field } from './src';
 
 const Ele = () => {
   const [form] = Form.useForm();
@@ -30,18 +30,15 @@ const Ele = () => {
     <>
       <div>
         <Form form={form} preserve={false}>
-          {count % 2 === 0 ? (
-            <Field name={['person']}>
-              <input />
-            </Field>
-          ) : null}
-          <br />
           <Field name={['name']}>
             <input />
           </Field>
           <br />
-
-          <Field name="age">
+          <Field name={['pwd']}>
+            <input />
+          </Field>
+          <br />
+          <Field name="again" dependencies={['pwd']} rules={[{ len: 2 }]}>
             <input />
           </Field>
           <br />
@@ -52,7 +49,7 @@ const Ele = () => {
             // console.log(form.getFieldsValue());
             // console.log(form.getFieldsValue(['person', 'name']));
             // console.log(form.getFieldsValue(['name', 'sex']));
-            console.log(form.getFieldsValue(['e1', 'person', 'e2']));
+            console.log(form.getFieldsValue(['name', 'person', 'e2']));
           }}
         >
           show value

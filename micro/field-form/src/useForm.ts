@@ -15,6 +15,8 @@ import {
   NamePath,
   Meta,
   InvalidateFieldEntity,
+  ReducerAction,
+  StoreValue,
 } from './interface';
 
 import {
@@ -66,7 +68,7 @@ class FormStore {
       this.formHooked = true;
 
       return {
-        // dispatch: this.dispatch,
+        dispatch: this.dispatch,
         initEntityValue: this.initEntityValue,
         registerField: this.registerField,
         useSubscribe: this.useSubscribe,
@@ -247,6 +249,35 @@ class FormStore {
   };
 
   // =========================== Observer ===========================
+
+  private dispatch = (action: ReducerAction) => {
+    switch (action.type) {
+      case 'updateValue': {
+        const { namePath, value } = action;
+        this.updateValue(namePath, value);
+        break;
+      }
+      // TODO
+      // case 'validateField': {
+      //   const { namePath, triggerName } = action;
+      //   this.validateFields([namePath], { triggerName });
+      //   break;
+      // }
+      default:
+      // Currently we don't have other action. Do nothing.
+    }
+  };
+
+  private updateValue = (name: NamePath, value: StoreValue) => {
+    const namePath = getNamePath(name);
+    const prevStore = this.store;
+    this.store = setValue(this.store, namePath, value);
+
+    // this.notifyObservers(prevStore, [namePath], {
+    //   type: 'valueUpdate',
+    //   source: 'internal',
+    // });
+  };
   /**
    * This only trigger when a field is on constructor to avoid we get initialValue too late
    * Field 可以携带自己的 initialValue 参数, 如果有, 会在这里被写入到 store 内

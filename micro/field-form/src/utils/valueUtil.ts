@@ -1,7 +1,7 @@
 import get from 'rc-util/lib/utils/get';
 import set from 'rc-util/lib/utils/set';
 
-import { NamePath, InternalNamePath, Store, StoreValue } from '../interface';
+import { NamePath, InternalNamePath, Store, StoreValue, EventArgs } from '../interface';
 import { toArray } from './typeUtil';
 
 /**
@@ -125,4 +125,13 @@ export function cloneByNamePathList(store: Store, namePathList: InternalNamePath
   });
 
   return newStore;
+}
+
+export function defaultGetValueFromEvent(valuePropName: string, ...args: EventArgs) {
+  const event = args[0];
+  if (event && event.target && valuePropName in event.target) {
+    return (event.target as HTMLInputElement)[valuePropName];
+  }
+
+  return event;
 }
