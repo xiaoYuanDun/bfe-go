@@ -8,6 +8,11 @@
     <script src="./LinkNode.js"></script>
     <script>
       {
+        function ListNode(val, next) {
+          this.val = val === undefined ? 0 : val;
+          this.next = next === undefined ? null : next;
+        }
+
         const n1 = new ListNode('n1');
         const n2 = new ListNode('n2');
         const n3 = new ListNode('n3');
