@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      {
+        const quickSort = (arr) => {
+          const correctBase = (start, end) => {
+            if (end <= start) return;
+
+            let i = start;
+            let j = end;
+            let base = arr[i];
+            let temp;
+
+            while (j > i) {
+              while (arr[j] > base && j > i) {
+                j--;
+              }
+              while (arr[i] <= base && j > i) {
+                i++;
+              }
+              if (j > i) {
+                temp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = temp;
+              }
+            }
+            if (j > start) {
+              temp = arr[j];
+              arr[j] = arr[start];
+              arr[start] = temp;
+            }
+
+            correctBase(start, j - 1);
+            correctBase(j + 1, end);
+          };
+          correctBase(0, arr.length - 1);
+          return arr;
+        };
+
+        console.log(quickSort([6, 12, 7, 9, 3, 4, 5, 10, 8]));
+      }
+    </script>
+  </head>
+
+  <body>
+    <div>快排</div>
+    <p>tips:</p>
+    <p>快速排序的特点:</p>
+    <p>
+      1. 每一次遍历, 都会把基准值放到正确位置上(和冒泡排序很相似,
+      每次把一个极值放到边界(最大/最小),
+      但冒泡每次的对比交换操作都是全量的(每个相邻的元素都要对比))
+    </p>
+    <p>
+      2. 之所以比冒泡快, 是因为快拍的交换是跳跃式的, 而冒泡每次只能固定移动一位,
+      但是快拍的最差情况和冒泡一样, 也是每次移动一位
+    </p>
+    <p>
+      3. 这里我每次都是取左侧第一位做基准值,
+      这时每次遍历都需要先进行右侧哨兵的移动
+    </p>
+    <a href="{地址}">传送门</a>
+  </body>
+</html>
