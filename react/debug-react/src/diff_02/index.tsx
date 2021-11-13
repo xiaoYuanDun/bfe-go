@@ -2,9 +2,9 @@ import React, { Fragment, useState } from 'react';
 
 // DIFF 调试
 function Root() {
-  const [arr, setArr] = useState(['A', 'B']);
+  const [arr, setArr] = useState(['A', 'B', 'C']);
 
-  const handleAdd = () => setArr(['A', 'C', 'B', 'D']);
+  const handleAdd = () => setArr(['A', 'C', 'B']);
 
   const handleMinus = () => setArr(['A', 'B']);
 
