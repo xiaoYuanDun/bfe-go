@@ -7,6 +7,9 @@
     <title>Document</title>
     <script>
       {
+        // 因为快排的特点, 一次循环分离出两个有序空间(以 哨兵节点 为界, 左侧全小于它, 右侧全大于它)
+        // 所以快排适用于任何 '区块分离' 的问题
+        // 如求 最大/最小 k 个数, 这一类问题需要得到子集, 但是不要求子集顺序, 快排的思想和它完美契合, 而且可以提前退出(子集不要求顺序)
         const quickSort = (arr) => {
           const correctBase = (start, end) => {
             if (end <= start) return;
