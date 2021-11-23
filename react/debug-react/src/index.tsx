@@ -58,10 +58,18 @@ import ReactDOM from 'react-dom';
 
 // DIFF 调试用例2 ./diff_02
 
-import Root from './diff_02';
+// import Root from './diff_02';
 
-const root = <Root />;
-ReactDOM.render(root, document.getElementById('root'));
+// const root = <Root />;
+// ReactDOM.render(root, document.getElementById('root'));
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+
+// 事件代理 调试用例
+
+import T1 from './event_proxy';
+ReactDOM.render(<T1 />, document.getElementById('root'));
 
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
