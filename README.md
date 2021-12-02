@@ -9,9 +9,9 @@
 - week_1:
 
 * [x] react setState 是同步还是异步 (react/1) 21-12-02
-* [ ] 什么是高阶组件，请举例说明
+* [x] 什么是高阶组件，请举例说明 (react/3) 21-12-02
 * [ ] 解释一下原型链
-* [ ] instanceof 原理
+* [x] instanceof 原理 (JS/6) 21-12-02
 * [ ] apply 和 call 的作用及区别
 * [ ] position 有哪些值，作用分别是什么
 * [ ] 说下你对 DOM 树的理解
@@ -21,7 +21,7 @@
 
 - week_2:
 
-* [ ] react 为什么需要合成事件
+* [x] react 为什么需要合成事件 (react/1) 21-12-02
 * [ ] 为什么有时 react 两次 setState，只执行一次
 * [ ] redux 有哪些原则
 * [ ] es5 实现继承
@@ -30,11 +30,11 @@
 * [ ] 说下事件模型
 * [ ] 如何减少白屏的时间
 * [ ] 3 次握手过程
-* [ ] 判断链表是否有环
+* [x] 判断链表是否有环 [hash 表, 快慢指针](https://leetcode-cn.com/problems/linked-list-cycle/)
 
 - week_3:
 
-* [ ] react 合成事件是什么，和原生事件的区别
+* [x] react 合成事件是什么，和原生事件的区别 (react/1) 21-12-02
 * [x] react 如何处理异常 (react/2) 21-12-02
 * [ ] 闭包的作用和原理
 * [ ] 0.1+0.2 为什么不等于 0.3
