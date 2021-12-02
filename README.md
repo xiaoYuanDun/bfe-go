@@ -8,7 +8,7 @@
 
 - week_1:
 
-* [x] react setState 是同步还是异步 (react/1)
+* [x] react setState 是同步还是异步 (react/1) 21-12-02
 * [ ] 什么是高阶组件，请举例说明
 * [ ] 解释一下原型链
 * [ ] instanceof 原理
@@ -35,7 +35,7 @@
 - week_3:
 
 * [ ] react 合成事件是什么，和原生事件的区别
-* [x] react 如何处理异常 (react/2)
+* [x] react 如何处理异常 (react/2) 21-12-02
 * [ ] 闭包的作用和原理
 * [ ] 0.1+0.2 为什么不等于 0.3
 * [ ] 什么是 BFC，BFC 有什么作用，如何形成 BFC
