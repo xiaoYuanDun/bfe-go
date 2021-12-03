@@ -30,7 +30,7 @@
 * [ ] 说下事件模型
 * [ ] 如何减少白屏的时间
 * [ ] 3 次握手过程
-* [x] 判断链表是否有环 [hash 表, 快慢指针](https://leetcode-cn.com/problems/linked-list-cycle/)
+* [x] 判断链表是否有环 [(hash 表, 快慢指针)](https://leetcode-cn.com/problems/linked-list-cycle/)
 
 - week_3:
 
