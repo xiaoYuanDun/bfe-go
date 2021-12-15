@@ -85,7 +85,8 @@ let state = {
 };
 
 const nextState = produce(state, (draft) => {
-  draft.other.count = 10;
+  // draft.other.count = 10;
+  draft.name = 'Micheal';
 });
 
 console.log('nextState', nextState);
