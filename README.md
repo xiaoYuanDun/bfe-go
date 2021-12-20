@@ -109,3 +109,16 @@
 * [x] 合并二维有序数组成一维有序数组 ([leetcode-剑指 Offer-25](https://leetcode-cn.com/problems/he-bing-liang-ge-pai-xu-de-lian-biao-lcof/))
 * [ ] 实现防抖函数
 * [ ] 最近看了什么书，有什么心得
+
+- week_9:
+
+* [ ] CSS3 有哪些新特性
+* [x] 层叠上下文是什么 (CSS/3) 21-12-20
+* [ ] history 和 hash 两种路由方式的最大区别是什么?
+* [ ] 动画性能如何优化
+* [ ] tree shaking 是什么，有什么作用，原理是什么
+* [ ] webpack 工作流程是怎样的
+* [ ] 什么场景下会用策略模式
+* [ ] 找出数组中和为 sum 的 n 个数
+* [ ] 判断括号字符串是否有效
+* [ ] 平常的学习途径

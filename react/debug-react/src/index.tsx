@@ -76,23 +76,23 @@ import ReactDOM from 'react-dom';
 
 // 事件代理 同步异步 调试用例
 
-// import E2 from './event_proxy/E2';
-// ReactDOM.render(<E2 />, document.getElementById('root'));
+import E2 from './event_proxy/E2';
+ReactDOM.render(<E2 />, document.getElementById('root'));
 
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
 
 // 错误边界
 
-import ErrorTest from './error_boundary ';
-import Boundary from './error_boundary /boundary';
+// import ErrorTest from './error_boundary ';
+// import Boundary from './error_boundary /boundary';
 
-const ele = (
-  <Boundary>
-    <ErrorTest />
-  </Boundary>
-);
-ReactDOM.render(ele, document.getElementById('root'));
+// const ele = (
+//   <Boundary>
+//     <ErrorTest />
+//   </Boundary>
+// );
+// ReactDOM.render(ele, document.getElementById('root'));
 
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
