@@ -63,10 +63,49 @@
 * [ ] vue 的数据绑定机制是如何实现的
 * [ ] vue next tick 实现原理
 * [ ] 谈谈变量提升
-* [ ] new 操作符具体做了什么
-* [ ] 介绍下盒子模型
+* [x] new 操作符具体做了什么 (手写/2) 21-12-20
+* [x] 介绍下盒子模型 ([链接自提](https://segmentfault.com/a/1190000013069516)) 21-12-20
 * [ ] 有哪些方式可以使 div 居中
 * [ ] 有听过前端性能优化指标 RAIL 吗
 * [ ] 进程和线程的区别
 * [x] tcp 滑动窗口是什么 (网络/2) 21-12-20
 * [x] 实现一个斐波那契数列 ([leetcode-509](https://leetcode-cn.com/problems/fibonacci-number/)) 21-12-20
+
+- week_6:
+
+* [ ] vue 的 computed 和 watch 的区别
+* [ ] 说下 vue 的 keep alive
+* [ ] 什么是立即执行函数
+* [ ] 谈下事件循环机制
+* [x] css 优先级是怎么计算的 ([链接自提](https://zhuanlan.zhihu.com/p/41604775)) 21-12-20
+* [ ] css 相关的性能优化
+* [ ] 谈下 webpack loader 机制
+* [ ] 进程通信方式有哪些.
+* [ ] 爬楼梯问题
+* [ ] 实现一个 trim 方法
+
+- week_7:
+
+* [ ] react fiber 有哪些优点，怎样做到的
+* [ ] 谈谈你对作用域的理解
+* [ ] 双飞翼/圣杯布局
+* [ ] 浮动元素会造成什么影响，如何清除浮动
+* [ ] 网站首页有大量的图片，加载很慢，如何去优化呢?
+* [ ] 描述下浏览器从输入网址到页面展现的整个过程
+* [ ] uglify 原理的是什么
+* [ ] tcp 重试机制
+* [x] 层次遍历二叉树 ([leetcode-102](https://leetcode-cn.com/problems/binary-tree-level-order-traversal/)) 21-12-20
+* [ ] 实现节流函数
+
+- week_8:
+
+* [ ] react 有哪些性能优化的点
+* [ ] v8 垃圾回收机制
+* [ ] css 样式隔离手段
+* [ ] 行内元素、块级元素有哪些，区别是什么
+* [ ] 聊下你知道的浏览器架构
+* [ ] 是否有写过 webpack 插件
+* [ ] websocket 建立过程
+* [x] 合并二维有序数组成一维有序数组 ([leetcode-剑指 Offer-25](https://leetcode-cn.com/problems/he-bing-liang-ge-pai-xu-de-lian-biao-lcof/))
+* [ ] 实现防抖函数
+* [ ] 最近看了什么书，有什么心得
