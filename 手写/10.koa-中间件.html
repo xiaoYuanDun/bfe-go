@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <script>
+    {
+      // 先定义出 koa 的服务形式和 koa 中间件的调用形式
+      function Koa() {
+        this.middlewares = [];
+        this.context = {};
+      }
+
+      Koa.prototype.use = function (middleware) {
+        this.middlewares.push(middleware);
+      };
+
+      Koa.prototype.listen = function (port) {
+        const composed = compose(this.middlewares);
+        return (symbol) => composed({ ...this.context, symbol });
+      };
+
+      function compose(mws) {
+        // 这里 index 是用来更新和监控中间件的执行流程的
+        // 比如，在 mw 函数体中，next 被误执行两次等问题，如果不检查控制，那么就会走两次
+        // 因为下一个 mw 是通过当前 mw bind 到新函数中的，所以每次 dispatch 的参数 i 是固定的，如果正常执行就是一个递增的态势
+        // 这里没执行一个 dispatch 就更新一下 index，保证指针指向最新的 mw，当 i < index，表示之前执行过的 mw 又重新调用了
+        return function (ctx, next) {
+          let index = -1;
+          function dispatch(i) {
+            if (i <= index)
+              return Promise.reject(new Error('next() called multiple times'));
+
+            // 否则更新下标
+            index = i;
+
+            const middleware = mws[i];
+
+            // 这里的关键是，把下一个中间件调用 bind 到一个新的函数中，传给当前中间件
+            // 相当于把流程继续执行的控制权交给了当前的中间件
+            // 在代码里的表现就是 "await next()"，用户可以在自己觉得合适的任何地方调用它
+            try {
+              return Promise.resolve(
+                middleware(ctx, dispatch.bind(null, i + 1))
+              );
+            } catch (e) {
+              return Promise.reject(e);
+            }
+          }
+          return dispatch(0);
+        };
+      }
+
+      const delay = (timeout) =>
+        new Promise((resolve) => {
+          setTimeout(resolve, timeout);
+        });
+      // 用例
+      // -----------------------------------------------------------------------
+      const app = new Koa();
+
+      // 注册中间件 1
+      app.use(async (ctx, next) => {
+        const start = Date.now();
+        console.log(`[${ctx.symbol}] mw-1 in`);
+        await delay(1000);
+        await next();
+        console.log(`[${ctx.symbol}] mw-1 out, cast: ${Date.now() - start}`);
+      });
+
+      // 注册中间件 2
+      app.use(async (ctx, next) => {
+        const start = Date.now();
+        console.log(`[${ctx.symbol}] mw-2 in`);
+        await delay(1000);
+        await next();
+        console.log(`[${ctx.symbol}] mw-2 out, cast: ${Date.now() - start}`);
+      });
+
+      // 注册响应体
+      app.use(async (ctx) => {
+        const start = Date.now();
+        console.log(`[${ctx.symbol}] main logic...`);
+        await delay(1000);
+        console.log(`[${ctx.symbol}] main logic cast: ${Date.now() - start}`);
+      });
+
+      // compose 中间件在这一步进行
+      // 正常 lisnen 之后，就会监听端口，有请求进来就会触发 composedMiddlewareFunction
+      // 这里，因为不是网络环境，所以返回一个 caller 对象，模拟网络请求
+      const caller = app.listen(3000);
+
+      // 模拟请求
+      caller(1);
+
+      caller(2);
+
+      //   caller();
+
+      // 期待输出顺序：
+      // mw-1 in
+      //  mw-2 in
+      //   main logic...
+      //  mw-2 out, cast: xxx
+      // mw-1 out, cast: yyy
+
+      // -----------------------------------------------------------------------
+    }
+  </script>
+  <body>
+    <p>koa 中间件的实现原理</p>
+  </body>
+</html>

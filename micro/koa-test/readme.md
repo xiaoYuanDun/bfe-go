@@ -1,3 +1,23 @@
+# koa 源码通关
+
+### 最简 koa 实例
+
+- 首先通过一段代码看看，如何启动一个最简单的 koa 服务：new 一个实例，注册响应回调，启动监听，完事了，非常简单
+
+```js
+// so easy
+const Koa = require('koa');
+const app = new Koa();
+
+app.use((ctx) => {
+  ctx.body = 'Hello Koa';
+});
+
+app.listen(3000);
+```
+
+---
+
 ### init
 
 ##### 初始化 koa 对象 app, 初始化数据接口
@@ -69,3 +89,7 @@ app.use(async (ctx) => {
 ### context
 
 #####
+
+### 参考资料
+
+- [koa 源码的整体架构, 洋葱模型](https://juejin.cn/post/6844904088220467213)

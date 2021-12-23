@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <script>
+    {
+      /**
+       * 这个例子主要是学习，axios 是如何取消一个 fetch 请求的
+       *
+       * https://developer.mozilla.org/zh-CN/docs/Web/API/Fetch_API
+       * https://developer.mozilla.org/zh-CN/docs/Web/API/AbortController
+       *
+       * 首先构造一个控制器对象 new AbortController()，把他的 signal 属性传给一个 fetch 请求，构建两者的关联
+       * 当我们需要需求某个请求时，只需要调用这个请求通过 signal 关联的 controller 即可，controller.abort()
+       *
+       * 因为 Fetch 是基于 promise 的，所以在取消后，后构建一个 AbortError 用来 reject 当前 promise
+       *
+       * 本质还是发布订阅，只不过浏览器提供了一个可以传递 signal 的通道
+       */
+
+      // 首先来个最简单的 delay 函数
+      const delay = (timeout) => {
+        let timeoutId;
+        let execute;
+        const delayObj = new Promise((resolve, reject) => {
+          execute = () => {
+            resolve();
+            console.log('promise 执行了...');
+          };
+          timeoutId = setTimeout(execute, timeout);
+        });
+
+        // 核心是清除定时器，取消定时器任务，这样其内部的 resolve 永远也不会被执行
+        const cancelFunc = () => {
+          clearTimeout(timeoutId);
+          timeoutId = null;
+        };
+
+        // 提前执行，核心是提取执行逻辑，在需要时跳过定时器，直接执行，然后清除当前所在定时器
+        const clearFunc = () => {
+          cancelFunc();
+          execute();
+        };
+
+        delayObj.cancel = cancelFunc;
+        delayObj.clear = clearFunc;
+        return delayObj;
+      };
+
+      // -----------------------------------------------------------------------
+
+      // 用自执行函数构造一个异步环境
+      (async function () {
+        console.log('start ...');
+        const p1 = delay(2000);
+
+        setTimeout(() => {
+          // 测试取消
+          // console.log('cancel promise ...');
+          // p1.cancel();
+          //
+          // 测试提前执行
+          // console.log('clear promise ...');
+          // p1.clear();
+        }, 1000);
+
+        await p1;
+        console.log('finish ...');
+      })();
+    }
+  </script>
+  <body>
+    <p>可以取消的 promise</p>
+  </body>
+</html>

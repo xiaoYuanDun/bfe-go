@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      {
+        const data = {
+          value: 'root',
+          children: [
+            {
+              value: 'a',
+              children: [
+                {
+                  value: 'b',
+                },
+                {
+                  value: 'c',
+                },
+              ],
+            },
+            {
+              value: 'd',
+              children: [
+                {
+                  value: 'e',
+                  children: [
+                    {
+                      value: 'f',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        };
+
+        // 实现 tree2list，输出： ['root/a/b', 'root/a/c', 'root/d/e/f']
+
+        // 下面给出两种解法，都是递归，但是思路略有不同
+        function tree2list(data) {
+          if (data.children) {
+            return data.children.reduce(
+              (acc, cur) => [
+                ...acc,
+                ...tree2list(cur).map((item) => data.value + '/' + item),
+              ],
+              []
+            );
+          }
+          return [data.value];
+        }
+
+        function tree2list(data) {
+          const res = [];
+          const path = [];
+
+          const dfs = (node) => {
+            if (node.children) {
+              path.push(node.value);
+              node.children.map(dfs);
+              path.pop();
+            } else {
+              res.push([...path, node.value].join('/'));
+            }
+          };
+          dfs(data);
+          return res;
+        }
+
+        console.log(tree2list(data));
+      }
+    </script>
+  </head>
+
+  <body>
+    <p>字节-国际化电商-一面</p>
+  </body>
+</html>

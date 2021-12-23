@@ -48,7 +48,7 @@
 - week_4:
 
 * [ ] react 为什么需要 fiber
-* [ ] redux 中间件机制
+* [x] redux 中间件机制 (JS/8) 21-12-23
 * [ ] bind 的实现
 * [ ] 说下 generator 原理
 * [ ] flex 布局有什么好处
