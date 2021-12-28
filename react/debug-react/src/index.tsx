@@ -16,11 +16,11 @@ import ReactDOM from 'react-dom';
 
 // Counter 计数用例, ./counter
 
-// import Counter from './counter/Counter';
-// import CountHook from './counter/CountHook';
+import Counter from './counter/Counter';
+import CountHook from './counter/CountHook';
 
-// const root = document.getElementById('root');
-// ReactDOM.render(<CountHook />, root);
+const root = document.getElementById('root');
+ReactDOM.render(<CountHook />, root);
 
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
@@ -76,8 +76,8 @@ import ReactDOM from 'react-dom';
 
 // 事件代理 同步异步 调试用例
 
-import E2 from './event_proxy/E2';
-ReactDOM.render(<E2 />, document.getElementById('root'));
+// import E2 from './event_proxy/E2';
+// ReactDOM.render(<E2 />, document.getElementById('root'));
 
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
@@ -93,6 +93,15 @@ ReactDOM.render(<E2 />, document.getElementById('root'));
 //   </Boundary>
 // );
 // ReactDOM.render(ele, document.getElementById('root'));
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+
+// FC 的函数式调用和组件式声明的区别，子组件的 hook 被提升到父组件的问题
+
+// import FcTest from './fc_test';
+
+// ReactDOM.render(<FcTest />, document.getElementById('root'));
 
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------

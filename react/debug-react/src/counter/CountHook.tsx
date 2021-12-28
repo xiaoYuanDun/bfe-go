@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import React, { useReducer, useState, useEffect } from 'react';
 
 function reducer(prevState: number, action: any) {
   if (action === 'add') {
@@ -8,16 +8,30 @@ function reducer(prevState: number, action: any) {
 }
 
 function CountHook() {
-  const [number, dispatch] = useReducer(reducer, 0);
+  // const [number, dispatch] = useReducer(reducer, 0);
+  const [number, setNumber] = useState(0);
 
+  // const [name, setName] = useState('xiaoMing');
+
+  // useEffect(() => {
+  //   console.log('useEffect invoke.');
+  //   return () => {
+  //     console.log('callback.');
+  //   };
+  // });
+
+  const handleClick = () => {
+    //   setNumber(number + 1);
+    setNumber(number + 1);
+  };
   return (
     <div key="count-wrap">
-      <p key="p">{number}</p>
-
+      {number}
       {/* {[...Array(100000)].map((it) => (
         <div>123</div>
       ))} */}
-      <button key="button" onClick={() => dispatch('add')}>
+      {/* <button key="button" onClick={() => dispatch('add')}> */}
+      <button key="button" onClick={handleClick}>
         click me ...
       </button>
     </div>
