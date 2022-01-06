@@ -41,3 +41,9 @@ const history: {
 ### 嵌套路由与 Outlet
 
 ### style，classname 做了 renderProps 处理
+
+## 奇技淫巧
+
+- Route 的使用，本身没有 return，可以作为一个强制用户固定格式的 `slot`
+
+-

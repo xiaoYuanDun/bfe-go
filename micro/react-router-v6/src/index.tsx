@@ -43,6 +43,7 @@ import Expenses from './simply/Expenses';
 import Invoices from './simply/Invoices';
 const ele = (
   <BrowserRouter>
+    {/* <Link to="/today" /> */}
     <Routes>
       <Route path="/" element={<App />} />
       <Route path="expenses" element={<Expenses />} />

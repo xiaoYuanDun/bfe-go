@@ -46,7 +46,7 @@ export function BrowserRouter({ children, basename }: BrowserRouterProps) {
       navigationType={state.action}
       location={state.location}
       basename={basename}
-      // navigator={history}
+      navigator={history}
     />
   );
 }
