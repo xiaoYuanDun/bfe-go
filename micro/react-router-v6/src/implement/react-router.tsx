@@ -1,4 +1,5 @@
 import React, { createContext, useMemo } from 'react';
+import { Action as NavigationType } from './history';
 
 import type { ReactElement, ReactNode } from 'react';
 
@@ -19,8 +20,16 @@ const NavigationContext = createContext<NavigationContextObject>(null!);
  */
 type RouterProps = {
   children?: ReactNode;
+  location: Partial<Location> | string;
+  navigationType?: NavigationType;
+  basename?: string;
 };
-export function Router({ children = null }: RouterProps): ReactElement | null {
+export function Router({
+  children = null,
+  navigationType = NavigationType.Pop,
+  location: locationProp,
+  basename: basenameProp = '/',
+}: RouterProps): ReactElement | null {
   let navigationContext = useMemo(() => {});
 
   return (
