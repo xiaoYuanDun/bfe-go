@@ -120,6 +120,8 @@ export function Router({
 
 /**
  * Route 组件的父容器，会渲染当前 location 最佳匹配度的 Route 组件
+ *
+ *
  */
 export interface RoutesProps {
   children?: React.ReactNode;
@@ -174,16 +176,19 @@ export function Route(
  * 因为多级嵌套时，路由匹配是一级一级向内的
  * 处于树中的组件，如果想渲染其子组件，必须使用 <Outlet> 组件作为子组件的渲染占位
  *
+ * 关于这一点，官网有一句话是这么说的："The nested url segments map to nested component trees"
+ *
  * @see https://reactrouter.com/docs/en/v6/api#useroutes
  */
 export function useRoutes(
   routes: RouteObject[],
   locationArg?: Partial<Location> | string
 ): ReactElement | null {
+  // 一个使用前的存在性验证
+  // This error is probably because they somehow have 2 versions of the
+  // router loaded. We can help them understand how to avoid that.
   invariant(
     useInRouterContext(),
-    // TODO: This error is probably because they somehow have 2 versions of the
-    // router loaded. We can help them understand how to avoid that.
     `useRoutes() may be used only in the context of a <Router> component.`
   );
 

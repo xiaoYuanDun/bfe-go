@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { createContext } from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter, Link, Routes, Route } from 'react-router-dom';
 
@@ -41,14 +41,22 @@ import { BrowserRouter, Link, Routes, Route } from 'react-router-dom';
 import App from './simply';
 import Expenses from './simply/Expenses';
 import Invoices from './simply/Invoices';
+import Parent from './simply/Parent';
 const ele = (
   <BrowserRouter>
-    {/* <Link to="/today" /> */}
     <Routes>
       <Route path="/" element={<App />} />
       <Route path="expenses" element={<Expenses />} />
       <Route path="invoices" element={<Invoices />} />
+      <Route path="parent" element={<Parent />}>
+        <Route index element={<div>parent - son - default</div>} />
+        <Route path="s1" element={<div>parent - son - 1</div>} />
+      </Route>
+      {/* <Route path="expenses/asd" element={<div>parent /asd</div>} /> */}
     </Routes>
+    {/* <Routes>
+      <Route path="/expenses" element={<div>另一个 Routes</div>} />
+    </Routes> */}
   </BrowserRouter>
 );
 
