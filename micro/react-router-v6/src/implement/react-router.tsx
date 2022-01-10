@@ -394,3 +394,60 @@ function invariant(cond: any, message: string): asserts cond {
 export function useInRouterContext(): boolean {
   return useContext(LocationContext) != null;
 }
+
+/**
+ * 通过 path 的一些配置信息（主要是 pathname），得到对应的正则表达式对象
+ *
+ * 对于正则转化时的 $& 的用法如果不懂，可以查看 MDN 的资料
+ * https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Regular_Expressions#escaping
+ */
+function compilePath(
+  path: string,
+  caseSensitive = false,
+  end = true
+): [RegExp, string[]] {
+  // TODO: * 连用的问题，如：'/**' 会被判定为 '/*/*'
+
+  // 记录当前 path 可能存在的动态属性名，如 'parent/:name/:id'，对应的路由会被赋值到 name 和 id 属性上
+  let paramNames: string[] = [];
+
+  let regexpSource =
+    '^' +
+    path
+      .replace(/\/*\*?$/, '') // 暂时屏蔽这两种情况：/ 和 /* ，下面会有单独的逻辑来处理这种情况
+      .replace(/^\/*/, '/') // 保证所有 path 开头都有一个 /
+      .replace(/[\\.*+^$?{}|()[\]]/g, '\\$&') // 如果 path 中存在特殊字符，需要对特殊字符进行转移，以免在生成正则时错意
+      .replace(/:(\w+)/g, (_: string, paramName: string) => {
+        paramNames.push(paramName); // 收集 path 中的动态属性名，并对对应位置添加匹配组
+        return '([^\\/]+)';
+      });
+
+  // TODO: 这里关于 * 的匹配逻辑没看太懂，向 paramNames 添加一个 '*' 属性是为什么？
+  if (path.endsWith('*')) {
+    paramNames.push('*');
+    regexpSource +=
+      path === '*' || path === '/*'
+        ? '(.*)$' // Already matched the initial /, just match the rest
+        : '(?:\\/(.+)|\\/*)$'; // Don't include the / in params["*"]
+  } else {
+    regexpSource += end
+      ? '\\/*$' // When matching to the end, ignore trailing slashes
+      : // Otherwise, match a word boundary or a proceeding /. The word boundary restricts
+        // parent routes to matching only their own words and nothing more, e.g. parent
+        // route "/home" should not match "/home2".
+        '(?:\\b|\\/|$)';
+  }
+
+  // 通过 path 源字符串生成对应的正则表达式对象
+  // 例如，parent/:name/:id 会得到这样的正则对象（正则的字符串表现形式）：
+  // /^\/parent\/([^\/]+)\/([^\/]+)\/*$/i
+  //
+  // ^\/parent\/ 表示以 /parent 开头
+  // ([^\/]+) 是一个匹配组，用来匹配第一个动态属性值
+  // \/ 表示一个 '/'
+  // ([^\/]+) 是另一个匹配组，用来匹配第二个动态属性值
+  // \/*$ 表示所有结尾部分
+  let matcher = new RegExp(regexpSource, caseSensitive ? undefined : 'i');
+
+  return [matcher, paramNames];
+}

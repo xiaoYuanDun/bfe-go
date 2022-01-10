@@ -46,17 +46,14 @@ const ele = (
   <BrowserRouter>
     <Routes>
       <Route path="/" element={<App />} />
-      <Route path="expenses" element={<Expenses />} />
+      {/* <Route path="expenses" element={<Expenses />} />
       <Route path="invoices" element={<Invoices />} />
       <Route path="parent" element={<Parent />}>
         <Route index element={<div>parent - son - default</div>} />
         <Route path="s1" element={<div>parent - son - 1</div>} />
-      </Route>
-      {/* <Route path="expenses/asd" element={<div>parent /asd</div>} /> */}
+      </Route> */}
+      <Route path="parent/:name/:id/*" element={<div> U know it</div>} />
     </Routes>
-    {/* <Routes>
-      <Route path="/expenses" element={<div>另一个 Routes</div>} />
-    </Routes> */}
   </BrowserRouter>
 );
 

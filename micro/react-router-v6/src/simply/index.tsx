@@ -14,7 +14,8 @@ export default function App() {
       >
         <Link to="/invoices">Invoices</Link> |{' '}
         <Link to="/expenses">Expenses</Link> |{' '}
-        <Link to="/parent/s1">Parent</Link>
+        {/* <Link to="/parent/s1">Parent</Link> */}
+        <Link to="/parent/danny/123">Parent</Link>
       </nav>
     </div>
   );
