@@ -72,9 +72,6 @@ const routes = [
  *     ...maybe another meta      // 当出现 Route 嵌套时，一个 branch 会存在多个 mete 配置
  *   }]
  * }
- *
- *
- *
  */
 const branches = [
   {
@@ -166,7 +163,7 @@ for (let i = 0; matches == null && i < branches.length; ++i) {
 return matches;
 ```
 
-- 来看看 `matchRouteBranch` 方法，他主要是从 `branch` 中拿出 `routesMeta` 信息，然后对每一层 Route 配置进行匹配（通过遍历 routesMeta 数组，非嵌套的 Route，它的 routesMeta 是长度为 1 的数组），我们可以把需要被验证匹配的 pathname 分成 **已完成匹配的** 和 **等待进行匹配的** 两部分看待，这里拿 '/parent/son1' 来距离，当进行某些操作后，地址栏的 pathname 部分变化为 `'/parent/son1'`，这时，`'/parent/son1'` 全部属于 **等待进行匹配的** 的部分，在 `matchRoute` 中进行判断时，主要就是使用的就是 `meta.relativePath` 来构建正则，并使用这个正则匹配 `remainingPathname` 来验证匹配情况的，每遍历完一层且匹配正确，就更新 `matchedPathname`，表示这部分属于 **已完成匹配的** 部分，在遍历下一层时会从基准 pathname 中截掉 **已完成匹配的** 的部分，得到这次匹配真正需要的的 `remainingPathname`，可以看下面这张表找找规律。中间任何一层不匹配都会导致当前 `branch` 匹配失败，否则就更新 `matchedParams（路径中的动态存值属性，如 '/:id' 等）` ，最后遍历完所有 meta，返回最终的 `matches`
+- 来看看 `matchRouteBranch` 方法，他主要是从 `branch` 中拿出 `routesMeta` 信息，然后对每一层 Route 配置进行匹配（通过遍历 routesMeta 数组，非嵌套的 Route，它的 routesMeta 是长度为 1 的数组），我们可以把需要被验证匹配的 pathname 分成 **已完成匹配的** 和 **等待进行匹配的** 两部分看待，这里拿 '/parent/son1' 来举例，当进行某些操作后，地址栏的 pathname 部分变化为 `'/parent/son1'`，这时，`'/parent/son1'` 全部属于 **等待进行匹配的** 的部分，在 `matchRoute` 中进行判断时，主要就是使用的就是 `meta.relativePath` 来构建正则，并使用这个正则匹配 `remainingPathname` 来验证匹配情况的，每遍历完一层且匹配正确，就更新 `matchedPathname`，表示这部分属于 **已完成匹配的** 部分，在遍历下一层时会从基准 pathname 中截掉 **已完成匹配的** 的部分，得到这次匹配真正需要的的 `remainingPathname`，可以看下面这张表找找规律。中间任何一层不匹配都会导致当前 `branch` 匹配失败，否则就更新 `matchedParams（路径中的动态存值属性，如 '/:id' 等）` ，最后遍历完所有 meta，返回最终的 `matches`
 
 |                       | meta_0                      | meta_1           |
 | --------------------- | --------------------------- | ---------------- |

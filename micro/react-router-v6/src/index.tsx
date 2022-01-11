@@ -58,11 +58,11 @@ const ele = (
     </Routes> */}
     <Routes>
       <Route path="/" element={<App />} />
-      <Route path="parent" element={<Parent />}>
-        <Route path="son1" element={<Son1 />} />
+      <Route path="expenses" element={<Expenses />} />
+      <Route path="parent/:name" element={<Parent />}>
+        <Route path="son1/:id" element={<Son1 />} />
         <Route path="son2" element={<Son2 />} />
       </Route>
-      <Route path="expenses" element={<Expenses />} />
     </Routes>
   </BrowserRouter>
 );
