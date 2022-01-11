@@ -181,14 +181,14 @@ return matches;
 ```js
 function matchRouteBranch(branch, pathname) {
   let { routesMeta } = branch;
-  let matchedParams = {};
+  let matchedParams = {}; // 路径匹配过程中产生的动态值，如 '/parent/:id/:name' 中的 id 和 name
   let matchedPathname = '/';
   let matches = [];
 
   for (let i = 0; i < routesMeta.length; ++i) {
     let meta = routesMeta[i];
     let end = i === routesMeta.length - 1;
-    let remainingPathname =
+    let remainingPathname = // 截掉 '已完成匹配的' 的部分
       matchedPathname === '/'
         ? pathname
         : pathname.slice(matchedPathname.length) || '/';
@@ -200,7 +200,9 @@ function matchRouteBranch(branch, pathname) {
       },
       remainingPathname
     );
-    if (!match) return null;
+    if (!match) return null; // 任何一层不匹配，就退出
+
+    // 更新它，因为每层都可能存在动态值，且最终
     Object.assign(matchedParams, match.params);
     let route = meta.route;
     matches.push({
@@ -210,6 +212,7 @@ function matchRouteBranch(branch, pathname) {
       route,
     });
 
+    // 更新 '已完成匹配的' 的部分
     if (match.pathnameBase !== '/') {
       matchedPathname = joinPaths([matchedPathname, match.pathnameBase]);
     }
