@@ -16,11 +16,11 @@ import ReactDOM from 'react-dom';
 
 // Counter 计数用例, ./counter
 
-import Counter from './counter/Counter';
-import CountHook from './counter/CountHook';
+// import Counter from './counter/Counter';
+// import CountHook from './counter/CountHook';
 
-const root = document.getElementById('root');
-ReactDOM.render(<CountHook />, root);
+// const root = document.getElementById('root');
+// ReactDOM.render(<CountHook />, root);
 
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
@@ -102,6 +102,15 @@ ReactDOM.render(<CountHook />, root);
 // import FcTest from './fc_test';
 
 // ReactDOM.render(<FcTest />, document.getElementById('root'));
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+
+// 测试同一个 context 的嵌套使用是的行为
+
+import ele from './context';
+
+ReactDOM.render(ele, document.getElementById('root'));
 
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
