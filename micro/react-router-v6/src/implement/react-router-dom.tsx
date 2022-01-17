@@ -3,18 +3,28 @@ import { createBrowserHistory } from 'history';
 import { Router } from './react-router';
 
 import type { ReactNode } from 'react';
-import type { BrowserHistory } from 'history';
+import type { BrowserHistory, Action } from './history';
 
-// 在浏览器环境下的一个 <Router> 容器，提供最简洁的 URLS
+////////////////////////////////////////////////////////////////////////////////
+// BROWSER-ROUTER
+//
+// 在浏览器环境下的一个 <Router> 容器
+////////////////////////////////////////////////////////////////////////////////
+
 type BrowserRouterProps = {
   children?: ReactNode;
-  // basename?: string;
-  window?: Window;
+  /**
+   * 可以理解为一个全局的路由根路径，如果设置了 basename，会在所有匹配路径前加上 basename 前缀
+   * browser-router 默认为 '/'
+   */
+  basename?: string;
+  // window?: Window;
 };
 export function BrowserRouter({ children, basename }: BrowserRouterProps) {
   const historyRef = useRef<BrowserHistory>();
   if (historyRef.current == null) {
-    historyRef.current = createBrowserHistory({ window });
+    // TODO: 实现 history 后使用自己的 createBrowserHistory
+    historyRef.current = createBrowserHistory({ window }) as BrowserHistory;
   }
 
   const history = historyRef.current!;
@@ -23,16 +33,20 @@ export function BrowserRouter({ children, basename }: BrowserRouterProps) {
     location: history.location,
   });
 
-  // TODO ???
+  /**
+   * TODO:
+   * 暂时只需要知道，history 会在地址栏变化是触发回调，更新 action 和 location
+   * 而 history.listen 的回调是一个销毁当前监听函数的函数
+   */
   useLayoutEffect(() => history.listen(setState), [history]);
 
   return (
     <Router
       children={children}
-      // basename={basename}
-      // location={state.location}
-      // navigationType={state.action}
-      // navigator={history}
+      navigationType={state.action}
+      location={state.location}
+      basename={basename}
+      navigator={history}
     />
   );
 }

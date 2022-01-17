@@ -13,7 +13,11 @@ export default function App() {
         }}
       >
         <Link to="/invoices">Invoices</Link> |{' '}
-        <Link to="/expenses">Expenses</Link>
+        <Link to="/expenses">Expenses</Link> |{' '}
+        {/* <Link to="/parent/s1">Parent</Link> */}
+        <Link to="/parent/danny/123">Parent</Link>|{' '}
+        <Link to="/parent/danny/son1/444">son1</Link> |{' '}
+        <Link to="/parent/son2">son2</Link> |{' '}
       </nav>
     </div>
   );

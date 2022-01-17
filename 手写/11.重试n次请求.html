@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <script>
+    {
+      function fetch(...args) {
+        console.log('exec once, ', args[2]);
+        if (args[2] === 1) return Promise.resolve({ code: 200, msg: '成功了' });
+        return Promise.reject({
+          code: -2,
+          errmsg: '抱歉，重试了三次后还是失败',
+        });
+      }
+
+      const request = (opts) => {
+        // 这里是你的实现，可以用fetch，或者axios
+        let { url, data, retry } = opts;
+        return new Promise((resolve, reject) => {
+          function _call(fn) {
+            fn.then(resolve, (err) => {
+              if (retry) {
+                _call(fetch(url, { data }, retry--));
+              } else {
+                reject(err);
+              }
+            });
+          }
+          _call(fetch(url, { data }, retry--));
+        });
+      };
+
+      //结果调用如下
+
+      request({
+        url: '/a/b/c',
+        data: {
+          a: 1,
+        },
+        retry: 3,
+      })
+        .then((res) => {
+          console.log(res);
+        })
+        .catch((err) => {
+          if (err.code == -2) {
+            console.log(err.errmsg); // 打印出来的errmsg是： 抱歉，重试了三次后还是失败
+            return;
+          }
+        });
+    }
+  </script>
+  <body>
+    <p>基于 promise 的网络请求方法，若失败，重复请求n次</p>
+  </body>
+</html>

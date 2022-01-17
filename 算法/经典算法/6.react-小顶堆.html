@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      {
+        /**
+         * 向末尾添加，但这时不能保证小顶堆特性（父节点值小于两个子节点），需要按需上浮
+         * 所以，一个完整的 push 操作包含两个步骤：
+         *   1. 添加
+         *   2. 上浮
+         */
+        function push(heap, node) {
+          const index = heap.length;
+          heap.push(node);
+          siftUp(heap, node, index);
+        }
+
+        /**
+         * 在做 siftUp 之前，heap 本身是保持小顶堆特性的，所以上浮到父节点比当前节点小就可以停止了
+         * 这里说一下为什么 >>> 可以找到父节点
+         * 因为 react 在小顶堆的实现中，底层载体是数组，使用数组表示堆的时候：
+         *   node 的左节点的下标时 nodeIndex * 2
+         *   node 的右节点的下标时 nodeIndex * 2 + 1
+         *   又因为无符号右移，相当于 n / 2，所以可以通过当前节点的下标找到正确的父节点下标
+         */
+        function siftUp(heap, node, i) {
+          let index = i;
+          while (index > 0) {
+            const parentIndex = (index - 1) >>> 1;
+            const parent = heap[parentIndex];
+            if (compare(parent, node) > 0) {
+              // 父节点更大，交换位置
+              heap[parentIndex] = node;
+              heap[index] = parent;
+              index = parentIndex;
+            } else {
+              // 父节点比当前 node 小，到此结束
+              return;
+            }
+          }
+        }
+
+        /**
+         * 弹出堆顶节点（当前堆的最小值）
+         * 弹出后，会造成堆顶丢失，解决办法是把末尾节点补充到堆顶
+         * 但是末尾节点是比较大的，所以这时无法保证小顶堆的特性，那么就需要把当前堆顶这个较大的节点下沉
+         * 所以，一个完整的 pop 操作包含三个步骤：
+         *   1. 弹出堆顶元素
+         *   2. 用末尾节点补充到堆顶
+         *   3. 对堆顶元素做一次下沉
+         */
+        function pop(heap) {
+          if (heap.length === 0) return null;
+          const first = heap[0];
+          const last = heap.pop();
+          // 如果当前堆大小为 1，直接返回，否则走 "替换下沉" 的逻辑
+          if (last !== first) {
+            heap[0] = last;
+            siftDown(heap, last, 0);
+          }
+          return first;
+        }
+
+        function siftDown(heap, node, i) {
+          let index = i;
+          const length = heap.length;
+          const halfLength = length >>> 1;
+          /**
+           * 注意这里的判断条件，为什么是 index < halfLength，而不是 index < length 呢？
+           * 其实，这是完全二叉树的特点，如果一个完全二叉树的节点数为 n，那么非叶子结点就有 n/2 个
+           * 这里的判断意思是，只有当前节点未非叶子结点，才继续执行
+           * 以为如果当前节点是叶子结点，那么它已经没有下沉的机会了，它已经处于最底层了
+           */
+          while (index < halfLength) {
+            const leftIndex = (index + 1) * 2 - 1;
+            const left = heap[leftIndex];
+            const rightIndex = leftIndex + 1;
+            const right = heap[rightIndex];
+            // If the left or right node is smaller, swap with the smaller of those.
+            if (compare(left, node) < 0) {
+              // 与左右节点中，更小的那个交换位置
+              if (rightIndex < length && compare(right, left) < 0) {
+                heap[index] = right;
+                heap[rightIndex] = node;
+                index = rightIndex;
+              } else {
+                heap[index] = left;
+                heap[leftIndex] = node;
+                index = leftIndex;
+              }
+            } else if (rightIndex < length && compare(right, node) < 0) {
+              // 只有右节点更小，直接与右节点交换位置
+              heap[index] = right;
+              heap[rightIndex] = node;
+              index = rightIndex;
+            } else {
+              // 子节点都比当前节点大，什么都不做，直接退出
+              return;
+            }
+          }
+        }
+
+        /**
+         * react 自己实现的 compare 还要对比两个节点的一些属性，这里我们只简单对比两个节点值
+         */
+        function compare(a, b) {
+          return a - b;
+        }
+
+        // ---- 用例 ----
+        const minHeap = [];
+        push(minHeap, 7);
+        push(minHeap, 6);
+        push(minHeap, 5);
+        push(minHeap, 4);
+        push(minHeap, 3);
+        push(minHeap, 2);
+        push(minHeap, 1);
+
+        const n1 = pop(minHeap); // 1
+
+        console.log(n1);
+
+        // export function peek(heap: Heap): Node | null {
+        //   return heap.length === 0 ? null : heap[0];
+        // }
+      }
+    </script>
+  </head>
+  <body>
+    <div>react 小顶堆</div>
+    <p>react 异步优先级队列通过内部实现的 min heap 实现</p>
+    <p>源码位置: react/packages/scheduler/src/SchedulerMinHeap.js</p>
+  </body>
+</html>
