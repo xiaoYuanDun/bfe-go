@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <script>
+    {
+      const cacheFetch = (service) => {
+        let promise;
+        let status;
+
+        return (...props) => {
+          if (status === 'pendding') {
+            return promise;
+          }
+
+          status = 'pendding';
+          promise = service(...props).then(
+            (res) => {
+              status = 'fullfilled';
+              return res;
+            },
+            (err) => {
+              status = 'rejected';
+              throw err;
+            }
+          );
+
+          return promise;
+        };
+      };
+
+      const getUser = (id) => {
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            console.log('---');
+            // resolve({ id, name: 'xiaoMing', age: 15 });
+            reject('no');
+          }, 2000);
+        });
+      };
+
+      const cacheGetUser = cacheFetch(getUser);
+
+      cacheGetUser(1).then(
+        (res) => {
+          console.log(res);
+        },
+        (err) => {
+          console.error(err);
+        }
+      );
+      cacheGetUser(2).then(
+        (res) => {
+          console.log(res);
+        },
+        (err) => {
+          console.error(err);
+        }
+      );
+      cacheGetUser(3).then(
+        (res) => {
+          console.log(res);
+        },
+        (err) => {
+          console.error(err);
+        }
+      );
+    }
+  </script>
+  <body>
+    <p>
+      需求：当一个自带请求的组件出现在多个不同的组件中，可能会造成同一个请求，被请求多次
+    </p>
+    <p>
+      比如有个 service 方法用来请求用户信息，A,B,C 三个组件都会调用这个
+      service，如何做到之请求一次呢
+    </p>
+    <p>
+      1. 有一个方法是，把获取 service 的逻辑提升到 A, B, C
+      的最近公共组件上，但是这样无疑是增加了公共组件的无用逻辑，且和 A, B, C
+      耦合在一起
+    </p>
+    <p>
+      2. 另一个方式是，在 promise 层面进行缓存，当 A 发出请求后，返回值前，B,C
+      的请求都被丢弃，等待 A 的返回值；返回值后，直接使用 A 的返回值
+    </p>
+  </body>
+</html>
