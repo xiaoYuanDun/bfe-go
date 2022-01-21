@@ -108,9 +108,28 @@ import ReactDOM from 'react-dom';
 
 // 测试同一个 context 的嵌套使用是的行为
 
-import ele from './context';
+// import ele from './context';
 
-ReactDOM.render(ele, document.getElementById('root'));
+// ReactDOM.render(ele, document.getElementById('root'));
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+
+// 测试 context 变更时的更新流程
+
+// import ContextChange from './context/ContextChange';
+
+// ReactDOM.render(<ContextChange />, document.getElementById('root'));
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+
+// 测试 concurrent 模式，F12 查看 task 分布情况
+
+// import App from './concurrent';
+
+// ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+// ReactDOM.render(<App />, document.getElementById('root'));
 
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------

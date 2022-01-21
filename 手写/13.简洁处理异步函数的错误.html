@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <script>
+    {
+      const asyncFuncA = (id) =>
+        new Promise((resolve, reject) => {
+          console.log('A start ...');
+          setTimeout(() => {
+            resolve('A' + id);
+          }, 1000);
+        });
+      const asyncFuncB = (id) =>
+        new Promise((resolve, reject) => {
+          console.log('B start ...');
+          setTimeout(() => {
+            resolve('B' + id);
+          }, 1000);
+        });
+      const asyncFuncC = (id) =>
+        new Promise((resolve, reject) => {
+          console.log('C start ...');
+          setTimeout(() => {
+            resolve('C' + id);
+          }, 1000);
+        });
+      const asyncFunc1 = (id) =>
+        new Promise((resolve, reject) => {
+          console.log('1 start ...');
+          setTimeout(() => {
+            resolve('1' + id);
+          }, 1000);
+        });
+      const asyncFunc2 = (id) =>
+        new Promise((resolve, reject) => {
+          console.log('2 start ...');
+          setTimeout(() => {
+            reject('2' + id);
+          }, 1000);
+        });
+
+      // 1. 单独包装每一个异步方法
+      // const asyncTask = async () => {
+      //   const now = Date.now();
+      //   console.log('start ...');
+
+      //   let res;
+      //   try {
+      //     res = await asyncFuncA();
+      //   } catch (error) {
+      //     throw new Error(error);
+      //   }
+      //   try {
+      //     res = await asyncFuncB(res);
+      //   } catch (error) {
+      //     throw new Error(error);
+      //   }
+      //   try {
+      //     res = await asyncFuncC(res);
+      //   } catch (error) {
+      //     throw new Error(error);
+      //   }
+      //   console.log('end: ', Date.now() - now);
+      // };
+
+      // 2. 统一包装 try/catch
+      // const asyncTask = async () => {
+      //   const now = Date.now();
+      //   console.log('start ...');
+      //   try {
+      //     const asyncFuncARes = await asyncFuncA();
+      //     const asyncFuncBRes = await asyncFuncB(asyncFuncARes);
+      //     const asyncFuncCRes = await asyncFuncC(asyncFuncBRes);
+      //   } catch (error) {
+      //     throw new Error(error);
+      //   }
+      //   console.log('end: ', Date.now() - now);
+      // };
+
+      // 3. 使用自定义包装
+      const composeAsync = (asyncFunc, beginArgs) => {
+        const dispatch = (i, args) => {
+          const curFunc = asyncFunc[i];
+          const nextFunc =
+            i + 1 < asyncFunc.length ? dispatch.bind(null, i + 1) : (s) => s;
+
+          return Promise.resolve(curFunc(args)).then(nextFunc);
+        };
+
+        const firstCall = Array.isArray(asyncFunc)
+          ? dispatch.bind(null, 0)
+          : asyncFunc;
+
+        try {
+          return Promise.resolve(firstCall(beginArgs)).then(
+            (res) => [undefined, res],
+            (err) => [err, undefined]
+          );
+        } catch (err) {
+          return [err, undefined];
+        }
+      };
+
+      const asyncTask = async () => {
+        const [err1, res1] = await composeAsync(asyncFunc1);
+        if (err1) {
+          console.log('err1', err1);
+          /*...*/
+        }
+
+        const [err2, res2] = await composeAsync(asyncFunc2);
+        if (err2) {
+          console.log('err2', err2);
+
+          /*...*/
+        }
+
+        const [err, res] = await composeAsync(
+          [asyncFuncA, asyncFuncB, asyncFuncC],
+          '1'
+        );
+        if (err) return;
+        console.log('got', res);
+        //
+      };
+
+      asyncTask();
+    }
+  </script>
+  <body>
+    <p>
+      async/await 函数中， try/catch
+      属于固定模板写法，这里封装一个简洁的错误捕获的方式 composeAsync
+    </p>
+    <p>可以单独处理异步，也可以组合链式依赖的异步调用</p>
+  </body>
+</html>

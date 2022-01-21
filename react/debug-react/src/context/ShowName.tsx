@@ -4,7 +4,7 @@ import { MyContext } from './index';
 const ShowName = () => {
   const context = useContext(MyContext);
 
-  return `${context.name}, `;
+  return <p>{context.name}</p>;
 };
 
 export default ShowName;

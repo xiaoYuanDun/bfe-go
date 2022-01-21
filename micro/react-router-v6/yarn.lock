@@ -1035,14 +1035,14 @@
   resolved "http://192.168.0.202:4873/@types%2fprop-types/-/prop-types-15.7.4.tgz#fcf7205c25dff795ee79af1e30da2c9790808f11"
   integrity sha1-/PcgXCXf95Xuea8eMNosl5CAjxE=
 
-"@types/react-dom@^17.0.5":
+"@types/react-dom@^17.0.11":
   version "17.0.11"
   resolved "http://192.168.0.202:4873/@types%2freact-dom/-/react-dom-17.0.11.tgz#e1eadc3c5e86bdb5f7684e00274ae228e7bcc466"
   integrity sha1-4ercPF6GvbX3aE4AJ0riKOe8xGY=
   dependencies:
     "@types/react" "*"
 
-"@types/react@*", "@types/react@^17.0.8":
+"@types/react@*", "@types/react@^17.0.38":
   version "17.0.38"
   resolved "http://192.168.0.202:4873/@types%2freact/-/react-17.0.38.tgz#f24249fefd89357d5fa71f739a686b8d7c7202bd"
   integrity sha512-SI92X1IA+FMnP3qM5m4QReluXzhcmovhZnLNm3pyeQlooi02qI7sLiepEYqT678uNiyc25XfCqxREFpy3W7YhQ==
@@ -3592,14 +3592,14 @@ raw-body@2.4.2:
     iconv-lite "0.4.24"
     unpipe "1.0.0"
 
-react-dom@^17.0.2:
-  version "17.0.2"
-  resolved "http://192.168.0.202:4873/react-dom/-/react-dom-17.0.2.tgz#ecffb6845e3ad8dbfcdc498f0d0a939736502c23"
-  integrity sha1-7P+2hF462Nv83EmPDQqTlzZQLCM=
+react-dom@^0.0.0-experimental-fe905f152-20220107:
+  version "0.0.0-experimental-fe905f152-20220107"
+  resolved "http://192.168.0.202:4873/react-dom/-/react-dom-0.0.0-experimental-fe905f152-20220107.tgz#b2067db58beb99aaa8a847af2db899dc77e26f28"
+  integrity sha512-7ctlpOR4PCgk0BMVP9auoXKibrZ5916LBCc7iow1rweO1Tshplxfc4UuvvH7CLhR3JdofB02Ai90bSxUaPMYlQ==
   dependencies:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
-    scheduler "^0.20.2"
+    scheduler "0.0.0-experimental-fe905f152-20220107"
 
 react-router-dom@^6.2.1:
   version "6.2.1"
@@ -3616,10 +3616,10 @@ react-router@6.2.1, react-router@^6.2.1:
   dependencies:
     history "^5.2.0"
 
-react@^17.0.2:
-  version "17.0.2"
-  resolved "http://192.168.0.202:4873/react/-/react-17.0.2.tgz#d0b5cc516d29eb3eee383f75b62864cfb6800037"
-  integrity sha1-0LXMUW0p6z7uOD91tihkz7aAADc=
+react@^0.0.0-experimental-fe905f152-20220107:
+  version "0.0.0-experimental-fe905f152-20220107"
+  resolved "http://192.168.0.202:4873/react/-/react-0.0.0-experimental-fe905f152-20220107.tgz#3a75896bf11708622490d16d90c592e13e6ee23a"
+  integrity sha512-Y8dZB3N3sD731FdX6QM9bjxv0usoq4NutazugbeEQUx3WHDbUJLGihUCPXPWs/PmSmCWNZ2Is6GI6pYHxhC+5Q==
   dependencies:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
@@ -3848,10 +3848,10 @@ safe-regex@^1.1.0:
   resolved "http://192.168.0.202:4873/safer-buffer/-/safer-buffer-2.1.2.tgz#44fa161b0187b9549dd84bb91802f9bd8385cd6a"
   integrity sha1-RPoWGwGHuVSd2Eu5GAL5vYOFzWo=
 
-scheduler@^0.20.2:
-  version "0.20.2"
-  resolved "http://192.168.0.202:4873/scheduler/-/scheduler-0.20.2.tgz#4baee39436e34aa93b4874bddcbf0fe8b8b50e91"
-  integrity sha1-S67jlDbjSqk7SHS93L8P6Li1DpE=
+scheduler@0.0.0-experimental-fe905f152-20220107:
+  version "0.0.0-experimental-fe905f152-20220107"
+  resolved "http://192.168.0.202:4873/scheduler/-/scheduler-0.0.0-experimental-fe905f152-20220107.tgz#65db1c3c615c8998c55343d6af2042bd376a5dc4"
+  integrity sha512-Dm0GlTvz7tlwUwTBdmYGTghBYPhl3fGKnny2UqkOGsnliR+uq5o6BtyMnM42xCZ6PInkojsKhZLSCgfF4oxpkw==
   dependencies:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
