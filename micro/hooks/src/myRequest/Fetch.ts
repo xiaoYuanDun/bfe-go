@@ -11,6 +11,7 @@ class Fetch<TData, TParams extends any[]> {
 		public options: Options<TData, TParams>,
 		public subscribe: Subscribe,
 		// public initState: Partial<FetchState<TData, TParams>> = {},
+		// t1
 	) {
 
 	}
