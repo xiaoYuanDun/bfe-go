@@ -1,15 +1,18 @@
-import type Fetch from "./Fetch";
+import type Fetch from './Fetch';
 
 /**
  * 远程请求函数的类型定义，useRequest 的基础范型就是又他推导出来的
  */
-export type Service<TData, TParams extends any[]> = (...args: TParams) => Promise<TData>;
-
+export type Service<TData, TParams extends any[]> = (
+  ...args: TParams
+) => Promise<TData>;
 
 export type Options<TData, TParams extends any[]> = {
   // 是否立即执行异步，默认为 false，表示立即执行
   manual?: boolean;
-}
+  // 默认参数
+  defaultParams?: TParams;
+};
 
 /**
  * plugin 的约定类型
@@ -23,8 +26,10 @@ export type Pulgin<TData, TParams extends any[]> = {
   ): PluginReturn<TData, TParams>;
 
   // 用于 useAutoRunPlugin 的首个初始化状态
-  onInit?: (options: Options<TData, TParams>) => Partial<FetchState<TData, TParams>>;
-}
+  onInit?: (
+    options: Options<TData, TParams>
+  ) => Partial<FetchState<TData, TParams>>;
+};
 
 /**
  * 返回一些生命周期钩子，每个插件有可能会在不同的请求周期造成影响，这样设计，
@@ -32,15 +37,12 @@ export type Pulgin<TData, TParams extends any[]> = {
  * 插件本身不用关心如何调用钩子，只需要按照约定提供合法规范的周期函数
  * 生命周期钩子的调用，由 fetch 实体来处理，
  */
-export type PluginReturn<TData, TParams extends any[]> = {
-
-
-}
-
+export type PluginReturn<TData, TParams extends any[]> = {};
 
 // ------------- fetch something -------------
 export type Subscribe = () => void;
 
+// fetch 单例实体存储的 state
 export interface FetchState<TData, TParams extends any[]> {
   loading: boolean;
   params?: TParams;
