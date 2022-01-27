@@ -1,5 +1,11 @@
 import { useMemoizedFn } from 'ahooks';
-import { useCreation, useLatest, useUpdate, useMount } from '../myHooks';
+import {
+  useCreation,
+  useLatest,
+  useUpdate,
+  useMount,
+  useUnmount,
+} from '../myHooks';
 import Fetch from './Fetch';
 
 import type { Service, Options, Pulgin } from './types';
@@ -47,14 +53,17 @@ function useRequestImplement<TData, TParams extends any[]>(
     }
   });
 
-  // console.log('impl');
-  // console.log('loading: ', fetchInstance.state.loading);
-  // console.log('data: ', fetchInstance.state.data);
+  // 有可能组件卸载时，异步请求还没有响应，这是需要取消请求
+  useUnmount(() => {
+    fetchInstance.cancel();
+  });
 
   return {
     loading: fetchInstance.state.loading,
     data: fetchInstance.state.data,
     run: fetchInstance.run.bind(fetchInstance),
+    runAsync: fetchInstance.runAsync.bind(fetchInstance),
+    cancel: fetchInstance.cancel.bind(fetchInstance),
     // go: useMemoizedFn(fetchInstance.go.bind(fetchInstance)),
   };
 }

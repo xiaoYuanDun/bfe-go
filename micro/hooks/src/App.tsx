@@ -5,16 +5,17 @@ import SonSync from './SonSync';
 
 function App() {
   const [id, setId] = useState<string>('');
+
   useEffect(() => {
     setTimeout(() => {
       setId('1');
-    }, 1500);
+    }, 1000);
   }, []);
 
   return (
     <div>
-      {/* <Son id={id} /> */}
-      <SonSync />
+      <Son id={id} />
+      {/* <SonSync /> */}
       {/* <SonTest /> */}
     </div>
   );

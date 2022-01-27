@@ -7,12 +7,14 @@ import useRequest from './myRequest/useRequest';
 
 function Son({ id }: { id: string }) {
   console.log('[render once]-------------------------');
-  const { loading, data, run } = useRequest(getDetailById, { manual: true });
+  const { loading, data, runAsync } = useRequest(getDetailById, {
+    manual: true,
+  });
 
   console.log('id: ', id, ', loading: ', loading, ', data: ', data);
 
   useUpdateEffect(() => {
-    run(id);
+    runAsync(id);
   }, [id]);
 
   return <div>{!id ? 'no id' : loading ? 'loading...' : data}</div>;

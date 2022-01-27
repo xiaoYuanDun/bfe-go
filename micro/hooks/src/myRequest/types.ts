@@ -37,7 +37,9 @@ export type Pulgin<TData, TParams extends any[]> = {
  * 插件本身不用关心如何调用钩子，只需要按照约定提供合法规范的周期函数
  * 生命周期钩子的调用，由 fetch 实体来处理，
  */
-export type PluginReturn<TData, TParams extends any[]> = {};
+export type PluginReturn<TData, TParams extends any[]> = {
+  onCancel?: () => void;
+};
 
 // ------------- fetch something -------------
 export type Subscribe = () => void;
