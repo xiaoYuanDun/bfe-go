@@ -1,14 +1,14 @@
-import { useMemoizedFn } from 'ahooks';
 import {
   useCreation,
   useLatest,
   useUpdate,
   useMount,
   useUnmount,
+  useMemoizedFn,
 } from '../myHooks';
 import Fetch from './Fetch';
 
-import type { Service, Options, Pulgin } from './types';
+import type { Service, Options, Pulgin, Result } from './types';
 
 /**
  * 最终要返回数据实体，比如：loading，data 等
@@ -61,11 +61,12 @@ function useRequestImplement<TData, TParams extends any[]>(
   return {
     loading: fetchInstance.state.loading,
     data: fetchInstance.state.data,
-    run: fetchInstance.run.bind(fetchInstance),
-    runAsync: fetchInstance.runAsync.bind(fetchInstance),
-    cancel: fetchInstance.cancel.bind(fetchInstance),
-    // go: useMemoizedFn(fetchInstance.go.bind(fetchInstance)),
-  };
+    run: useMemoizedFn((fetchInstance.run as Function).bind(fetchInstance)),
+    runAsync: useMemoizedFn(
+      (fetchInstance.runAsync as Function).bind(fetchInstance)
+    ),
+    cancel: useMemoizedFn(fetchInstance.cancel.bind(fetchInstance)),
+  } as Result<TData, TParams>;
 }
 
 export default useRequestImplement;

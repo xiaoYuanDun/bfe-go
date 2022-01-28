@@ -51,3 +51,17 @@ export interface FetchState<TData, TParams extends any[]> {
   data?: TData;
   error?: Error;
 }
+
+// 实体最终对外暴露的属性和接口
+export interface Result<TData, TParams extends any[]> {
+  loading: boolean;
+  data?: TData;
+  run: Fetch<TData, TParams>['run'];
+  runAsync: Fetch<TData, TParams>['runAsync'];
+  cancel: Fetch<TData, TParams>['cancel'];
+  // error?: Error;
+  // params: TParams | [];
+  // refresh: Fetch<TData, TParams>['refresh'];
+  // refreshAsync: Fetch<TData, TParams>['refreshAsync'];
+  // mutate: Fetch<TData, TParams>['mutate'];
+}
