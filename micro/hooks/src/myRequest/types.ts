@@ -12,6 +12,18 @@ export type Options<TData, TParams extends any[]> = {
   manual?: boolean;
   // 默认参数
   defaultParams?: TParams;
+
+  // loading delay
+  loadingDelay?: number;
+
+  // polling
+  pollingInterval?: number;
+
+  // debounce，和 lodash.debounce 含义相同
+  debounceWait?: number;
+  debounceLeading?: boolean;
+  debounceTrailing?: boolean;
+  debounceMaxWait?: number;
 };
 
 /**
@@ -26,9 +38,9 @@ export type Pulgin<TData, TParams extends any[]> = {
   ): PluginReturn<TData, TParams>;
 
   // 用于 useAutoRunPlugin 的首个初始化状态
-  onInit?: (
-    options: Options<TData, TParams>
-  ) => Partial<FetchState<TData, TParams>>;
+  // onInit?: (
+  //   options: Options<TData, TParams>
+  // ) => Partial<FetchState<TData, TParams>>;
 };
 
 /**
@@ -38,6 +50,9 @@ export type Pulgin<TData, TParams extends any[]> = {
  * 生命周期钩子的调用，由 fetch 实体来处理，
  */
 export type PluginReturn<TData, TParams extends any[]> = {
+  onBefore?: () => void;
+  onFinally?: () => void;
+
   onCancel?: () => void;
 };
 
@@ -59,9 +74,9 @@ export interface Result<TData, TParams extends any[]> {
   run: Fetch<TData, TParams>['run'];
   runAsync: Fetch<TData, TParams>['runAsync'];
   cancel: Fetch<TData, TParams>['cancel'];
+  refresh: Fetch<TData, TParams>['refresh'];
+  refreshAsync: Fetch<TData, TParams>['refreshAsync'];
   // error?: Error;
   // params: TParams | [];
-  // refresh: Fetch<TData, TParams>['refresh'];
-  // refreshAsync: Fetch<TData, TParams>['refreshAsync'];
   // mutate: Fetch<TData, TParams>['mutate'];
 }

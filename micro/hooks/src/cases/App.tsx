@@ -1,7 +1,7 @@
 import React, { useEffect, useState, memo } from 'react';
 import Son from './Son';
 import SonSync from './SonSync';
-// import SonTest from './SonTest';
+import DebounceCase from './debounce';
 
 function App() {
   const [id, setId] = useState<string>('');
@@ -14,9 +14,9 @@ function App() {
 
   return (
     <div>
-      <Son id={id} />
+      {/* <Son id={id} /> */}
       {/* <SonSync /> */}
-      {/* <SonTest /> */}
+      <DebounceCase />
     </div>
   );
 }

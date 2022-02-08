@@ -28,8 +28,8 @@ function useMemoizedFn<T extends (...args: any[]) => any>(fn: T) {
   fnRef.current = fn;
 
   // 这里只是给一个假的调用外壳，只初始化一次，实际调用的是每次最新的 fn
-  const memoizedFn = useRef(() => {
-    fnRef.current?.();
+  const memoizedFn = useRef((...args: any[]) => {
+    fnRef.current?.(...args);
   });
 
   return memoizedFn.current;

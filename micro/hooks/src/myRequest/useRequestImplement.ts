@@ -10,9 +10,6 @@ import Fetch from './Fetch';
 
 import type { Service, Options, Pulgin, Result } from './types';
 
-/**
- * 最终要返回数据实体，比如：loading，data 等
- */
 function useRequestImplement<TData, TParams extends any[]>(
   service: Service<TData, TParams>,
   options: Options<TData, TParams> = {},
@@ -30,11 +27,12 @@ function useRequestImplement<TData, TParams extends any[]>(
   const update = useUpdate();
 
   // 这是维护请求整个生命周期的数据变化的核心对象
+  // 最终要返回数据实体，比如：loading，data 等都包含在其中
   const fetchInstance = useCreation(() => {
     // TODO, 这个 initState 不太明了
-    const initState = plugins
-      .map((p) => p?.onInit?.(fetchOptions))
-      .filter(Boolean);
+    // const initState = plugins
+    //   .map((p) => p?.onInit?.(fetchOptions))
+    //   .filter(Boolean);
 
     return new Fetch<TData, TParams>(
       serviceRef,
@@ -43,6 +41,13 @@ function useRequestImplement<TData, TParams extends any[]>(
       //   { ...initState }
     );
   }, []);
+
+  // 执行并注册插件
+  // 最终会得到一个包含各生命周期勾着的对象的数组，如：
+  // [{ onBefore: ..., onCancel: ... }, { onRequest: ... }, { onFinally: ... }, ...]
+  fetchInstance.pluginImpls = plugins.map((plugin) =>
+    plugin(fetchInstance, fetchOptions)
+  );
 
   // 如果自动执行，这里就是执行时机，全生命周期只执行这一次，这里只负责调用一次，其他由 fetchInstance 实例接管
   useMount(() => {
@@ -53,11 +58,12 @@ function useRequestImplement<TData, TParams extends any[]>(
     }
   });
 
-  // 有可能组件卸载时，异步请求还没有响应，这是需要取消请求
+  // 有可能组件卸载时，异步请求还没有响应，这时需要取消请求
   useUnmount(() => {
     fetchInstance.cancel();
   });
 
+  console.log('got');
   return {
     loading: fetchInstance.state.loading,
     data: fetchInstance.state.data,
@@ -66,7 +72,9 @@ function useRequestImplement<TData, TParams extends any[]>(
       (fetchInstance.runAsync as Function).bind(fetchInstance)
     ),
     cancel: useMemoizedFn(fetchInstance.cancel.bind(fetchInstance)),
-  } as Result<TData, TParams>;
+    refresh: useMemoizedFn(fetchInstance.refresh.bind(fetchInstance)),
+    refreshAsync: useMemoizedFn(fetchInstance.refreshAsync.bind(fetchInstance)),
+  } as unknown as Result<TData, TParams>;
 }
 
 export default useRequestImplement;

@@ -20,6 +20,7 @@
     "@babel/preset-typescript": "^7.13.0",
     "@types/react": "^17.0.8",
     "@types/react-dom": "^17.0.5",
+    "@types/lodash": "^4.14.178",
     "babel-loader": "^8.2.2",
     "html-webpack-plugin": "^5.3.1",
     "typescript": "^4.3.2",
@@ -32,6 +33,7 @@
     "core-js": "^3.13.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "ahooks": "^3.1.8"
+    "ahooks": "^3.1.8",
+    "lodash": "^4.17.21"
   }
 }

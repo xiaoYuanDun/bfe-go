@@ -62,13 +62,16 @@ class Fetch<TData, TParams extends any[]> {
       // @ts-ignore
       .map((plugin) => plugin[event]?.(...rest))
       .filter(Boolean);
-    return { ...res };
+
+    // 学到了
+    // 通过 Object.assign 可以把 [{ name: 'xiaoMing' }, { age: 15 }] 快速转换成 { name: 'xiaoMing', age: 15 } 这种形式
+    return Object.assign({}, ...res);
   }
 
   // 不过这里不是真正的取消请求（如 AbortController，https://developer.mozilla.org/zh-CN/docs/Web/API/AbortController）
   // 而是仅仅把加载状态置为 false
   cancel() {
-    // 请求过程标量，一个序号唯一的表示一次请求过程
+    // 请求过程标量，一个序号唯一的标识一次请求过程
     this.count += 1;
     this.setState({ loading: false });
 
@@ -76,23 +79,42 @@ class Fetch<TData, TParams extends any[]> {
     this.runPluginHandler('onCancel');
   }
 
-  async runAsync(...params: TParams): Promise<TData> {
+  async runAsync(...params: TParams) {
     // 每次新的请求都对应一个递增的新的 ID
     this.count++;
     const currentCount = this.count;
 
-    // TODO，自动执行时，这里会造成一次多余的 re-render
-    this.setState({ loading: true });
+    // 有些插件可能需要干预执行流程，比如 useLoadingDelay 会延迟判断是否变更 loading 状态，所以会影响下面的 setState -> loading: true 的过程
+    const { ...pluginsReturnState } = this.runPluginHandler('onBefore', params);
 
-    const res = await this.serviceRef.current(...params);
+    // TODO，自动执行时，这里会造成一次多余的 re-render，大多数情况下，这是一次无效渲染
+    this.setState({ loading: true, ...pluginsReturnState });
 
-    // TODO，这里返回一个用不决议的 promise，我是这样理解的
-    // 因为如果用户使用了 runAsync.then 那么即使组件卸载了，再返回值到达时，依然可以执行 then 中定义的回调
-    // 这有可能不是用户期待的，
-    // 但是如果用不决议，那么 then 回调永远不会被释放，不知道会不会有什么性能问题
-    if (currentCount !== this.count) return new Promise(() => {});
+    try {
+      console.log(`start: [${currentCount}]`);
+      const res = await this.serviceRef.current(...params);
 
-    this.setState({ data: res, loading: false });
+      // TODO，这里返回一个用不决议的 promise，我是这样理解的
+      // 因为如果用户使用了 runAsync.then 那么即使组件卸载了，再返回值到达时，依然可以执行 then 中定义的回调
+      // 这有可能不是用户期待的，
+      // 但是如果用不决议，那么 then 回调永远不会被释放，不知道会不会有什么性能问题
+      if (currentCount !== this.count) {
+        console.log(`丢弃: [${currentCount}]`);
+        return new Promise(() => {});
+      }
+
+      console.log(`完成: [${currentCount}]`);
+      this.setState({ data: res, loading: false });
+
+      // 这里不需要额外的判断
+      // if (this.count === currentCount) {
+      // TODO, 参数待完善
+      this.runPluginHandler('onFinally');
+      // }
+      return res;
+    } catch (e) {
+      // TODO ...
+    }
   }
 
   // TODO，这里其实调用的也是异步方式，和官方文档的描述有出入
@@ -106,6 +128,16 @@ class Fetch<TData, TParams extends any[]> {
     // });
 
     this.runAsync(...params);
+  }
+
+  refresh() {
+    // @ts-ignore
+    this.run(...(this.state.params || []));
+  }
+
+  refreshAsync() {
+    // @ts-ignore
+    return this.runAsync(...(this.state.params || []));
   }
 }
 

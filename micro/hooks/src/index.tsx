@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import { useMemoizedFn } from 'ahooks';
 
-import App from './App';
+import App from './cases/App';
 
 const ele = <App />;
 

@@ -1,11 +1,9 @@
-import { } from "react";
+import {} from 'react';
 
-import { Pulgin } from "../types";
-
+import type { Pulgin } from '../types';
 
 const useAutoRunPlugin: Pulgin<any, any> = () => {
+  return {};
+};
 
-	return {}
-}
-
-export default useAutoRunPlugin
+export default useAutoRunPlugin;
