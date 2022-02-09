@@ -112,7 +112,8 @@ function flushWork() {
 function workLoop() {}
 
 function shouldYield() {
-  const currentTime = getCurrentTime();
+  // TODO, 不完善
+  return getCurrentTime() >= deadline;
 }
 
 export { scheduleCallback, shouldYield };
