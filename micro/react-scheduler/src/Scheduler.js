@@ -132,7 +132,7 @@ function scheduleCallback(priorityLevel, callback) {
     priorityLevel,
     startTime,
     expirationTime,
-    // expirationTime 是 taskQueue 入队列是判断优先级的重要属性，expirationTime 越小优先级越高，在队列中越靠前
+    // expirationTime 是 taskQueue 入队列是判断优先级的重要属性，expirationTime 越小优先级越高，在队列中越靠前，越早执行
     sortIndex: expirationTime,
   };
 
@@ -221,13 +221,26 @@ function flushWork() {
   }
 }
 
+/**
+ *
+ * 工作循环，执行的逻辑依据
+ *
+ * - 如果 taskQueue 不为空，取出任务
+ *   - 如果时间片用尽，且当前任务还没有过期，退出
+ *   - 如果时间片用尽，但当前任务已经过去，继续执行（过期的任务一定要执行，不能等到下一次循环，即使可能造成浏览器卡顿）
+ *
+ */
 function workLoop() {
-  // 取出任务
+  const currentTime = getCurrentTime();
   currentTask = peek(taskQueue);
 
   while (currentTask !== null) {
-    // 循环过程中也要判断是否过期
-    if (shouldYield()) {
+    // 循环过程中也要判断是否过期，同时要兼顾任务过期时间
+    // console.log('currentTask.expirationTime', currentTask.expirationTime);
+    // console.log('currentTime', currentTime);
+
+    if (currentTask.expirationTime > currentTime && shouldYield()) {
+      // if (shouldYield()) {
       break;
     }
 
@@ -235,7 +248,12 @@ function workLoop() {
 
     if (typeof callback === 'function') {
       currentTask.callback = null;
-      const continuationCallback = callback();
+
+      // 可以把当前任务是否超时的信息，传递给回调，比如：react 的 performConcurrentWorkOnRoot 方法
+      // 定义：function performConcurrentWorkOnRoot(root, didTimeout) { ... }
+      // 使用：scheduleCallback(schedulerPriorityLevel, performConcurrentWorkOnRoot.bind(null, root));
+      const didTimeout = currentTask.expirationTime <= currentTime;
+      const continuationCallback = callback(didTimeout);
 
       // 由于我们回调形式是，如果没执行完，就返回它自身，所以这里表示该回调下次还要继续执行
       if (typeof continuationCallback === 'function') {

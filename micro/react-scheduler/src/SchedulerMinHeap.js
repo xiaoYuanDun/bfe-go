@@ -72,6 +72,7 @@ function siftDown(heap, node, i) {
 }
 
 // 排队机制，首先比较过期时间（sortIndex），然后比较 id
+// id 是个递增序列， sortIndex 相同时，id 越小的任务，优先级越高
 function compare(a, b) {
   const diff = a.sortIndex - b.sortIndex;
   return diff !== 0 ? diff : a.id - b.id;
