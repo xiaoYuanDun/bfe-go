@@ -1,1 +1,23 @@
 # `react-scheduler` 简单实现和学习
+
+### 顺序的任务队列的实现
+
+todo
+
+### 带优先级的，可中断的任务队列
+
+- 为了达到这个目的，引入小顶堆实现的优先队列 **`SchedulerMinHeap`**
+
+- 定义优先级概念，如何比较不同任务的优先级 **`SchedulerPriorities`**
+
+- 在生成每个任务时(scheduleCallback)，根据不同的 `priorityLevel`，设置不同的过期时间 `expirationTime`
+
+  比如，在 `flushSyncCallbacks` 中，调用 `scheduleCallback` 就是 最高优先级`ImmediatePriority`，而在 `commitRootImpl` 中就是 `NormalPriority`
+
+- 每个任务都会包含：创建时的时间(`startTime`)，过期时间(`expirationTime`)，任务优先级(`priorityLevel`) 等信息
+
+# 几个问题
+
+- 为什么不使用 `setTimeout`, `requestIdleCallback`, `requestAnimationFrame`
+
+-
