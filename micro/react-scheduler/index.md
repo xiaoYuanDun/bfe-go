@@ -20,4 +20,6 @@ todo
 
 - 为什么不使用 `setTimeout`, `requestIdleCallback`, `requestAnimationFrame`
 
--
+- react 何时使用 scheduleCallback 调度了一个延时任务，目前没有在源码中找到哪里有用到
+
+- taskQueue 不为空时，如果这是有延时任务加入，这是逻辑并不会起一个 requestHostTimeout，那 timerQueue 又是什么时候被调度的呢
