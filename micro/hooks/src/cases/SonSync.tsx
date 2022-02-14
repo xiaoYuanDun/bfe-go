@@ -17,7 +17,7 @@ function SonSync() {
     setTimeout(() => {
       setPolling(2000);
       console.log('polling 改变造成的 render');
-    }, 2000);
+    }, 5000);
   }, []);
 
   console.log('[render once]-------------------------');

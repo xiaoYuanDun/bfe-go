@@ -15,8 +15,8 @@ function App() {
   return (
     <div>
       {/* <Son id={id} /> */}
-      {/* <SonSync /> */}
-      <DebounceCase />
+      <SonSync />
+      {/* <DebounceCase /> */}
     </div>
   );
 }

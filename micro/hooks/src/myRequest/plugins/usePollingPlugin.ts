@@ -24,17 +24,17 @@ const usePollingPlugin: Pulgin<any, any> = (
   // 如果只是改变轮询时间（不为 0），不作其他操作
   // 会等待上一次轮询时间到期，并在下一次轮巡时，更新轮询时间
   useUpdateEffect(() => {
-    if (!pollingInterval) {
-      stopPolling();
-    }
-    // TODO，立即停止当前轮询，并应用最新时间开启一次轮询
-    // stopPolling();
-    // if (pollingInterval) {
-    //   console.log('立即以最新时间开始新的轮询');
-    //   timerRef.current = window.setTimeout(() => {
-    //     fetchInstance.refresh();
-    //   }, pollingInterval);
+    // if (!pollingInterval) {
+    //   stopPolling();
     // }
+    // TODO，立即停止当前轮询，并应用最新时间开启一次轮询
+    stopPolling();
+    if (pollingInterval) {
+      console.log('立即以最新时间开始新的轮询');
+      timerRef.current = window.setTimeout(() => {
+        fetchInstance.refresh();
+      }, pollingInterval);
+    }
   }, [pollingInterval]);
 
   // 对于提前返回的逻辑，注意需要放在正确的位置，不要影响 hooks 顺序
