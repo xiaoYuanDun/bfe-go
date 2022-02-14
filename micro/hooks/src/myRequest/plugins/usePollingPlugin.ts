@@ -29,7 +29,7 @@ const usePollingPlugin: Pulgin<any, any> = (
     // }
     // TODO，立即停止当前轮询，并应用最新时间开启一次轮询
     stopPolling();
-    if (pollingInterval) {
+    if (pollingInterval && timerRef.current !== -1) {
       console.log('立即以最新时间开始新的轮询');
       timerRef.current = window.setTimeout(() => {
         fetchInstance.refresh();
@@ -51,7 +51,10 @@ const usePollingPlugin: Pulgin<any, any> = (
         fetchInstance.refresh();
       }, pollingInterval);
     },
-    onCancel: stopPolling,
+    onCancel: () => {
+      stopPolling()
+      timerRef.current = -1
+    },
   };
 };
 

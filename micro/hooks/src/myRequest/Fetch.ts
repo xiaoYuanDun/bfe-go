@@ -91,7 +91,7 @@ class Fetch<TData, TParams extends any[]> {
     this.setState({ loading: true, ...pluginsReturnState });
 
     try {
-      console.log(`start: [${currentCount}]`);
+      // console.log(`start: [${currentCount}]`);
       const res = await this.serviceRef.current(...params);
 
       // TODO，这里返回一个用不决议的 promise，我是这样理解的
@@ -99,11 +99,11 @@ class Fetch<TData, TParams extends any[]> {
       // 这有可能不是用户期待的，
       // 但是如果用不决议，那么 then 回调永远不会被释放，不知道会不会有什么性能问题
       if (currentCount !== this.count) {
-        console.log(`丢弃: [${currentCount}]`);
-        return new Promise(() => {});
+        // console.log(`丢弃: [${currentCount}]`);
+        return new Promise(() => { });
       }
 
-      console.log(`完成: [${currentCount}]`);
+      // console.log(`完成: [${currentCount}]`);
       this.setState({ data: res, loading: false });
 
       // 这里不需要额外的判断

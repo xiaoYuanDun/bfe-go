@@ -2,6 +2,7 @@ import React, { useEffect, useState, memo } from 'react';
 import Son from './Son';
 import SonSync from './SonSync';
 import DebounceCase from './debounce';
+import Polling from "./Polling";
 
 function App() {
   const [id, setId] = useState<string>('');
@@ -15,8 +16,9 @@ function App() {
   return (
     <div>
       {/* <Son id={id} /> */}
-      <SonSync />
+      {/* <SonSync /> */}
       {/* <DebounceCase /> */}
+      {<Polling />}
     </div>
   );
 }
