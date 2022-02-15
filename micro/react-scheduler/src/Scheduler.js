@@ -258,10 +258,13 @@ function performWorkUntilDeadline() {
     // 每一轮宏任务得到执行时，都会设置一个此任务的到期时间
     deadline = currentTime + yieldInterval;
 
+    // TODO, 这个意义在哪里，已经用 const 声明了，又不能改变，
+    // const hasTimeRemaining = true
+
     // 当前任务是否还需要在下一轮调度中继续执行（没有执行完）
     let hasMoreWork = true;
     try {
-      hasMoreWork = scheduledHostCallback();
+      hasMoreWork = scheduledHostCallback(/* hasTimeRemaining */ currentTime);
     } finally {
       if (hasMoreWork) {
         // 工作还没有完成，继续生成一个调度宏任务
@@ -301,6 +304,7 @@ function handleTimeout(currentTime) {
   }
 }
 
+// 这个方法调用频率比较高，在 workLoop 前后都会检查，每完成一个时间片也会检查，需要及时把 timerQueue 中准备好的 task 转移到 taskQueue
 function advanceTimers(currentTime) {
   // 从 timerQueue 中循环取出合法任务，直到约到第一个不合法的 task 或者 timerQueue 为空，则退出当前工作循环
   let timer = peek(timerQueue);
@@ -328,7 +332,7 @@ function advanceTimers(currentTime) {
 /**
  * 开始启动工作循环，在分到的时间片内循环的执行任务
  */
-function flushWork() {
+function flushWork(initialTime) {
   // 调度任务被执行，之后如果有新的任务，就可以正常发起新的调度任务了
   isHostCallbackScheduled = false;
 
@@ -344,7 +348,7 @@ function flushWork() {
   isPerformingWork = true;
 
   try {
-    return workLoop();
+    return workLoop(initialTime);
   } finally {
     isPerformingWork = false;
   }
@@ -359,8 +363,11 @@ function flushWork() {
  *   - 如果时间片用尽，但当前任务已经过去，继续执行（过期的任务一定要执行，不能等到下一次循环，即使可能造成浏览器卡顿）
  *
  */
-function workLoop() {
-  const currentTime = getCurrentTime();
+function workLoop(initialTime) {
+  const currentTime = initialTime;
+
+  advanceTimers(currentTime);
+
   currentTask = peek(taskQueue);
 
   while (currentTask !== null) {
@@ -385,8 +392,11 @@ function workLoop() {
         currentTask.callback = continuationCallback;
       } else {
         // 当前任务已经执行完了，从队列中弹出
-        if (currentTask === peek(taskQueue)) pop(taskQueue);
+        if (currentTask === peek(taskQueue)) {
+          pop(taskQueue);
+        }
       }
+      advanceTimers(currentTime);
     } else {
       pop(taskQueue);
     }
@@ -395,7 +405,7 @@ function workLoop() {
     currentTask = peek(taskQueue);
   }
 
-  // 表示这次退出是因为时间不足，在还没有全部执行完毕之前，不会考虑优先级更低的 timerQueue
+  // 表示这次退出是因为时间不足
   if (currentTask !== null) {
     return true;
   } else {

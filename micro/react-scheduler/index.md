@@ -18,8 +18,18 @@ todo
 
 # 几个问题
 
-- 为什么不使用 `setTimeout`, `requestIdleCallback`, `requestAnimationFrame`
+- 为什么不使用 `setTimeout`, `requestIdleCallback`, `requestAnimationFrame` [issue](https://github.com/facebook/react/issues/13206)
 
 - react 何时使用 scheduleCallback 调度了一个延时任务，目前没有在源码中找到哪里有用到
 
 - taskQueue 不为空时，如果这是有延时任务加入，这是逻辑并不会起一个 requestHostTimeout，那 timerQueue 又是什么时候被调度的呢
+
+- shouldYield, didTimeout
+
+- `unstable_runWithPriority` 何时使用
+
+---
+
+# 技术揭秘-问题点
+
+- `taskQueue` 应该是 **已经被调度的任务**，而非已经过期的任务

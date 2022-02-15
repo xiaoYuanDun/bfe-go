@@ -3,6 +3,10 @@ import { useUpdateEffect } from '../../myHooks';
 
 import type { Pulgin } from '../types';
 
+// TODO, 待实现
+import isDocumentVisible from 'ahooks/lib/useRequest/src/utils/isDocumentVisible';
+import subscribeReVisible from 'ahooks/lib/useRequest/src/utils/subscribeReVisible';
+
 /**
  * 轮询功能扩展，在每次请求结束时，启动一个新的定时请求
  *
@@ -10,27 +14,28 @@ import type { Pulgin } from '../types';
  */
 const usePollingPlugin: Pulgin<any, any> = (
   fetchInstance,
-  { pollingInterval }
+  { pollingInterval, pollingWhenHidden = true }
 ) => {
-  const timerRef = useRef<number>();
+  const timerRef = useRef<number>(-1);
+  const unsubscribeRef = useRef<() => void>();
 
   const stopPolling = () => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
     }
+    unsubscribeRef.current?.();
   };
 
   // 若 pollingInterval 为 0，表示需要取消轮询，直接停止定时器即可
   // 如果只是改变轮询时间（不为 0），不作其他操作
   // 会等待上一次轮询时间到期，并在下一次轮巡时，更新轮询时间
   useUpdateEffect(() => {
-    // if (!pollingInterval) {
-    //   stopPolling();
-    // }
-    // TODO，立即停止当前轮询，并应用最新时间开启一次轮询
-    stopPolling();
-    if (pollingInterval && timerRef.current !== -1) {
-      console.log('立即以最新时间开始新的轮询');
+    clearTimeout(timerRef.current);
+    if (
+      pollingInterval &&
+      timerRef.current !== -1 &&
+      (pollingWhenHidden || isDocumentVisible())
+    ) {
       timerRef.current = window.setTimeout(() => {
         fetchInstance.refresh();
       }, pollingInterval);
@@ -47,13 +52,21 @@ const usePollingPlugin: Pulgin<any, any> = (
     // 开始一次新的请求前清除上一次的定时器
     onBefore: stopPolling,
     onFinally: () => {
+      // TODO, 待实现
+      if (!pollingWhenHidden && !isDocumentVisible()) {
+        unsubscribeRef.current = subscribeReVisible(() => {
+          fetchInstance.refresh();
+        });
+        return;
+      }
+
       timerRef.current = window.setTimeout(() => {
         fetchInstance.refresh();
       }, pollingInterval);
     },
     onCancel: () => {
-      stopPolling()
-      timerRef.current = -1
+      stopPolling();
+      // timerRef.current = -1;
     },
   };
 };

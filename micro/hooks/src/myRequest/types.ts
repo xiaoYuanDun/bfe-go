@@ -18,6 +18,7 @@ export type Options<TData, TParams extends any[]> = {
 
   // polling
   pollingInterval?: number;
+  pollingWhenHidden?: boolean;
 
   // debounce，和 lodash.debounce 含义相同
   debounceWait?: number;
