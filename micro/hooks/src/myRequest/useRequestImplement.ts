@@ -63,7 +63,6 @@ function useRequestImplement<TData, TParams extends any[]>(
     fetchInstance.cancel();
   });
 
-  console.log('got');
   return {
     loading: fetchInstance.state.loading,
     data: fetchInstance.state.data,

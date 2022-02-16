@@ -16,26 +16,31 @@ const usePollingPlugin: Pulgin<any, any> = (
   fetchInstance,
   { pollingInterval, pollingWhenHidden = true }
 ) => {
-  const timerRef = useRef<number>(-1);
+  const timerRef = useRef<number>();
   const unsubscribeRef = useRef<() => void>();
 
   const stopPolling = () => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
+      console.log(`${timerRef.current} 被清除了`);
+      timerRef.current = undefined;
     }
     unsubscribeRef.current?.();
   };
 
-  // 若 pollingInterval 为 0，表示需要取消轮询，直接停止定时器即可
-  // 如果只是改变轮询时间（不为 0），不作其他操作
-  // 会等待上一次轮询时间到期，并在下一次轮巡时，更新轮询时间
+  const cancelPolling = () => {
+    console.log('cancelPolling');
+    stopPolling();
+    timerRef.current = -1;
+  };
+
   useUpdateEffect(() => {
-    clearTimeout(timerRef.current);
-    if (
-      pollingInterval &&
-      timerRef.current !== -1 &&
-      (pollingWhenHidden || isDocumentVisible())
-    ) {
+    if (timerRef.current === -1) return;
+
+    if (!pollingInterval) {
+      stopPolling();
+    } else if (isDocumentVisible() || pollingWhenHidden) {
+      clearTimeout(timerRef.current);
       timerRef.current = window.setTimeout(() => {
         fetchInstance.refresh();
       }, pollingInterval);
@@ -45,12 +50,18 @@ const usePollingPlugin: Pulgin<any, any> = (
   // 对于提前返回的逻辑，注意需要放在正确的位置，不要影响 hooks 顺序
   // 不配置 polling 设置项，不做任何操作，直接返回
   if (!pollingInterval) {
-    return {};
+    return {
+      onCancel: cancelPolling,
+      onBefore: stopPolling,
+    };
   }
 
   return {
     // 开始一次新的请求前清除上一次的定时器
-    onBefore: stopPolling,
+    onBefore: () => {
+      console.log('onBefore');
+      stopPolling();
+    },
     onFinally: () => {
       // TODO, 待实现
       if (!pollingWhenHidden && !isDocumentVisible()) {
@@ -63,12 +74,98 @@ const usePollingPlugin: Pulgin<any, any> = (
       timerRef.current = window.setTimeout(() => {
         fetchInstance.refresh();
       }, pollingInterval);
+
+      console.log('onFinally 启动: ', timerRef.current);
+      console.log(' ');
     },
-    onCancel: () => {
-      stopPolling();
-      // timerRef.current = -1;
-    },
+    onCancel: cancelPolling,
   };
 };
 
+// --------------------------------
+
+// const usePollingPlugin: Pulgin<any, any> = (
+//   fetchInstance,
+//   { pollingInterval, pollingWhenHidden = true }
+// ) => {
+//   const timerRef = useRef<number>();
+//   const unsubscribeRef = useRef<() => void>();
+
+//   const stopPolling = () => {
+//     if (timerRef.current) {
+//       clearTimeout(timerRef.current);
+//       console.log(`${timerRef.current} 被清除了`);
+//       timerRef.current = undefined;
+//     }
+//     unsubscribeRef.current?.();
+//   };
+
+//   useUpdateEffect(() => {
+//     if (!pollingInterval) {
+//       stopPolling();
+//     } else if (timerRef.current) {
+//       // if pollingInterval is changed, restart polling
+//       clearTimeout(timerRef.current);
+//       timerRef.current = setTimeout(() => {
+//         fetchInstance.refresh();
+//       }, pollingInterval);
+//     }
+//   }, [pollingInterval]);
+
+//   // 对于提前返回的逻辑，注意需要放在正确的位置，不要影响 hooks 顺序
+//   // 不配置 polling 设置项，不做任何操作，直接返回
+//   if (!pollingInterval) {
+//     return {
+//       onBefore: stopPolling,
+//     };
+//   }
+
+//   return {
+//     // 开始一次新的请求前清除上一次的定时器
+//     onBefore: () => {
+//       console.log('onBefore');
+//       stopPolling();
+//     },
+//     onFinally: () => {
+//       // TODO, 待实现
+//       if (!pollingWhenHidden && !isDocumentVisible()) {
+//         unsubscribeRef.current = subscribeReVisible(() => {
+//           fetchInstance.refresh();
+//         });
+//         return;
+//       }
+
+//       timerRef.current = window.setTimeout(() => {
+//         fetchInstance.refresh();
+//       }, pollingInterval);
+
+//       console.log('onFinally 启动: ', timerRef.current);
+//       console.log(' ');
+//     },
+//     onCancel: () => {
+//       stopPolling();
+//     },
+//   };
+// };
+
 export default usePollingPlugin;
+
+/**
+ *
+ * 1. 0
+ * 2. cancel
+ * 3. 1000
+ * - 继续停止
+ *
+ * 1. cancel
+ * 2. 0
+ * 3. 1000
+ * - 继续停止
+ *
+ * 1. cancel
+ * 2. 0
+ * 3. run
+ * 4. 1000
+ * - 开始
+ *
+ */

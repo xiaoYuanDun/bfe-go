@@ -6,28 +6,20 @@ import { getDetailById } from './services';
 import useRequest from '../myRequest/useRequest';
 
 function Polling() {
-  const [polling, setPolling] = useState(3000);
+  const [polling, setPolling] = useState(1000);
 
   const { loading, data, cancel, runAsync } = useRequest(
     () => getDetailById('22'),
     {
       pollingInterval: polling,
-      manual: true,
+      // manual: true,
       // pollingWhenHidden: false,
     }
   );
 
-  const handleChange = () => {
-    setPolling(polling === 1000 ? 3000 : 1000);
-  };
-
   useEffect(() => {
     console.log('change to ', polling);
   }, [polling]);
-
-  useMount(() => {
-    console.log('mounted !');
-  });
 
   const handleTimer = () => {
     console.log('10s 后，pollingInterval 变为 2');
@@ -37,8 +29,7 @@ function Polling() {
     }, 10000);
   };
 
-  console.log('[render once]-------------------------');
-  console.log('loading: ', loading, ', data: ', data);
+  console.log(`[render once]---, loading: ${loading}, data: ${data}`);
 
   return (
     <div>
@@ -48,8 +39,14 @@ function Polling() {
       <div>
         <button onClick={runAsync}>run</button>
         <button onClick={cancel}>cancel</button>
-        <button onClick={handleChange}>change</button>
         <button onClick={handleTimer}>timer</button>
+        <p />
+
+        <button onClick={() => setPolling(0)}>change to 0</button>
+        <button onClick={() => setPolling(1000)}>change to 1000</button>
+        <button onClick={() => setPolling(2000)}>change to 2000</button>
+        <button onClick={() => setPolling(5000)}>change to 5000</button>
+        <button onClick={() => setPolling(10000)}>change to 10000</button>
       </div>
     </div>
   );
