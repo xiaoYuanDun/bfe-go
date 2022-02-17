@@ -51,8 +51,8 @@ const usePollingPlugin: Pulgin<any, any> = (
   // 不配置 polling 设置项，不做任何操作，直接返回
   if (!pollingInterval) {
     return {
-      onCancel: cancelPolling,
-      onBefore: stopPolling,
+      onCancel: cancelPolling, // 处理 pollingInterval 为 0 时，点击取消的问题，如果不返回，无法将状态置为 cancel
+      onBefore: stopPolling, // 处理 激活轮询时，要把 cancel 标识（-1）置为 undefined，如果不返回，状态一直是 -1，会造成误判
     };
   }
 

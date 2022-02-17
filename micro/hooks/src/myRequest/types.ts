@@ -1,3 +1,4 @@
+import type { DependencyList } from 'react';
 import type Fetch from './Fetch';
 
 /**
@@ -25,6 +26,13 @@ export type Options<TData, TParams extends any[]> = {
   debounceLeading?: boolean;
   debounceTrailing?: boolean;
   debounceMaxWait?: number;
+
+  // ready
+  ready?: boolean;
+
+  // refresh
+  refreshDeps?: DependencyList;
+  refreshDepsAction?: () => void;
 };
 
 /**
@@ -39,9 +47,9 @@ export type Pulgin<TData, TParams extends any[]> = {
   ): PluginReturn<TData, TParams>;
 
   // 用于 useAutoRunPlugin 的首个初始化状态
-  // onInit?: (
-  //   options: Options<TData, TParams>
-  // ) => Partial<FetchState<TData, TParams>>;
+  onInit?: (
+    options: Options<TData, TParams>
+  ) => Partial<FetchState<TData, TParams>>;
 };
 
 /**
