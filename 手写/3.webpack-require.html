@@ -1,55 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-  </head>
-  <script>
-    {
-      // 1. 首先根据 entry 入口文件，递归的查找所有的依赖模块，并把这些模块集中在 modules 中
-      const modules = {
-        './src/index.js'(module, exports, require) {
-          const p1 = require('./src/page_1.js');
-          const p2 = require('./src/page_2.js');
-          const sum = p1 + p2;
-          module.exports = sum;
-        },
-        './src/page_1.js'(module) {
-          module.exports = 'page_1';
-        },
-        './src/page_2.js'(module) {
-          module.exports = 'page_2';
-        },
-      };
 
-      // 2. webpack 会使用自定义 require 方法，用来处理模块导入
-      //    同时有一个全局的缓存变量，用于缓存已经处理过的模块（已经处理过的直接返回缓存）
-      const cachaModules = {};
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+</head>
+<script>
+  {
+    // 1. 首先根据 entry 入口文件，递归的查找所有的依赖模块，并把这些模块集中在 modules 中
+    const modules = {
+      './src/index.js'(module, exports, require) {
+        const p1 = require('./src/page_1.js');
+        const p2 = require('./src/page_2.js');
+        const sum = p1 + p2;
+        module.exports = sum;
+      },
+      './src/page_1.js'(module) {
+        module.exports = 'page_1';
+      },
+      './src/page_2.js'(module) {
+        module.exports = 'page_2';
+      },
+    };
 
-      function require(moduleId) {
-        const cacheModule = cachaModules[moduleId];
-        if (cacheModule !== undefined) {
-          return cacheModule.exports;
-        }
+    // 2. webpack 会使用自定义 require 方法，用来处理模块导入
+    //    同时有一个全局的缓存变量，用于缓存已经处理过的模块（已经处理过的直接返回缓存）
+    const cachaModules = {};
 
-        const module = (cachaModules[moduleId] = {
-          exports: {},
-        });
-
-        modules[moduleId](module, module.exports, require);
-
-        return module.exports;
+    function require(moduleId) {
+      const cacheModule = cachaModules[moduleId];
+      if (cacheModule !== undefined) {
+        return cacheModule.exports;
       }
 
-      // 4. 从入口文件开始执行，整个过程会被包裹在一个 自执行函数 里
-      require('./src/index.js');
+      const module = (cachaModules[moduleId] = {
+        exports: {},
+      });
 
-      console.log('modules', modules);
-      console.log('cachaModules', cachaModules);
+      modules[moduleId](module, module.exports, require);
+
+      return module.exports;
     }
-  </script>
-  <body>
-    webpack require 过程
-  </body>
+
+    // 4. 从入口文件开始执行，整个过程会被包裹在一个 自执行函数 里
+    const res = require('./src/index.js');
+
+    console.log('res', res)
+    console.log('modules', modules);
+    console.log('cachaModules', cachaModules);
+  }
+</script>
+
+<body>
+  webpack require 过程
+</body>
+
 </html>

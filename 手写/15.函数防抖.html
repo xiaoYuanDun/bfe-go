@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+</head>
+<script>
+  {
+    // 函数防抖
+    // 延时时间内，如果有新动作，则重制延时
+    const debounce = (cb, timeout) => {
+
+      let id = -1
+
+      const func = (...args) => {
+        if (id) {
+          resetTimer(...args)
+        } else {
+          cb(...args)
+        }
+      }
+
+      const resetTimer = (...args) => {
+        clearTimeout(id)
+        id = setTimeout(() => {
+          cb(...args)
+        }, timeout);
+      }
+
+      return func
+    }
+
+    // case
+    function say(x = '1') {
+      console.log('say:', x)
+    }
+
+    const debounceFunc = debounce(say, 1000)
+
+    function handleClick() {
+      say()
+    }
+
+    function handleDebounceClick() {
+      debounceFunc('dade')
+    }
+  }
+</script>
+
+<body>
+  <p>
+    实现函数防抖
+  </p>
+  <div>
+    <button onclick="handleClick()">click</button>
+    <br />
+    <br />
+    <button onclick="handleDebounceClick()">debounce click</button>
+  </div>
+</body>
+
+</html>

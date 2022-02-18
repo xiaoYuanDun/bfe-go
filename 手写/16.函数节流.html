@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+</head>
+<script>
+  {
+    // 函数节流
+    // 一个单位延时时间内，只会触发一次
+    const throttle = (cb, timeout) => {
+
+      let id
+
+      const func = (...args) => {
+        if (id) return
+
+        cb(...args)
+
+        id = setTimeout(() => {
+          id = undefined
+        }, timeout);
+      }
+
+      return func
+    }
+
+    // case
+    function say(x = '1') {
+      console.log('say:', x)
+    }
+
+    const throttleFunc = throttle(say, 1000)
+
+    function handleClick() {
+      say()
+    }
+
+    function handleThrottleClick() {
+      throttleFunc('dade')
+    }
+  }
+</script>
+
+<body>
+  <p>
+    实现函数节流
+  </p>
+  <div>
+    <button onclick="handleClick()">click</button>
+    <br />
+    <br />
+    <button onclick="handleThrottleClick()">debounce click</button>
+  </div>
+</body>
+
+</html>

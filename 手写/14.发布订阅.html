@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+</head>
+<script>
+  {
+
+    // 1. 普通实现
+
+    function EventListener() {
+      this.listeners = []
+    }
+
+    EventListener.prototype.listen = function (cb) {
+      this.listeners.push(cb)
+      return () => {
+        this.listeners = this.listeners.filter(func => func !== cb)
+      }
+    }
+
+    EventListener.prototype.call = function () {
+      this.listeners.forEach(cb => {
+        cb()
+      });
+    }
+
+    // case
+    // function say_0() {
+    //   console.log('this is 0')
+    // }
+
+    // function say_1() {
+    //   console.log('this is 1')
+    // }
+
+    // console.log('origin')
+    // const listener = new EventListener()
+    // listener.call()
+
+    // console.log('2 added')
+    // const unListen_0 = listener.listen(say_0)
+    // const unListen_1 = listener.listen(say_1)
+    // listener.call()
+
+    // console.log('1 removed')
+    // unListen_0()
+    // listener.call()
+
+    // --------------------------------------------
+
+    // 2. EventEmitter
+    class EventEmmiter {
+      constructor() {
+        this.listeners = {}
+      }
+
+      on(key, cb) {
+        if (!this.listeners[key]) {
+          this.listeners[key] = []
+        }
+        this.listeners[key].push(cb)
+
+        function unbind() {
+          this.listeners = this.listeners.filter(func => func !== cb)
+        }
+        return unbind.bind(this)
+      }
+
+      off(key, cb) {
+        const currentListeners = this.listeners[key]
+        if (!currentListeners) return
+
+        this.listeners[key] = this.listeners[key].filter(func => func !== cb)
+      }
+
+      emit() {
+        const args = [].slice.call(arguments, 0)
+        const key = args[0]
+        const rest = args.slice(1)
+        const currentListeners = this.listeners[key]
+
+        if (!currentListeners) return
+        this.listeners[key].forEach(cb => {
+          cb.apply(null, rest)
+        })
+      }
+    }
+
+    // case
+    function say_3() {
+      console.log('this is 3')
+    }
+
+    function say_x(x = 'x') {
+      console.log('this is ', x)
+    }
+
+    class MyEvent extends EventEmmiter { }
+
+    const inst = new MyEvent()
+
+    inst.on('all', say_3)
+    inst.on('all', say_x)
+
+    inst.on('3', say_3)
+
+    console.log('emit 2')
+    inst.emit('2')
+
+    console.log('emit 3')
+    inst.emit('3')
+
+    console.log('emit all')
+    inst.emit('all')
+
+
+    console.log('remove say_3 from 2')
+    inst.off('2', say_3)
+    inst.emit('all')
+
+    console.log('remove say_3 from all')
+    inst.off('all', say_3)
+    inst.emit('all')
+    // inst.emit('3')
+  }
+</script>
+
+<body>
+  <p>
+    实现发布订阅模式
+  </p>
+</body>
+
+</html>
