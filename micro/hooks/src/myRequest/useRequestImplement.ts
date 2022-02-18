@@ -29,16 +29,16 @@ function useRequestImplement<TData, TParams extends any[]>(
   // 这是维护请求整个生命周期的数据变化的核心对象
   // 最终要返回数据实体，比如：loading，data 等都包含在其中
   const fetchInstance = useCreation(() => {
-    // TODO, 这个 initState 不太明了
-    // const initState = plugins
-    //   .map((p) => p?.onInit?.(fetchOptions))
-    //   .filter(Boolean);
+    // 个人理解这是一个干预初始化参数的时机，目前只有 useAutoRunPlugin 用到了这里
+    const initState = plugins
+      .map((p) => p?.onInit?.(fetchOptions))
+      .filter(Boolean);
 
     return new Fetch<TData, TParams>(
       serviceRef,
       fetchOptions,
-      update
-      //   { ...initState }
+      update,
+      Object.assign({}, ...initState)
     );
   }, []);
 
@@ -63,7 +63,6 @@ function useRequestImplement<TData, TParams extends any[]>(
     fetchInstance.cancel();
   });
 
-  console.log('got');
   return {
     loading: fetchInstance.state.loading,
     data: fetchInstance.state.data,
