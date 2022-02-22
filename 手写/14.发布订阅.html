@@ -64,10 +64,10 @@
         }
         this.listeners[key].push(cb)
 
-        function unbind() {
-          this.listeners = this.listeners.filter(func => func !== cb)
-        }
-        return unbind.bind(this)
+        // function unbind() {
+        //   this.listeners = this.listeners.filter(func => func !== cb)
+        // }
+        // return unbind.bind(this)
       }
 
       off(key, cb) {
