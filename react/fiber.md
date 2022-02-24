@@ -20,6 +20,21 @@
 
 ##### `enqueueSetState` 会先通过当前节点的实例(如 Count 组件的实例就是 new Count())获取对应的 `fiber`
 
+### fiber 的结构
+```js
+const ifber = {
+	updateQueue: {
+		baseState: fiber.memoizedState,
+		shared: {
+			pending: update_n,
+      lanes: NoLanes,
+		},
+    firstBaseUpdate: null,
+    lastBaseUpdate: null,
+    effects: null,
+	}
+}
+```
 ---
 
 useEffect:
