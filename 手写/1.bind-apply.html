@@ -1,105 +1,107 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-  </head>
-  <script>
-    {
-      // 总结：最终结果可以使用 myBind_1, myBind_2
-      // 大部分时候可以使用 self = this 或 箭头函数 替代 bind
 
-      // 同时关于 instanceof 可以查看一下这个属性 [Symbol.hasInstance]
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+</head>
+<script>
+  {
+    // 总结：最终结果可以使用 myBind_1, myBind_2
+    // 大部分时候可以使用 self = this 或 箭头函数 替代 bind
 
-      // call, apply, bind
-      // 如何判断函数是 普通调用 () / 构造函数调用 new
-      // 通过 new 调用一个 bind 函数时, this 绑定的情况是怎样的
+    // 同时关于 instanceof 可以查看一下这个属性 [Symbol.hasInstance]
 
-      // 这个 bind 函数是最简版的, 可以绑定 this, 但是不能处理 new 调用时的绑定切换
-      Function.prototype.myBind_0 = function (bThis) {
-        // 第一个参数是 bThis, 排除
-        const args = [].slice.call(arguments, 1);
-        const fn = this;
-        return function () {
-          fn.apply(bThis, args.concat([].slice.call(arguments)));
-        };
+    // call, apply, bind
+    // 如何判断函数是 普通调用 () / 构造函数调用 new
+    // 通过 new 调用一个 bind 函数时, this 绑定的情况是怎样的
+
+    // 这个 bind 函数是最简版的, 可以绑定 this, 但是不能处理 new 调用时的绑定切换
+    Function.prototype.myBind_0 = function (bThis) {
+      // 第一个参数是 bThis, 排除
+      const args = [].slice.call(arguments, 1);
+      const fn = this;
+      return function () {
+        fn.apply(bThis, args.concat([].slice.call(arguments)));
+      };
+    };
+
+    // 把原始构造函数手动添加到 bound 的原型链上, 用这个变量来判断是否 new 调用
+    Function.prototype.myBind_1 = function (bThis) {
+      const args = [].slice.call(arguments, 1);
+      const fn = this;
+
+      // new 调用时, this 指向 new 关键字后面的构造调用函数
+      const bound = function () {
+        fn.apply(
+          this instanceof bound ? this : bThis,
+          args.concat([].slice.call(arguments))
+        );
       };
 
-      // 把原始构造函数手动添加到 bound 的原型链上, 用这个变量来判断是否 new 调用
-      Function.prototype.myBind_1 = function (bThis) {
-        const args = [].slice.call(arguments, 1);
-        const fn = this;
+      // 给 bound 函数的原型链上添加一些额外信息, 用于在下面判断: 是否是使用 new 关键字调用了 bound
+      // 借助 instanceof 判断
+      // object instanceof constructor
+      // constructor 的 prototype 是否出现在 object 的原型链上
+      bound.prototype = this.prototype;
+      // bound.prototype.constructor = this.prototype.constructor;
 
-        // new 调用时, this 指向 new 关键字后面的构造调用函数
-        const bound = function () {
-          fn.apply(
-            this instanceof bound ? this : bThis,
-            args.concat([].slice.call(arguments))
-          );
-        };
+      return bound;
+    };
 
-        // 给 bound 函数的原型链上添加一些额外信息, 用于在下面判断: 是否是使用 new 关键字调用了 bound
-        // 借助 instanceof 判断
-        // object instanceof constructor
-        // constructor 的 prototype 是否出现在 object 的原型链上
-        bound.prototype = this.prototype;
-        // bound.prototype.constructor = this.prototype.constructor;
+    // 这种写法是 mdn 上 bind 方法的 polyfill, 和上一个方法的区别是：
+    // 多了一层 fNOP 变量
+    // 判断 this 是多了一点判断
+    // TODO	暂时不知道这么做的好处是什么
+    // 还有一个问题, 都过 new 调用生成的新对象, 类型显示为 bound, 而非原始函数(这里是 Person)
+    Function.prototype.myBind_2 = function (bThis) {
+      const args = [].slice.call(arguments, 1);
+      const fn = this;
+      const fNOP = function () { };
 
-        return bound;
+      const bound = function () {
+        fn.apply(
+          this instanceof fNOP && bThis ? this : bThis,
+          args.concat([].slice.call(arguments))
+        );
       };
 
-      // 这种写法是 mdn 上 bind 方法的 polyfill, 和上一个方法的区别是：
-      // 多了一层 fNOP 变量
-      // 判断 this 是多了一点判断
-      // TODO	暂时不知道这么做的好处是什么
-      // 还有一个问题, 都过 new 调用生成的新对象, 类型显示为 bound, 而非原始函数(这里是 Person)
-      Function.prototype.myBind_2 = function (bThis) {
-        const args = [].slice.call(arguments, 1);
-        const fn = this;
-        const fNOP = function () {};
+      fNOP.prototype = this.prototype;
+      bound.prototype = new fNOP();
 
-        const bound = function () {
-          fn.apply(
-            this instanceof fNOP && bThis ? this : bThis,
-            args.concat([].slice.call(arguments))
-          );
-        };
+      return bound;
+    };
 
-        fNOP.prototype = this.prototype;
-        bound.prototype = new fNOP();
-
-        return bound;
-      };
-
-      //	1. 可以用下面的代码来测试原生 bind 和 myBind 的表现
-      function Person(name) {
-        this.name = name;
-      }
-
-      const p1 = {};
-
-      console.log('p1', p1);
-
-      Person('yyyy');
-      console.log('p1', p1);
-
-      const bound = Person.bind(p1);
-      const bound1 = Person.myBind_2(p1);
-
-      bound('xiaoMing');
-      console.log('p1', p1);
-
-      const p2 = new bound('hhh');
-      console.log('p1', p1);
-      console.log('p2', p2);
-
-      const p3 = new bound1('kk');
-      console.log('p3', p3);
+    //	1. 可以用下面的代码来测试原生 bind 和 myBind 的表现
+    function Person(name) {
+      this.name = name;
     }
-  </script>
-  <body>
-    bind apply
-  </body>
-</html>
 
+    const p1 = {};
+
+    console.log('p1', p1);
+
+    Person('yyyy');
+    console.log('p1', p1);
+
+    const bound = Person.bind(p1);
+    const bound1 = Person.myBind_2(p1);
+
+    bound('xiaoMing');
+    console.log('p1', p1);
+
+    const p2 = new bound('hhh');
+    console.log('p1', p1);
+    console.log('p2', p2);
+
+    const p3 = new bound1('kk');
+    console.log('p3', p3);
+  }
+</script>
+
+<body>
+  bind apply
+</body>
+
+</html>

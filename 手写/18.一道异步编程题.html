@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+</head>
+<script>
+  {
+
+    // 你的实现
+    // 有几个要点：
+    //   1. tasks 支持嵌套
+    //   2. tasks 是顺序执行的
+    //   3. 目前看来每个 task 必须是个函数，但不一定返回 promise
+    const createFlow = (tasks) => {
+
+      const dispatch = (_tasks, i) => {
+
+        let curTask
+        if (typeof _tasks[i] === 'function') {
+          curTask = _tasks[i]
+        } else {
+          curTask = dispatch(_tasks[i], 0)
+        }
+        return Promise.resolve(curTask()).then(() => {
+          if (i + 1 >= _tasks.length) return Promise.resolve()
+          return dispatch(_tasks, i + 1)
+        })
+      }
+
+      const queue = [...tasks]
+      queue.run = (cb) => dispatch(queue, 0).then(cb)
+
+      return queue
+    }
+
+
+    const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    const subFlow = createFlow([
+      () => delay(1000).then(() => console.log("c"))
+    ])
+
+    createFlow([
+      () => console.log("a"),
+      () => console.log("b"),
+      subFlow,
+      [
+        () => delay(1000).then(() => console.log("d")),
+        () => delay(1000).then(() => console.log("e")),
+        () => console.log("f"),
+        () => console.log("g"),
+        () => delay(1000).then(() => console.log("h")),
+      ],
+    ]).run(() => {
+      console.log("done");
+    });
+
+    // 需要按照 a,b,延迟1秒,c,延迟1秒,d,e, done 的顺序打印
+  }
+</script>
+
+<body>
+  <p>
+    蚂蚁异步编程题
+  </p>
+</body>
+
+</html>

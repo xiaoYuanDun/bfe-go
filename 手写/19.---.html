@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+</head>
+<script>
+  {
+
+    const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    const tasks = [
+      () => new Promise((resolve) => {
+        console.log('red')
+        setTimeout(resolve, 3000);
+      }),
+      () => new Promise((resolve) => {
+        console.log('yellow')
+        setTimeout(resolve, 1000);
+      }),
+      () => new Promise((resolve) => {
+        console.log('green')
+        setTimeout(resolve, 3000);
+      }),
+    ]
+    function exec(i) {
+      const task = Promise.resolve(tasks[i]()).then(() => {
+        return exec((i + 1) % 3)
+      })
+    }
+
+    exec(0)
+  }
+</script>
+
+<body>
+  <p>
+    蚂蚁异步编程题
+  </p>
+</body>
+
+</html>
