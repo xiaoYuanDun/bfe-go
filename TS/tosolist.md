@@ -1,4 +1,3 @@
-
 - Without
 
 - ROX
@@ -7,11 +6,10 @@
 
 - [T] extends [U] ? [U] extends [T]
 
-
 type Compare<A, B> =
-  (<T>() => T extends A ? 1 : 2) extends
-  (<T>() => T extends B ? 1 : 2)
-  ? true : false
+(<T>() => T extends A ? 1 : 2) extends
+(<T>() => T extends B ? 1 : 2)
+? true : false
 
 - 类型关联
 
@@ -26,3 +24,11 @@ type Compare<A, B> =
 - tsrpc
 
 - 新文件/通用代码片段 保持一致 snippet
+
+- type 与 interface
+
+### 应用问题
+
+- declare, namespace, module, 三方类型扩展, reference
+
+- 函数重载的定义
