@@ -1,79 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-  </head>
-  <script>
-    {
-      // 新增一个柯里化应用：immer 的第一个参数为函数时，是个比较隐蔽但有用的柯里化实践
 
-      // 柯里化 辅助函数
-      // 没有兼容旧规范, 直接使用最新语法
-      // 初级版, 只做了一层柯里化, 功能比较单一
-      function curry() {
-        const [fn, ...args] = arguments;
-        var newFn = function () {
-          return fn(...args, ...arguments);
-        };
-        return newFn;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+</head>
+<script>
+  {
+    // 新增一个柯里化应用：immer 的第一个参数为函数时，是个比较隐蔽但有用的柯里化实践
 
-      function add(a, b, c) {
-        return a + b + c;
-      }
-
-      // 普通用法
-      // console.log(add(1, 2, 3));
-
-      // curry 后
-      // console.log(curry(add)(1, 2, 3));
-
-      // console.log(curry(add, 1)(2, 3));
-
-      // console.log(curry(add, 1, 2)(3));
-
-      // console.log(curry(add, 1, 2, 3)());
-
-      // console.log(curry(add, 1, 2, 3, 4)());
-
-      // console.log(curry(add, 1, 2)(3, 4, 5));
-
-      // -------------------- --------------------
-
-      // 进阶版
-      // 只要得到全部所需的参数, 就返回结果, 理论上可以无限次调用
-      // 记录已经得到的参数(闭包), 长度不足继续返回函数, 否则直接调用
-      function curryPlus() {
-        const [fn, ...args] = arguments;
-        let len = fn.length;
-
-        var newFn = function () {
-          var newArgs = [...args, ...arguments];
-          if (newArgs.length < len) {
-            return curry(newFn, ...newArgs);
-          }
-          return fn(...newArgs);
-        };
-
-        return newFn;
-      }
-
-      const addPlus = curryPlus(add);
-
-      console.log(addPlus(1, 2, 3));
-
-      console.log(addPlus(1)(2, 3));
-
-      console.log(addPlus(1, 2)(3));
-
-      console.log(addPlus()()()(1)(2)(3));
+    // 柯里化 辅助函数
+    // 没有兼容旧规范, 直接使用最新语法
+    // 初级版, 只做了一层柯里化, 功能比较单一
+    function curry() {
+      const [fn, ...args] = arguments;
+      var newFn = function () {
+        return fn(...args, ...arguments);
+      };
+      return newFn;
     }
-  </script>
-  <body>
-    柯里化
-    <br />
-    新增一个柯里化应用：immer的第一个参数为函数时，是个比较隐蔽但有用的柯里化实践
-  </body>
+
+    function add(a, b, c) {
+      return a + b + c;
+    }
+
+    // 普通用法
+    // console.log(add(1, 2, 3));
+
+    // curry 后
+    // console.log(curry(add)(1, 2, 3));
+
+    // console.log(curry(add, 1)(2, 3));
+
+    // console.log(curry(add, 1, 2)(3));
+
+    // console.log(curry(add, 1, 2, 3)());
+
+    // console.log(curry(add, 1, 2, 3, 4)());
+
+    // console.log(curry(add, 1, 2)(3, 4, 5));
+
+    // -------------------- --------------------
+
+    // 进阶版
+    // 只要得到全部所需的参数, 就返回结果, 理论上可以无限次调用
+    // 记录已经得到的参数(闭包), 长度不足继续返回函数, 否则直接调用
+    function curryPlus() {
+      const [fn, ...args] = arguments;
+      let len = fn.length;
+
+      var newFn = function () {
+        var newArgs = [...args, ...arguments];
+        if (newArgs.length < len) {
+          return curry(newFn, ...newArgs);
+        }
+        return fn(...newArgs);
+      };
+
+      return newFn;
+    }
+
+    const addPlus = curryPlus(add);
+
+    console.log(addPlus(1, 2, 3));
+
+    console.log(addPlus(1)(2, 3));
+
+    console.log(addPlus(1, 2)(3));
+
+    console.log(addPlus()()()(1)(2)(3));
+
+
+    // 另一种形式
+    // 
+    // sum(1)(2)(3)(), sum 没有具体实现，但是可以接收参数，空调用是进行累加计算
+    // 
+    // function sum() {
+    //   if (!arguments.length) return 0
+    //   const args = [...arguments]
+
+    //   const newFn = function () {
+    //     if (!arguments.length) {
+    //       return args.reduce((acc, cur) => acc + cur, 0)
+    //     } else {
+    //       args.push(...arguments)
+    //       return newFn
+    //     }
+    //   }
+    //   return newFn
+    // }
+
+    // console.log(sum(1)(2)(3)())
+  }
+</script>
+
+<body>
+  柯里化
+  <br />
+  新增一个柯里化应用：immer的第一个参数为函数时，是个比较隐蔽但有用的柯里化实践
+</body>
+
 </html>
