@@ -20,12 +20,15 @@ module.exports = {
   // tree-shaking
   entry: './src/index2.js',
 
+  // 查看 source-map
+  entry: './src/index-sourcemap.js',
+
   output: {
     filename: '[name].[chunkhash:8].js',
     path: path.resolve(__dirname, '../dist'),
     clean: true,
   },
-  devtool: 'source-map',
+  devtool: 'cheap-source-map', // source-map, eval, cheap
   resolve: {
     extensions: ['.js', '.jsx'],
   },

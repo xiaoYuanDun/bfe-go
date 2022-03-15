@@ -1,7 +1,7 @@
 import React from 'react';
 
 const App = () => {
-  const arr = new Array(20000).fill(0);
+  const arr = new Array(10000).fill(0);
 
   return (
     <div>

@@ -11,7 +11,7 @@ function CountHook() {
   // const [number, dispatch] = useReducer(reducer, 0);
   const [number, setNumber] = useState(0);
 
-  // const [name, setName] = useState('xiaoMing');
+  const [name, setName] = useState('xiaoMing');
 
   // useEffect(() => {
   //   console.log('useEffect invoke.');
@@ -24,6 +24,7 @@ function CountHook() {
     //   setNumber(number + 1);
     setNumber(number + 1);
   };
+
   return (
     <div key="count-wrap">
       {number}
@@ -31,6 +32,7 @@ function CountHook() {
         <div>123</div>
       ))} */}
       {/* <button key="button" onClick={() => dispatch('add')}> */}
+      <input value={name} onChange={(e) => setName(e.target.value)} />
       <button key="button" onClick={handleClick}>
         click me ...
       </button>
