@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>垂直居中</title>
+    <style>
+        .wrapper {
+            height: 300px;
+            border: 1px solid black;
+        }
+
+        /* case-1 */
+        /* .case-1 {
+            line-height: 300px;
+        } */
+
+        /* case-2 */
+        /* .wrapper {
+            display: flex;
+            align-items: center;
+        } */
+
+        /* case-3 */
+        /* .wrapper {
+            position: relative;
+        }
+
+        .case-3 {
+            position: absolute;
+            margin: auto;
+            top: 0;
+            bottom: 0;
+            height: 30px;
+        } */
+
+        /* case-4 */
+        .wrapper {
+            position: relative;
+        }
+
+        .case-4 {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+
+        <!-- case-1 -->
+        <!-- <span class="case-1">行内元素垂直</span> -->
+
+        <!-- case-2 -->
+        <!-- <div class="case-2">快级元素 flex 布局</div> -->
+
+        <!-- case-3 -->
+        <!-- <div class="case-3">定高垂直</div> -->
+
+        <!-- case-4 -->
+        <div class="case-4">不定宽高</div>
+
+    </div>
+</body>
+
+</html>

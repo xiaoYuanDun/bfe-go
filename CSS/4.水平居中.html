@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>水平居中</title>
+    <style>
+        .wrapper {
+            height: 300px;
+            border: 1px solid black;
+        }
+
+        /* case-1 */
+        /* .wrapper {
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        .case-1 {
+            border: 1px solid red;
+            line-height: 300px;
+        } */
+
+        /* case-2 */
+        /* .wrapper {
+            text-align: center;
+        }
+
+        .case-2 {
+            display: inline-block;
+        } */
+
+        /* case-3 */
+        /* .wrapper {
+            display: flex;
+            justify-content: center;
+        } */
+
+        /* case-4 */
+        /* .wrapper {
+            position: relative;
+        }
+
+        .case-4 {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        } */
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <!-- case-1 -->
+        <!-- 父组件 text-align -->
+        <!-- <span class="case-1">行内元素水平居中</span> -->
+
+        <!-- case-2 -->
+        <!-- 定宽直接使用 margin: 0 auto, 否则转为 inline-block -->
+        <!-- <div class="case-2">块级元素水平居中</div> -->
+
+        <!-- case-3 -->
+        <!-- <div>flex 布局</div> -->
+
+        <!-- case-4 -->
+        <!-- <div class="case-4">left, transform</div> -->
+    </div>
+</body>
+
+</html>
