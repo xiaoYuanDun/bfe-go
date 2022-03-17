@@ -11,6 +11,7 @@
         let promise;
         let status;
 
+        // 这里的缓存条件可以根据需求自定义，使用在途的 promise 时间，或者手动设定定时器
         return (...props) => {
           if (status === 'pendding') {
             return promise;
@@ -87,5 +88,7 @@
       2. 另一个方式是，在 promise 层面进行缓存，当 A 发出请求后，返回值前，B,C
       的请求都被丢弃，等待 A 的返回值；返回值后，直接使用 A 的返回值
     </p>
+    <!-- 类似的一道面试题 -->
+    <!-- https://juejin.cn/post/7072149856139083812?utm_source=gold_browser_extension -->
   </body>
 </html>
