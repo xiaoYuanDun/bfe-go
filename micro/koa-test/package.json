@@ -1,5 +1,5 @@
 {
-  "name": "koa-test",
+  "name": "simple-koa-test",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",

@@ -1,61 +1,80 @@
-const Koa = require('koa');
-// const Koa = require('./mykoa');
+const http = require('http');
+const context = require('./context');
+const request = require('./request');
+const response = require('./response');
 
-const app = new Koa();
+class Application {
+  constructor(options) {
+    options = options || {};
 
-// example-0
-//
-// app.use(async (ctx, next) => {
-//   console.log('1');
-//   await new Promise((resolve) => {
-//     setTimeout(resolve, 1500);
-//   });
-//   await next();
-//   await new Promise((resolve) => {
-//     setTimeout(resolve, 1500);
-//   });
-//   console.log('2');
-// });
+    this.context = Object.create(context);
+    this.request = Object.create(request);
+    this.response = Object.create(response);
+  }
 
-// app.use(async (ctx, next) => {
-//   await new Promise((resolve) => {
-//     setTimeout(resolve, 1500);
-//   });
-//   console.log('3');
-//   await next();
-//   await new Promise((resolve) => {
-//     setTimeout(resolve, 1500);
-//   });
-//   console.log('4');
-// });
+  listen(...args) {
+    const server = http.createServer(this.callback());
 
-// app.use(async (ctx) => {
-//   ctx.body = 'h1i';
-// });
+    console.log('listen on ', args[0]);
+    return server.listen(...args);
+  }
 
-// app.listen(3000);
+  /**
+   * 这里产生响应主函数，同时初始化中间件
+   * 初始化 核心context 对象
+   */
+  callback() {
+    const internalCallback = (req, res) => {
+      const ctx = this.createContext(req, res);
+      return this.handleRequest(ctx);
+    };
 
-// example-1
-app.use(async (ctx, next) => {
-  const start = Date.now();
-  await next();
-  const ms = Date.now() - start;
-  ctx.set('X-Response-Time', `${ms}ms`);
-});
+    return internalCallback;
+  }
 
-// logger
+  /**
+   * 创建 核心context 对象
+   * 每次请求会创建一个 context 对象，通过 Object.create 每次构建一个连接到 context 原型的对象
+   * 这里拿到的 req，res 对象是 node.httpServer 提供的请求响应对象，可以看到它们的类型，都是流的类型，一个可读流，一个可写流
+   *
+   * type RequestListener = (req: IncomingMessage, res: ServerResponse) => void;
+   *   class IncomingMessage extends stream.Readable { ... }
+   *   class ServerResponse extends OutgoingMessage { ... } extends stream.Writable { ... }
+   *
+   * 这里基本工作就是构建一个，代表本次请求过程的对象实体，并构建他们之间的联系
+   */
+  createContext(req, res) {
+    // 构建全新 context 对象，并通过原型连接公共 context；request，response 同理
+    const context = Object.create(this.context);
+    const request = (context.request = Object.create(this.request));
+    const response = (context.response = Object.create(this.response));
 
-app.use(async (ctx, next) => {
-  const start = Date.now();
-  await next();
-  const ms = Date.now() - start;
-  console.log(`${ctx.method} ${ctx.url} - ${ms}`);
-});
+    // 共享一些对象
+    context.app = request.app = response.app = this;
+    context.req = request.req = response.req = req;
+    context.res = request.res = response.res = res;
+    request.ctx = response.ctx = context;
 
-// response
+    return context;
+  }
 
-app.use(async (ctx) => {
-  ctx.body = 'Hello World';
-});
+  handleRequest(ctx) {
+    console.log('got req');
 
-app.listen(3000);
+    const response = () => this.handleResponse(ctx);
+    return Promise.resolve().then(response);
+  }
+
+  handleResponse(ctx) {
+    const res = ctx.res;
+
+    // ctx.res.writeHead(200, { 'Content-Type': 'application/json' });
+    // ctx.res.end(
+    //   JSON.stringify({
+    //     data: 'Hello World!',
+    //   })
+    // );
+  }
+}
+
+module.exports = Application;

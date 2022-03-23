@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    委托模式，把一些内部的方法或者属性委托给对外暴露的对象上
+    <br />
+    koa
+  </body>
+  <script>
+    {
+      function Delegator(proto, target) {
+        if (!(this instanceof Delegator)) return new Delegator(proto, target);
+        this.proto = proto;
+        this.target = target;
+        this.methods = [];
+      }
+
+      // 如果以 'response' 委托给 obj, 则访问 obj.xxx 时访问的实际上是 obj.response.xxx
+      Delegator.prototype.method = function (name) {
+        const proto = this.proto;
+        const target = this.target;
+
+        // 这里做的就是，给被委托对象上注册一个同名的函数调用，而实际上调用的是内部委托对象的方法
+        proto[name] = function () {
+          return this[target][name].apply(this[target], arguments);
+        };
+
+        // 返回 this，实现链式调用，注意这里的 this 是 Delegator 实例
+        return this;
+      };
+
+      /**
+       * 源码中在这里定义属性时用的是 __defineGetter__, __defineSetter__
+       * 但是这对方法属于过时废弃方法，在自己实现时，尝试使用 defineProperty 来代替
+       * 但是发现，在针对同一个属性分别进行 getter, setter 调用时，defineProperty 会调用两次
+       * 这会导致 defineProperty 的重复报错（不能重复定义属性描述）
+       *
+       * 这该如何解决呢？
+       * https://stackoverflow.com/questions/27400010/object-prototype-definegetter-and-definesetter-polyfill
+       *
+       */
+      Delegator.prototype.getter = function (name) {
+        const proto = this.proto;
+        const target = this.target;
+        const newDescriptor = Object.assign(
+          Object.getOwnPropertyDescriptor(proto, name) || {},
+          {
+            get: function () {
+              return this[target][name];
+            },
+            configurable: true,
+          }
+        );
+
+        Object.defineProperty(proto, name, newDescriptor);
+
+        return this;
+      };
+
+      Delegator.prototype.setter = function (name) {
+        const proto = this.proto;
+        const target = this.target;
+        const newDescriptor = Object.assign(
+          Object.getOwnPropertyDescriptor(proto, name) || {},
+          {
+            set: function (val) {
+              this[target][name] = val;
+            },
+            configurable: true,
+          }
+        );
+
+        Object.defineProperty(proto, name, newDescriptor);
+
+        return this;
+      };
+
+      Delegator.prototype.access = function (name) {
+        return this.getter(name).setter(name);
+      };
+
+      const internal = {
+        name: '内部变量',
+        age: 18,
+        getAge: function () {
+          return this.age;
+        },
+      };
+
+      const api = {
+        version: '1.0',
+      };
+
+      // 把内部对象委托到 api.inter 上
+      // getAge 可访问
+      // name 可访问，修改
+      // age 可访问，不可修改
+      Delegator(api, 'inter').method('getAge').access('name').getter('age');
+      api.inter = internal;
+
+      console.log(api.getAge());
+      console.log(api.name);
+      api.name = '我被改变了';
+      console.log(api.name);
+      console.log(api.age);
+      api.age = 1;
+      console.log(api.age);
+    }
+  </script>
+</html>
