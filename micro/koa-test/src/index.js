@@ -1,7 +1,14 @@
 const http = require('http');
+const fs = require('fs');
+const path = require('path');
+const Stream = require('stream');
+
+const statuses = require('statuses');
+
 const context = require('./context');
 const request = require('./request');
 const response = require('./response');
+const compose = require('./compose');
 
 class Application {
   constructor(options) {
@@ -10,13 +17,21 @@ class Application {
     this.context = Object.create(context);
     this.request = Object.create(request);
     this.response = Object.create(response);
+
+    this.middlewares = [];
   }
 
+  // 启动服务
   listen(...args) {
     const server = http.createServer(this.callback());
-
     console.log('listen on ', args[0]);
     return server.listen(...args);
+  }
+
+  use(fn) {
+    if (typeof fn !== 'function') throw new TypeError('must be a function');
+    this.middlewares.push(fn);
+    return this;
   }
 
   /**
@@ -24,9 +39,10 @@ class Application {
    * 初始化 核心context 对象
    */
   callback() {
+    const composeFn = compose(this.middlewares);
     const internalCallback = (req, res) => {
       const ctx = this.createContext(req, res);
-      return this.handleRequest(ctx);
+      return this.handleRequest(ctx, composeFn);
     };
 
     return internalCallback;
@@ -58,22 +74,49 @@ class Application {
     return context;
   }
 
-  handleRequest(ctx) {
-    console.log('got req');
-
+  handleRequest(ctx, composeFn) {
+    const res = ctx.res;
+    res.statusCode = 404; // 默认状态码初始值都是 404
     const response = () => this.handleResponse(ctx);
-    return Promise.resolve().then(response);
+    const error = (err) => ctx.onError(err);
+
+    return composeFn(ctx).then(response).catch(error);
   }
 
   handleResponse(ctx) {
     const res = ctx.res;
+    let body = ctx.body;
+    const code = ctx.status;
 
-    // ctx.res.writeHead(200, { 'Content-Type': 'application/json' });
-    // ctx.res.end(
-    //   JSON.stringify({
-    //     data: 'Hello World!',
-    //   })
-    // );
+    // 当状态码属于无响应体的响应时，走这个逻辑，比如，204，205，304 都不需要响应体
+    if (statuses.empty[code]) {
+      ctx.body = null;
+      res.end();
+      return;
+    }
+
+    if (body === null || body === undefined) {
+      // body 是被用户明确手动设置为 null 的，这时删除一些不必要的 headers
+      if (ctx.response._explicitNullBody) {
+        ctx.response.remove('Content-Type');
+        ctx.response.remove('Transfer-Encoding');
+        ctx.length = 0;
+        return res.end();
+      }
+    }
+
+    // 当响应内容为流
+    if (body instanceof Stream) return body.pipe(res);
+
+    // ...处理各种类型的响应
+    // if() {}
+
+    // 当响应内容为普通文本时，把他们转换为 json
+    body = JSON.stringify(body);
+    if (!res.headersSent) {
+      ctx.length = Buffer.byteLength(body);
+    }
+    res.end(body);
   }
 }
 
