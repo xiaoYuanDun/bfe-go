@@ -1,14 +1,19 @@
 {
-  "name": "koa-test",
+  "name": "simple-koa-test",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon src/index.js"
+    "dev": "nodemon app.js"
   },
   "dependencies": {
+    "cache-content-type": "^1.0.1",
+    "destroy": "^1.2.0",
+    "http-errors": "^2.0.0",
     "koa": "^2.13.1",
     "koa-router": "^10.0.0",
-    "nodemon": "^2.0.7"
+    "nodemon": "^2.0.7",
+    "on-finished": "^2.4.1",
+    "statuses": "^2.0.1"
   }
 }

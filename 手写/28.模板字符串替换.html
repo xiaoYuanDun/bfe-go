@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <script>
+    {
+      const render = (template, data) => {
+        return template.replace(/\{(.*?)\}/g, function (_, $1) {
+          const attr = $1.split('.')[1];
+          if (attr in data) {
+            return data[attr];
+          } else {
+            return _;
+          }
+        });
+      };
+
+      let template = '我是{data.name}，年龄{data.age}，性别{data.sex}';
+      let person = {
+        name: '布兰',
+        age: 12,
+      };
+
+      // 我是布兰，年龄12，性别{data.sex}
+      console.log(render(template, person));
+    }
+  </script>
+
+  <body>
+    <p>模板字符串替换</p>
+  </body>
+</html>
