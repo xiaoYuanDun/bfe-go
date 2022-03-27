@@ -26,7 +26,8 @@
 
       this.resolve = (value) => {
         if (this.status === PENDING) {
-          // 处理静态方法，此时没有 promise 实例
+          // 处理静态方法，此时 value 是个 promise，需要等他决议后再向后执行
+          // 所以把当前决议权放在 value 的 then 回调里
           if (value instanceof MyPromise) return value.then(this.resolve, this.reject)
 
           // 实施清空当前 promise 的 then 注册的回调

@@ -5,7 +5,7 @@ const REJECTED = 'rejected'
 
 
 function _Promise(exector) {
-    
+
     this.status = PENDING
     this.value = undefined
     this.reason = undefined
@@ -29,9 +29,9 @@ function _Promise(exector) {
 
 }
 
-_Promise.prototype.then = function(onFullfilled, onRejected) {
+_Promise.prototype.then = function (onFullfilled, onRejected) {
 
-    if(this.status === PENDING) {
+    if (this.status === PENDING) {
         this.fullfilledListeners.push(() => {
             onFullfilled(this.value)
         })
@@ -39,14 +39,14 @@ _Promise.prototype.then = function(onFullfilled, onRejected) {
             onRejected(this.reason)
         })
     }
-    if(this.status === FULLFILLED) {
+    if (this.status === FULLFILLED) {
         onFullfilled(this.value)
     }
-    if(this.status === REJECTED) {
+    if (this.status === REJECTED) {
         onRejected(this.reason)
     }
-    
-    
+
+
 }
 
 
@@ -54,9 +54,7 @@ console.log('start...')
 
 const p1 = new _Promise((resolve, reject) => {
     setTimeout(() => {
-
-    resolve(1)
-        
+        resolve(1)
     }, 1000);
 })
 
