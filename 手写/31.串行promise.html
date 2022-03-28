@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+</head>
+<script>
+  {
+    const p1 = (data) => new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(data || 1)
+      }, 1000);
+    })
+    const p2 = (data) => new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(data + 2)
+      }, 1000);
+    })
+    const p3 = (data) => new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(data + 3)
+      }, 1000);
+    })
+
+    const arr = [p1, p2, p3]
+
+    const asyncHelper = (arr, ...originArgs) => {
+
+      let index = -1
+
+      const dispatch = (...args) => {
+        index += 1
+        if (index === arr.length) return Promise.resolve(...args)
+
+        const task = arr[index]
+        return Promise.resolve(task(...args)).then(dispatch)
+      }
+
+      return Promise.resolve(dispatch(...originArgs))
+    }
+
+
+    asyncHelper(arr, 5).then(data => {
+      console.log(data)
+    })
+  }
+</script>
+
+<body>
+  <p>模板引擎</p>
+</body>
+
+</html>

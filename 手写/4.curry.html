@@ -46,20 +46,26 @@
     // 进阶版
     // 只要得到全部所需的参数, 就返回结果, 理论上可以无限次调用
     // 记录已经得到的参数(闭包), 长度不足继续返回函数, 否则直接调用
-    function curryPlus() {
-      const [fn, ...args] = arguments;
-      let len = fn.length;
+    // function curryPlus() {
+    //   const [fn, ...args] = arguments;
+    //   let len = fn.length;
 
-      var newFn = function () {
-        var newArgs = [...args, ...arguments];
-        if (newArgs.length < len) {
-          return curry(newFn, ...newArgs);
-        }
-        return fn(...newArgs);
-      };
+    //   var newFn = function () {
+    //     var newArgs = [...args, ...arguments];
+    //     if (newArgs.length < len) {
+    //       return curry(newFn, ...newArgs);
+    //     }
+    //     return fn(...newArgs);
+    //   };
 
-      return newFn;
+    //   return newFn;
+    // }
+
+    const curryPlus = (fn, ...arg) => {
+      if (arg.length < fn.length) return (...args) => curryPlus(fn, ...arg, ...args)
+      return fn(...arg)
     }
+
 
     const addPlus = curryPlus(add);
 

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>text-page</title>
+</head>
+<script>
+    {
+        const PENDDING = 'pendding'
+        const FULLFILLED = 'fullfilled'
+        const REJECTED = 'rejected'
+
+        function resolvePromise(p2, x, resolve, reject) {
+            if (x === p2) {
+                throw TypeError('循环引用')
+            } else if (x instanceof _Promise) {
+                x.then(resolve, reject)
+            } else {
+                resolve(x)
+            }
+        }
+
+        function _Promise(exector) {
+
+            this.status = PENDDING
+            this.listeners = []
+            this.errorListeners = []
+            this.value
+            this.reason
+
+            const resolve = (data) => {
+                if (this.status !== PENDDING) return
+                if (data instanceof _Promise) return data.then(resolve, reject)
+                this.value = data
+                this.status = FULLFILLED
+                this.listeners.forEach(func => {
+                    func(data)
+                })
+            }
+
+            const reject = (reason) => {
+                if (this.status !== PENDDING) return
+                this.reason = reason
+                this.status = REJECTED
+                this.errorListeners.forEach(func => {
+                    func(reason)
+                })
+            }
+
+            exector(resolve, reject)
+        }
+
+        _Promise.prototype.then = function (fullfilled, rejected) {
+            const p2 = new _Promise((resolve, reject) => {
+                // then 会真正调度一个异步任务
+                queueMicrotask(() => {
+                    if (this.status === FULLFILLED) {
+                        const x = fullfilled(this.value)
+                        resolvePromise(p2, x, resolve, reject)
+                    } else if (this.status === REJECTED) {
+                        const x = rejected(this.reason)
+                        resolvePromise(p2, x, resolve, reject)
+                    } else if (this.status === PENDDING) {
+                        this.listeners.push((data) => {
+                            // then 穿透
+                            if (typeof fullfilled !== 'function') {
+                                fullfilled = x => x
+                            }
+                            const x = fullfilled(data)
+                            resolvePromise(p2, x, resolve, reject)
+                        })
+                        this.errorListeners.push((reason) => {
+                            if (typeof rejected !== 'function') {
+                                rejected = err => { throw e }
+                            }
+                            const x = rejected(reason)
+                            resolvePromise(p2, x, resolve, reject)
+                        })
+                    }
+                })
+
+            })
+            return p2
+        }
+
+        _Promise.prototype.catch = function (errFunc) {
+            return this.then(null, errFunc)
+        }
+
+        _Promise.prototype.finally = function (func) {
+            return this.then(data => {
+                func()
+                return data
+            }, err => {
+                func()
+                throw err
+            })
+        }
+
+        _Promise.resolve = function (value) {
+            return new _Promise((resolve) => {
+                resolve(value)
+            })
+        }
+
+        _Promise.all = function (promises) {
+            return new _Promise((resolve, reject) => {
+                let count = 0
+                const res = []
+
+                promises.forEach((pro, index) => {
+                    pro.then(data => {
+                        res[index] = data
+                        count++
+                        if (count === promises.length) resolve(res)
+                    }, err => {
+                        reject(err)
+                    })
+                })
+            })
+        }
+
+        _Promise.allSettled = function (promises) {
+            return new _Promise((resolve, reject) => {
+                const res = []
+                let count = 0
+
+                promises.forEach((pro, index) => {
+                    pro.then(data => {
+                        res[index] = { status: 'fullfilled', value: data }
+                    }, err => {
+                        res[index] = { status: 'rejected', reason: err }
+                    }).finally(() => {
+                        if (++count === promises.length) resolve(res)
+                    })
+                })
+            })
+        }
+
+        // ---
+        console.log('start ...')
+
+        const p1 = new _Promise((resolve) => {
+            setTimeout(() => {
+                resolve('ok')
+            }, 1000);
+        })
+        const p2 = new _Promise((resolve) => {
+            setTimeout(() => {
+                resolve('vv')
+            }, 2000);
+        })
+        const p3 = new _Promise((resolve, reject) => {
+            setTimeout(() => {
+                // resolve('ygy')
+                reject('ooi')
+            }, 3000);
+        })
+
+        _Promise.allSettled([p1, p2, p3]).then(res => {
+            console.log('get', res)
+        }, err => {
+            console.log('err', err)
+        })
+    }
+</script>
+
+<body>
+    <div class="outer">
+        text-page
+    </div>
+</body>
+
+</html>
