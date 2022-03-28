@@ -65,3 +65,6 @@ Delegator(context__proto__, 'response')
   .access('length')
   .access('type')
   .getter('headerSent');
+
+// 同理，把一些 request 上的属性委托到 context 上
+Delegator(context__proto__, 'request').access('path').access('method');

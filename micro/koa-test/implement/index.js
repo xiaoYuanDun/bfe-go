@@ -24,7 +24,7 @@ class Application {
   // 启动服务
   listen(...args) {
     const server = http.createServer(this.callback());
-    console.log('listen on ', args[0]);
+
     return server.listen(...args);
   }
 

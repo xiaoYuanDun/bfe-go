@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon app.js"
+    "dev": "nodemon src/app.js"
   },
   "dependencies": {
     "cache-content-type": "^1.0.1",
@@ -14,6 +14,9 @@
     "koa-router": "^10.0.0",
     "nodemon": "^2.0.7",
     "on-finished": "^2.4.1",
+    "parseurl": "^1.3.3",
+    "path-to-regexp": "^6.2.0",
+    "require-directory": "^2.1.1",
     "statuses": "^2.0.1"
   }
 }

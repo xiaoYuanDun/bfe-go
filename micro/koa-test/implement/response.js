@@ -8,6 +8,8 @@ const destroy = require('destroy');
  * 这里和 context 一样，也是构建一个通用的原型对象
  */
 const response__proto__ = {
+  // getter/setter -------------------------------------------------------------
+
   /**
    * 这里在每次请求流程中生成的 response_once 中维护一个 body
    * 在最终处理响应体时，会取出这个 _body，并使用 原始res 相关方法来处理
