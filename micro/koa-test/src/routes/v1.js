@@ -1,9 +1,16 @@
-module.exports = (router) => {
-  router.get('/', (ctx) => {
-    ctx.body = 'good';
-  });
-
-  router.get('/get-err', (ctx) => {
-    ctx.throw(404, '无这个资源');
-  });
+module.exports = {
+  routes: [
+    {
+      path: '/',
+      mws: (ctx) => {
+        ctx.body = 'good';
+      },
+    },
+    {
+      path: '/get-err',
+      mws: (ctx) => {
+        ctx.throw(404, '无这个资源');
+      },
+    },
+  ],
 };

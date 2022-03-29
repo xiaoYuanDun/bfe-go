@@ -103,6 +103,14 @@ class Application {
         ctx.length = 0;
         return res.end();
       }
+
+      // todo，兜底处理，这里逻辑还不完善
+      if (!res.headersSent) {
+        body = ctx.message || String(code);
+        ctx.type = 'text';
+        ctx.length = Buffer.byteLength(body);
+      }
+      return res.end(body);
     }
 
     // 当响应内容为流

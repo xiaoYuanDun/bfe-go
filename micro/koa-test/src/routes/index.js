@@ -1,11 +1,18 @@
 const requireDirectory = require('require-directory');
-const Router = require('koa-router');
-// const Router = require('../../implement/router');
+// const Router = require('koa-router');
+const Router = require('../../implement/router');
 
 const router = new Router();
 
 requireDirectory(module, __dirname, {
-  visit: (registerFunc) => registerFunc(router),
+  visit: (routeConfig) => {
+    const { prefix = '', routes = [] } = routeConfig;
+
+    routes.forEach(({ method = 'get', path, mws }) => {
+      const curMws = Array.isArray(mws) ? mws : [mws];
+      router[method](prefix + path, ...curMws);
+    });
+  },
 });
 
 module.exports = router;
