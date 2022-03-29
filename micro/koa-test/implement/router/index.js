@@ -140,8 +140,17 @@ Router.prototype.match = function (path, method) {
       }
     }
   }
-
   return matched;
 };
+
+// TODO, 非核心方法，有空再来看吧
+// Router.prototype.prefix           --> 遍历 router.stack, 调用每个 layer 的 setPrefix
+// Router.prototype.use              --> 可用于嵌套路由，实现原理和上面差不多
+// Router.prototype.allowedMethods   --> ...
+// Router.prototype.all
+// Router.prototype.redirect
+// Router.prototype.route
+// Router.prototype.url
+// Router.prototype.param
 
 module.exports = Router;

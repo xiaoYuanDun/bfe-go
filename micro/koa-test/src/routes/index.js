@@ -1,6 +1,6 @@
 const requireDirectory = require('require-directory');
-// const Router = require('koa-router');
-const Router = require('../../implement/router');
+const Router = require('koa-router');
+// const Router = require('../../implement/router');
 
 const router = new Router();
 
@@ -15,7 +15,15 @@ requireDirectory(module, __dirname, {
   },
 });
 
-module.exports = router;
+const routeMiddleware = router.routes();
+
+// forums.use('/forums/:fid/posts', posts.routes(), posts.allowedMethods());
+
+const prefixRouter = new Router();
+prefixRouter.use('/wqh', routeMiddleware);
+const newMiddleware = prefixRouter.routes();
+
+module.exports = newMiddleware;
 
 // ---------- v1 版本，路由需要这样写，比较丑陋
 // -----------------------------------------------------------------------------
