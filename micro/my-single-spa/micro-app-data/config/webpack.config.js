@@ -43,11 +43,6 @@ module.exports = {
   ],
   externals: {
     'react': 'React',
-    // 'react-dom': {
-    //   commonjs: 'react-dom', // 这里更改了
-    //   commonjs2: 'react-dom', // 这里更改了
-    //   amd: 'react-dom', // 这里更改了
-    //   root: 'reactDom'
-    // }
+    'react-dom': 'ReactDOM'
   },
 };

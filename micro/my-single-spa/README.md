@@ -63,3 +63,9 @@ System.register(
 ### todo
 
 - qiankun 如何突破 systemjs 模块限制，import-html-entry
+
+
+libraryTarget  tagget
+不配 			umd	   可以
+umd			   umd 	  可以
+umd			   cjs	  不可以
