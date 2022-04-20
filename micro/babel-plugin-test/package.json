@@ -1,5 +1,5 @@
 {
-  "name": "app-user",
+  "name": "simple-react",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
@@ -13,21 +13,19 @@
     "@babel/plugin-transform-runtime": "^7.14.3",
     "@babel/preset-env": "^7.14.4",
     "@babel/preset-react": "^7.13.13",
+    "@babel/preset-typescript": "^7.13.0",
+    "@types/react": "^17.0.8",
+    "@types/react-dom": "^17.0.5",
     "babel-loader": "^8.2.2",
-    "clean-webpack-plugin": "^4.0.0",
-    "css-loader": "^6.7.1",
     "html-webpack-plugin": "^5.3.1",
-    "less": "^4.1.2",
-    "less-loader": "^10.2.0",
-    "mini-css-extract-plugin": "^2.6.0",
-    "style-loader": "^3.3.1",
+    "typescript": "^4.3.2",
     "webpack": "^5.38.1",
     "webpack-cli": "^4.7.0",
-    "webpack-dev-server": "4.8.1"
+    "webpack-dev-server": "^3.11.2"
   },
   "dependencies": {
     "@babel/runtime": "^7.14.0",
-    "ahooks": "^3.3.8",
+    "antd": "^4.19.5",
     "core-js": "^3.13.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2"

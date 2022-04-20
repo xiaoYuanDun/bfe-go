@@ -21,3 +21,10 @@ export function readResAsString(response) {
 export function defaultGetTemplate(tpl) {
   return tpl;
 }
+
+// 提取出 DOM  标签中的内容
+export const getInlineCode = (match) => {
+  const start = match.indexOf('>') + 1;
+  const end = Math.lastIndexOf('<');
+  return match.substr(start, end);
+};
