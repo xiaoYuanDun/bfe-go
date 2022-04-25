@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+</head>
+<script>
+  {
+
+    /**
+     * 给定两个数组 a 和 b
+     * 如果 a 是 b 的子集，返回 1
+     * 如果 b 是 a 的子集，返回 2
+     * 如果 a 和 b 相同，返回 0
+     * 都不是，返回 -1
+     */
+    function intersection(a, b) {
+
+      // a 的长度大，只有可能是 2，-1
+      // b 的长度大，只有可能是 1，-1
+      let res = a.length === b.length ? 0 : a.length > b.length ? 2 : 1
+      const hash = {}
+
+      const long = res === 1 ? b : a
+      const short = res === 2 ? b : a
+
+      for (let i = 0; i < long.length; i++) {
+        if (long[i] in hash) {
+          hash[long[i]]++
+        } else {
+          hash[long[i]] = 1
+        }
+      }
+
+      for (let i = 0; i < short.length; i++) {
+        if (hash[short[i]] !== 0) {
+          hash[short[i]]--
+        } else {
+          return -1
+        }
+      }
+
+      return res
+    }
+
+    // 1
+    intersection([2, 3, 5], [1, 2, 3, 4, 5, 6])
+
+    // 2
+    intersection()
+
+
+  }
+</script>
+
+<body>
+  <p>判断数组相交情况</p>
+</body>
+
+</html>

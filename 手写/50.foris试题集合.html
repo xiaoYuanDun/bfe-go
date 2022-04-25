@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+</head>
+<script>
+  {
+    //  考闭包，数组分包，股票买卖时间最佳时间，查找节点，判断对象是否有某属性，快速排序，设计模式，小数相加，数值反转， 时间转换(3day ago ,2 hours ago) ，， 快速排序和时间差函数还有整数翻转是一样的，新增的有  、 数的先序遍历
+
+    // 1. 柯里化
+    const add = (a, b, c) => a + b + c
+    const curry = (fn, ...args) => {
+      if (fn.length > args.length) {
+        return (...arg) => curry(fn, ...args, ...arg)
+      }
+      return fn.apply(null, args)
+    }
+
+    console.log(add(1, 2, 3))
+    const newAdd = curry(add)
+    console.log(newAdd(1)(2)(3))
+    console.log(newAdd(1)(2, 3))
+    console.log(newAdd(1, 2)(3))
+
+    // -------------------------------------------------------------------------------
+
+    // 2. 使用setTimeout模拟setInterval
+    function virtualInterval(fn, interval) {
+      let id
+      const schduleTimer = () => {
+        id = setTimeout(() => {
+          fn()
+          schduleTimer(fn, interval)
+        }, interval);
+      }
+      schduleTimer()
+
+      return () => clearTimeout(id)
+    }
+
+    let clear = virtualInterval(() => { console.log('gogogo') }, 1000)
+
+    // let count = 0
+    // const id = setInterval(() => {
+    //   if (count === 5) clearInterval(id)
+    //   console.log(count++)
+    // }, 1000);
+
+    // -------------------------------------------------------------------------------
+
+    // 3. 对象下划线转驼峰
+    const convertObj = (obj) => {
+      if (typeof obj !== 'object') return obj
+
+      const temp = {}
+      Object.keys(obj).forEach(key => {
+        const [first, ...rest] = key.split('_')
+        const newKey = rest.reduce((acc, cur) => {
+          return acc + cur.charAt(0).toLocaleUpperCase() + cur.substr(1)
+        }, first)
+        temp[newKey] = convertObj(obj[key])
+      })
+      return temp
+    }
+
+    const obj = {
+      name: 'xiaoMIng',
+      age_f_one: {
+        set: 2,
+        ff_jh: 'dd'
+      }
+    }
+
+    console.log(convertObj(obj))
+
+    // -------------------------------------------------------------------------------
+
+    // 4. 实现compose函数
+    const compose = (...args) => {
+      return args.reduce((acc, cur) => (...arg) => acc(cur(...arg)))
+    }
+
+    const add1 = (str) => '1' + str
+    const add2 = (str) => '2' + str
+    const add3 = (str) => '3' + str
+    console.log(add1(add2(add3('xiaoIng'))))
+
+    const newFn = compose(add1, add2, add3)
+    console.log(newFn('red'))
+
+    // -------------------------------------------------------------------------------
+
+    // 5. 快速排序
+    const quickSort = (arr) => {
+
+      const _internalSort = (head, tail) => {
+        let left = head + 1
+        let right = tail
+        const symbol = arr[head]
+
+        while (left < right) {
+          while (left < right && arr[right] > symbol) { right-- }
+          while (left < right && arr[left] <= symbol) { left++ }
+          [arr[left], arr[right]] = [arr[right], arr[left]]
+        }
+        if (symbol !== arr[right]) {
+          [arr[head], arr[right]] = [arr[right], arr[head]]
+        }
+
+        if (right + 1 < tail) _internalSort(right + 1, tail)
+        if (right - 1 > head) _internalSort(head, right - 1)
+      }
+
+      _internalSort(0, arr.length - 1)
+      return arr
+    }
+
+    const arr = [4, 1, 3, 5, 2]
+    console.log(quickSort(arr))
+
+    // -------------------------------------------------------------------------------
+
+    // 6. groupBy
+    const groupBy = (list, key) => {
+      return list.reduce((acc, cur) => {
+        // acc[cur[key]] = (acc[cur[key]] || []).push(cur)
+        const _key = cur[key]
+        if (acc[_key]) {
+          acc[_key].push(cur)
+        } else {
+          acc[_key] = [cur]
+        }
+        return acc
+      }, {})
+    }
+
+    const arr_2 = [
+      { name: 'xiaoMing', age: 19, sex: 'd' },
+      { name: 'danny', age: 10, sex: 'g' },
+      { name: 'xiaoHong', age: 22, sex: 'd' },
+      { name: 'jack', age: 10, sex: 'd' },
+    ]
+
+    console.log(groupBy(arr_2, 'age'))
+    console.log(groupBy(arr_2, 'sex'))
+    console.log(groupBy(arr_2, 'name'))
+
+    // -------------------------------------------------------------------------------
+
+    // 7. 从数组中找出两数之和
+    function twoSum(arr, target) {
+      const hash = {}
+
+      for (let i = 0; i < arr.length; i++) {
+        if (arr[i] in hash) {
+          return hash[arr[i], i]
+        } else {
+          hash[target - arr[i]] = i
+        }
+      }
+      return undefined
+    }
+
+    console.log(twoSum([2, 7, 11, 15], 9))
+
+    // -------------------------------------------------------------------------------
+
+    // 8. 手写发布订阅
+    function Emitter() {
+      this.listeners = {}
+    }
+
+    Emitter.prototype.on = function (key, fn) {
+      // (this.listeners[key] || (this.listeners[key] = [])).push(fn)
+      if (this.listeners[key]) {
+        this.listeners[key].push(fn)
+      } else {
+        this.listeners[key] = [fn]
+      }
+    }
+
+    Emitter.prototype.off = function (key, fn) {
+      if (this.listeners[key]) {
+        this.listeners[key] = this.listeners[key].filter(listener => listener !== fn)
+      }
+    }
+
+    Emitter.prototype.emit = function (key) {
+      (this.listeners[key] || []).forEach(listener => {
+        listener()
+      })
+    }
+
+    // -------------------------------------------------------------------------------
+
+    // 9. 数值反转
+    const trverNum = (num) => {
+
+      let newNum = 0, cur
+      const max = Math.pow(2, 31) - 1
+      const min = Math.pow(-2, 31)
+
+      while (num) {
+        cur = num % 10
+        num = parseInt(num / 10)
+        newNum = newNum * 10 + cur
+        if (newNum > max || newNum < min) return 0
+      }
+
+      return newNum
+    }
+
+
+    // -------------------------------------------------------------------------------
+
+    // 10. 大数相架
+    const addBig = (a, b) => {
+      let res = ''
+      let i1 = a.length - 1
+      let i2 = b.length - 1
+      let nextAdd = 0, cur, sum
+
+      while (i1 >= 0 || i2 >= 0 || nextAdd) {
+        sum = +(a[i1--] || 0) + +(b[i2--] || 0) + nextAdd
+        cur = sum % 10
+        nextAdd = Math.floor(sum / 10)
+        res = `${cur}${res}`
+      }
+      return res
+    }
+
+    // -------------------------------------------------------------------------------
+
+    // 11. BFS
+    function TreeNode(val) {
+      this.val = val;
+      this.left = this.right = null;
+    }
+    const n1 = new TreeNode(3)
+    const n2 = new TreeNode(9)
+    const n3 = new TreeNode(20)
+    const n4 = new TreeNode(15)
+    const n5 = new TreeNode(7)
+    n1.left = n2
+    n2.right = n3
+    n3.left = n4
+    n3.right = n5
+
+    const bfs = root => {
+      const res = []
+
+      if (!root) return res
+
+      const queue = [root]
+      let len, node
+
+      while (len = queue.length) {
+        for (let i = 0; i < len; i++) {
+          node = queue.shift()
+          res.push(node.val)
+          if (node.left) queue.push(node.left)
+          if (node.right) queue.push(node.right)
+        }
+      }
+      return res
+    }
+
+    console.log(bfs(n1))
+
+    // -------------------------------------------------------------------------------
+
+    // 12. 买卖股票
+    var maxProfit = function (prices) {
+      let min = Infinity, res = 0
+
+      for (const price of prices) {
+        min = Math.min(min, price)
+        res = Math.max(res, price - min)
+      }
+
+      return res
+    };
+
+    console.log(maxProfit([7, 1, 5, 3, 6, 4]))
+
+    // -------------------------------------------------------------------------------
+
+    // 13. 最长不重复子字符串
+    const longestSubStr = s => {
+      const hash = {}
+      let max = 0
+      let left = right = 0
+
+      while (right < s.length) {
+
+        while (hash[s[right]]) {
+          delete hash[s[left]]
+          left++
+        }
+
+        // 不存在，继续遍历
+        while (!hash[s[right]]) {
+          hash[s[right]] = 1
+          right++
+        }
+
+        max = Math.max(max, right - left)
+      }
+      return max
+    }
+
+    console.log(longestSubStr('abcabcbb'))
+
+    // -------------------------------------------------------------------------------
+
+    // 14. 
+    function addSmall(num1, num2) {
+
+      let temp1, temp2, a;
+
+      // 获取temp1小数点后的长度
+      temp1 = num1.toString().split(".")[1].length || 0;
+
+      // 获取temp2小数点后的长度
+      temp2 = num2.toString().split(".")[1].length || 0;
+
+      // Math.max(temp1, temp2) 为了获取temp1和temp2两个值中较大的一个
+      // Math.pow(a,b) 表示 a 的 b 次方
+      accuracy = Math.pow(10, Math.max(temp1, temp2));
+
+      // 计算的方式是先将所有的小数乘为整数，待加减运算执行完之后再除去对应的 a 的值，将其变为小数输出
+      return res = (num1 * a + num2 * a) / a
+    }
+
+
+    console.log(addSmall(1.2312, 212.42))
+  }
+</script>
+
+<body>
+  <p>
+    foris 试题集合
+  </p>
+</body>
+
+</html>

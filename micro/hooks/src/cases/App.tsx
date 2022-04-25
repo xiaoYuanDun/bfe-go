@@ -4,6 +4,7 @@ import SonSync from './SonSync';
 import DebounceCase from './debounce';
 import Polling from './Polling';
 import Ready from './Ready';
+import CreationTest from "./CreationTest";
 
 function App() {
   const [id, setId] = useState<string>('');
@@ -20,7 +21,8 @@ function App() {
       {/* <SonSync /> */}
       {/* <DebounceCase /> */}
       {/* {<Polling />} */}
-      <Ready />
+      {/* <Ready /> */}
+      <CreationTest />
     </div>
   );
 }
