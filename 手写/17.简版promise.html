@@ -1,388 +1,400 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <script>
+    {
+      const PENDING = 'pending';
+      const FULLFILLED = 'fullfilled';
+      const REJECTED = 'rejected';
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Document</title>
-</head>
-<script>
-  {
+      // 执行器构造函数
+      // exec = (resolve, reject) => { ... }
+      function MyPromise(exector) {
+        this.fullfilledListeners = [];
+        this.rejectedListeners = [];
+        this.status = PENDING;
+        this.value = undefined;
+        this.reason = undefined;
 
+        this.resolve = (value) => {
+          if (this.status === PENDING) {
+            // 处理静态方法，此时 value 是个 promise，需要等他决议后再向后执行
+            // 所以把当前决议权放在 value 的 then 回调里
+            if (value instanceof MyPromise)
+              return value.then(this.resolve, this.reject);
 
-    const PENDING = 'pending'
-    const FULLFILLED = 'fullfilled'
-    const REJECTED = 'rejected'
-
-    // 执行器构造函数
-    // exec = (resolve, reject) => { ... }
-    function MyPromise(exector) {
-
-      this.fullfilledListeners = []
-      this.rejectedListeners = []
-      this.status = PENDING
-      this.value = undefined
-      this.reason = undefined
-
-      this.resolve = (value) => {
-        if (this.status === PENDING) {
-          // 处理静态方法，此时 value 是个 promise，需要等他决议后再向后执行
-          // 所以把当前决议权放在 value 的 then 回调里
-          if (value instanceof MyPromise) return value.then(this.resolve, this.reject)
-
-          // 实施清空当前 promise 的 then 注册的回调
-          this.value = value
-          this.status = FULLFILLED
-          this.fullfilledListeners.forEach(listener => listener(value))
-        }
-      }
-
-      this.reject = (reason) => {
-        if (this.status === PENDING) {
-          this.reason = reason
-          this.status = REJECTED
-          this.rejectedListeners.forEach(listener => listener(reason))
-        }
-      }
-
-      try {
-        exector(this.resolve, this.reject)
-      } catch (e) {
-        this.reject(e)
-      }
-    }
-
-    // then 
-    MyPromise.prototype.then = function (onFullfilled, onRejected) {
-      // then 方法也返回一个 promise
-      const promise2 = new MyPromise((resolve, reject) => {
-
-        // 通过 Promise.resolve, Promise.reject，status 逻辑变化
-        if (this.status === FULLFILLED) {
-          try {
-            const x = onFullfilled(this.value)
-            resolvePromise(promise2, x, resolve, reject)
-          } catch (e) {
-            reject(e)
+            // 实施清空当前 promise 的 then 注册的回调
+            this.value = value;
+            this.status = FULLFILLED;
+            this.fullfilledListeners.forEach((listener) => listener(value));
           }
-        }
-        if (this.status === REJECTED) {
-          try {
-            const x = onRejected(this.reason)
-            resolvePromise(promise2, x, resolve, reject)
-          } catch (e) {
-            reject(e)
+        };
+
+        this.reject = (reason) => {
+          if (this.status === PENDING) {
+            this.reason = reason;
+            this.status = REJECTED;
+            this.rejectedListeners.forEach((listener) => listener(reason));
           }
-        }
+        };
 
-        // promise2 的初始化是个异步过程，因为内部需要拿到 promise2 的引用
-        // 还未决议，需要把 then 回调注册到缓存队列中
-        if (this.status === PENDING) {
-          // 原始 promise 决议后，触发 then 的回调
-          this.fullfilledListeners.push((value) => {
-            // then 穿透
-            // if (typeof onFullfilled !== 'function') {
-            //   resolve(value)
-            //   return
-            // }
-            if (typeof onFullfilled !== 'function') onFullfilled = x => x
-
-
-            // 需要对 then 的返回执行进行判断，如果是 promise，要等这个子 promise 决议后，才能继续下一个 then
-            queueMicrotask(() => {
-              try {
-                const x = onFullfilled(value)
-                resolvePromise(promise2, x, resolve, reject)
-              } catch (e) {
-                reject(e)
-              }
-            })
-          })
-
-          this.rejectedListeners.push((reason) => {
-            // then 穿透
-            if (typeof onRejected !== 'function') onRejected = e => { throw e }
-
-            queueMicrotask(() => {
-              try {
-                const x = onRejected(reason)
-                resolvePromise(promise2, x, resolve, reject)
-              } catch (e) {
-                reject(e)
-              }
-            })
-          })
-        }
-      })
-      return promise2
-    }
-
-    // 只有两种情况会走的 then 的失败回调
-    //   1. 上一个 promise 中抛出异常
-    //   2. 上个 promise 中手动 reject
-    // 所以在 then 方法中，即使走到了 onRejected 分支，如果不手动抛出另一个异常，也会走到下一个 then 的 onFullfilled 分支内
-    function resolvePromise(promise2, x, resolve, reject) {
-      if (promise2 === x) {
-        return reject(new TypeError('循环引用'))
-      }
-
-      if (x instanceof MyPromise) {
-        // 我们把 resolve 当作 res 的 then 回调，向子 promise 内部传递
-        // 这样，当 res 决议时，就能触发这个 resolve，这保证了子 promise 已经决议，符合 A+ 规范
-        // 这是一个递归的过程
-        x.then(resolve, reject)
-      } else if (typeof x === 'function' || typeof x === 'object' && typeof x !== null) {
         try {
-          const then = x.then
-          if (typeof then === 'function') {
-            then.call(x, y => {
-              // y 有可能还是个 promise
-              resolvePromise(promise2, y, resolve, reject)
-            }, r => {
-              reject(r)
-            })
-          } else {
-            resolve(x)
-          }
+          exector(this.resolve, this.reject);
         } catch (e) {
-          reject(e)
+          this.reject(e);
         }
-      } else {
-        // 当前 then 后如果还有 then，必须等这里决议，才会继续向下执行回调
-        resolve(x)
       }
-    }
 
-    // 原型方法
-    MyPromise.prototype.catch = function (handleError) {
-      return MyPromise.prototype.then.call(this, undefined, handleError)
-    }
-
-    // 只是插入一个肯定执行的逻辑序列，不影响流程，会把上面的 data/err 继续向下传递
-    MyPromise.prototype.finally = function (fn) {
-      return MyPromise.prototype.then.call(this, (data) => {
-        MyPromise.resolve(fn()).then(() => data)
-      }, (err) => {
-        MyPromise.resolve(fn()).then(null, () => {
-          throw err
-        })
-      })
-    }
-
-    // 静态方法
-    MyPromise.resolve = function (value) {
-      return new MyPromise((resolve, reject) => {
-        resolve(value)
-      })
-    }
-
-    MyPromise.reject = function (reason) {
-      return new MyPromise((resolve, reject) => {
-        reject(reason)
-      })
-    }
-
-    MyPromise.all = function (promises) {
-      return new MyPromise((resolve, reject) => {
-        let count = 0
-        const res = []
-        promises.forEach((p, index) => {
-          MyPromise.resolve(p).then(data => {
-            res[index] = data
-            count += 1
-            if (count === promises.length) resolve(res)
-          }, reject)
-        })
-      })
-    }
-
-    MyPromise.race = function (promises) {
-      return new MyPromise((resolve, reject) => {
-        promises.forEach((p, index) => {
-          MyPromise.resolve(p).then(resolve, reject)
-        })
-      })
-    }
-
-    MyPromise.allSettled = function (promises) {
-      return new MyPromise((resolve, reject) => {
-        let count = 0
-        const res = []
-        promises.forEach((p, index) => {
-          MyPromise.resolve(p).then((data) => {
-            res[index] = ['fullfilled', data]
-            count += 1
-            if (count === promises.length) resolve(res)
-          }, err => {
-            res[index] = ['rejected', err]
-            count += 1
-            if (count === promises.length) resolve(res)
-          })
-        })
-      })
-    }
-
-    // 如，readFIle(path, cb)
-    function promisify(fn) {
-      return (...args) => {
-        return new Promise((resolve, reject) => {
-          fn(...args, (err, data) => {
-            if (err) {
-              reject(err)
-            } else {
-              resolve(res)
+      // then
+      MyPromise.prototype.then = function (onFullfilled, onRejected) {
+        // then 方法也返回一个 promise
+        const promise2 = new MyPromise((resolve, reject) => {
+          // 通过 Promise.resolve, Promise.reject，status 逻辑变化
+          if (this.status === FULLFILLED) {
+            try {
+              const x = onFullfilled(this.value);
+              resolvePromise(promise2, x, resolve, reject);
+            } catch (e) {
+              reject(e);
             }
-          })
-        })
+          }
+          if (this.status === REJECTED) {
+            try {
+              const x = onRejected(this.reason);
+              resolvePromise(promise2, x, resolve, reject);
+            } catch (e) {
+              reject(e);
+            }
+          }
+
+          // promise2 的初始化是个异步过程，因为内部需要拿到 promise2 的引用
+          // 还未决议，需要把 then 回调注册到缓存队列中
+          if (this.status === PENDING) {
+            // 原始 promise 决议后，触发 then 的回调
+            this.fullfilledListeners.push((value) => {
+              // then 穿透
+              // if (typeof onFullfilled !== 'function') {
+              //   resolve(value)
+              //   return
+              // }
+              if (typeof onFullfilled !== 'function') onFullfilled = (x) => x;
+
+              // 需要对 then 的返回执行进行判断，如果是 promise，要等这个子 promise 决议后，才能继续下一个 then
+              queueMicrotask(() => {
+                try {
+                  const x = onFullfilled(value);
+                  resolvePromise(promise2, x, resolve, reject);
+                } catch (e) {
+                  reject(e);
+                }
+              });
+            });
+
+            this.rejectedListeners.push((reason) => {
+              // then 穿透
+              if (typeof onRejected !== 'function')
+                onRejected = (e) => {
+                  throw e;
+                };
+
+              queueMicrotask(() => {
+                try {
+                  const x = onRejected(reason);
+                  resolvePromise(promise2, x, resolve, reject);
+                } catch (e) {
+                  reject(e);
+                }
+              });
+            });
+          }
+        });
+        return promise2;
+      };
+
+      // 只有两种情况会走的 then 的失败回调
+      //   1. 上一个 promise 中抛出异常
+      //   2. 上个 promise 中手动 reject
+      // 所以在 then 方法中，即使走到了 onRejected 分支，如果不手动抛出另一个异常，也会走到下一个 then 的 onFullfilled 分支内
+      function resolvePromise(promise2, x, resolve, reject) {
+        if (promise2 === x) {
+          return reject(new TypeError('循环引用'));
+        }
+
+        if (x instanceof MyPromise) {
+          // 我们把 resolve 当作 res 的 then 回调，向子 promise 内部传递
+          // 这样，当 res 决议时，就能触发这个 resolve，这保证了子 promise 已经决议，符合 A+ 规范
+          // 这是一个递归的过程
+          x.then(resolve, reject);
+        } else if (
+          typeof x === 'function' ||
+          (typeof x === 'object' && typeof x !== null)
+        ) {
+          try {
+            const then = x.then;
+            if (typeof then === 'function') {
+              then.call(
+                x,
+                (y) => {
+                  // y 有可能还是个 promise
+                  resolvePromise(promise2, y, resolve, reject);
+                },
+                (r) => {
+                  reject(r);
+                }
+              );
+            } else {
+              resolve(x);
+            }
+          } catch (e) {
+            reject(e);
+          }
+        } else {
+          // 当前 then 后如果还有 then，必须等这里决议，才会继续向下执行回调
+          resolve(x);
+        }
       }
+
+      // 原型方法
+      MyPromise.prototype.catch = function (handleError) {
+        return MyPromise.prototype.then.call(this, undefined, handleError);
+      };
+
+      // 只是插入一个肯定执行的逻辑序列，不影响流程，会把上面的 data/err 继续向下传递
+      MyPromise.prototype.finally = function (fn) {
+        return MyPromise.prototype.then.call(
+          this,
+          (data) => {
+            MyPromise.resolve(fn()).then(() => data);
+          },
+          (err) => {
+            MyPromise.resolve(fn()).then(null, () => {
+              throw err;
+            });
+          }
+        );
+      };
+
+      // 静态方法
+      MyPromise.resolve = function (value) {
+        return new MyPromise((resolve, reject) => {
+          resolve(value);
+        });
+      };
+
+      MyPromise.reject = function (reason) {
+        return new MyPromise((resolve, reject) => {
+          reject(reason);
+        });
+      };
+
+      MyPromise.all = function (promises) {
+        return new MyPromise((resolve, reject) => {
+          let count = 0;
+          const res = [];
+          promises.forEach((p, index) => {
+            MyPromise.resolve(p).then((data) => {
+              res[index] = data;
+              count += 1;
+              if (count === promises.length) resolve(res);
+            }, reject);
+          });
+        });
+      };
+
+      MyPromise.race = function (promises) {
+        return new MyPromise((resolve, reject) => {
+          promises.forEach((p, index) => {
+            MyPromise.resolve(p).then(resolve, reject);
+          });
+        });
+      };
+
+      MyPromise.allSettled = function (promises) {
+        return new MyPromise((resolve, reject) => {
+          let count = 0;
+          const res = [];
+          promises.forEach((p, index) => {
+            MyPromise.resolve(p).then(
+              (data) => {
+                res[index] = ['fullfilled', data];
+                count += 1;
+                if (count === promises.length) resolve(res);
+              },
+              (err) => {
+                res[index] = ['rejected', err];
+                count += 1;
+                if (count === promises.length) resolve(res);
+              }
+            );
+          });
+        });
+      };
+
+      // 如，readFIle(path, cb)
+      function promisify(fn) {
+        return (...args) => {
+          return new Promise((resolve, reject) => {
+            fn(...args, (err, data) => {
+              if (err) {
+                reject(err);
+              } else {
+                resolve(res);
+              }
+            });
+          });
+        };
+      }
+
+      // ---------------------
+      // case_0
+      // const p1 = new Promise((resolve, reject) => {
+      //   setTimeout(() => {
+      //     resolve(111)
+      //   }, 1000);
+      // })
+      // p1.then(data => {
+      //   console.log('多重then')
+      // }, err => {
+      //   console.log('多重err')
+      // })
+      // const p2 = p1.then(data => {
+      //   console.log('data: ', data)
+      //   return new Promise((resolve, reject) => {
+      //     setTimeout(() => {
+      //       resolve(222)
+      //     }, 1000);
+      //   })
+      // }, err => {
+      //   console.log('err: ', err)
+      // })
+
+      // p2.then(data => {
+      //   console.log('dd: ', data)
+      // }, err => {
+      //   console.log('ee: ', err)
+      // })
+
+      // ---------------------
+      // case_1
+      // const p1 = new MyPromise((resolve, reject) => {
+      //   setTimeout(() => {
+      //     resolve(111)
+      //   }, 1000);
+      // })
+      // const p2 = p1.then(data => {
+      //   console.log('data: ', data)
+      //   return new MyPromise((resolve, reject) => {
+      //     setTimeout(() => {
+      //       resolve(222)
+      //     }, 1000);
+      //   })
+      // })
+
+      // p2.then(d => {
+      //   console.log('d: ', d)
+      // })
+
+      // ---------------------
+      // case_2
+      // const p1 = new MyPromise((resolve, reject) => {
+      //   setTimeout(() => {
+      //     reject(111)
+      //     // throw new Error(123)
+      //   }, 1000);
+      // })
+
+      // // const p2 = p1.catch(err => {
+      // //   console.log('catch', err)
+      // // })
+      // const p2 = p1.then(res => {
+      //   console.log('res1', res)
+      // }, err => {
+      //   console.log('err1', err)
+      // })
+      // // const p2 = p1.then()
+
+      // const p3 = p2.then(res => {
+      //   console.log('res2', res)
+      // }, err => {
+      //   console.log('err2', err)
+      // })
+
+      // ---------------------
+      // case_3
+      // const p1 = new MyPromise((resolve, reject) => {
+      //   setTimeout(() => {
+      //     resolve('111')
+      //   }, 1000);
+      // })
+
+      // const p2 = p1.then(res => {
+      //   console.log('r1', res)
+      //   return new Promise((resolve, reject) => {
+      //     setTimeout(() => {
+      //       resolve(new Promise((resolve, reject) => {
+      //         setTimeout(() => {
+      //           resolve('333')
+      //         }, 1000)
+      //       }))
+      //     }, 1000);
+      //   })
+      // }).then(res => {
+      //   console.log('p2 res', res)
+      // })
+
+      // ---------------------
+      // case_4
+      // const p1 = new MyPromise((resolve, reject) => {
+      //   setTimeout(() => {
+      //     resolve('111')
+      //   }, 1000);
+      // })
+      // const p2 = new MyPromise((resolve, reject) => {
+      //   setTimeout(() => {
+      //     reject('222')
+      //   }, 2000);
+      // })
+      // const p3 = new MyPromise((resolve, reject) => {
+      //   setTimeout(() => {
+      //     resolve('333')
+      //   }, 3000);
+      // })
+      // const p4 = new MyPromise((resolve, reject) => {
+      //   setTimeout(() => {
+      //     resolve('444')
+      //   }, 4000);
+      // })
+
+      // MyPromise.all([p1, p2, p3, p4]).then(res => {
+      //   console.log('all resolve', res)
+      // }, err => {
+      //   console.log('all reject', err)
+      // })
+
+      // ---------------------
+      // case_5
+      MyPromise.reject(
+        new MyPromise((resolve) => {
+          setTimeout(() => {
+            resolve('111');
+          }, 1000);
+        })
+      ).then(
+        (res) => {
+          console.log('res', res);
+        },
+        (err) => {
+          console.log('err', err);
+        }
+      );
     }
+  </script>
 
-    // ---------------------
-    // case_0
-    // const p1 = new Promise((resolve, reject) => {
-    //   setTimeout(() => {
-    //     resolve(111)
-    //   }, 1000);
-    // })
-    // p1.then(data => {
-    //   console.log('多重then')
-    // }, err => {
-    //   console.log('多重err')
-    // })
-    // const p2 = p1.then(data => {
-    //   console.log('data: ', data)
-    //   return new Promise((resolve, reject) => {
-    //     setTimeout(() => {
-    //       resolve(222)
-    //     }, 1000);
-    //   })
-    // }, err => {
-    //   console.log('err: ', err)
-    // })
-
-    // p2.then(data => {
-    //   console.log('dd: ', data)
-    // }, err => {
-    //   console.log('ee: ', err)
-    // })
-
-    // ---------------------
-    // case_1
-    // const p1 = new MyPromise((resolve, reject) => {
-    //   setTimeout(() => {
-    //     resolve(111)
-    //   }, 1000);
-    // })
-    // const p2 = p1.then(data => {
-    //   console.log('data: ', data)
-    //   return new MyPromise((resolve, reject) => {
-    //     setTimeout(() => {
-    //       resolve(222)
-    //     }, 1000);
-    //   })
-    // })
-
-    // p2.then(d => {
-    //   console.log('d: ', d)
-    // })
-
-    // ---------------------
-    // case_2
-    // const p1 = new MyPromise((resolve, reject) => {
-    //   setTimeout(() => {
-    //     reject(111)
-    //     // throw new Error(123)
-    //   }, 1000);
-    // })
-
-    // // const p2 = p1.catch(err => {
-    // //   console.log('catch', err)
-    // // })
-    // const p2 = p1.then(res => {
-    //   console.log('res1', res)
-    // }, err => {
-    //   console.log('err1', err)
-    // })
-    // // const p2 = p1.then()
-
-    // const p3 = p2.then(res => {
-    //   console.log('res2', res)
-    // }, err => {
-    //   console.log('err2', err)
-    // })
-
-    // ---------------------
-    // case_3
-    // const p1 = new MyPromise((resolve, reject) => {
-    //   setTimeout(() => {
-    //     resolve('111')
-    //   }, 1000);
-    // })
-
-    // const p2 = p1.then(res => {
-    //   console.log('r1', res)
-    //   return new Promise((resolve, reject) => {
-    //     setTimeout(() => {
-    //       resolve(new Promise((resolve, reject) => {
-    //         setTimeout(() => {
-    //           resolve('333')
-    //         }, 1000)
-    //       }))
-    //     }, 1000);
-    //   })
-    // }).then(res => {
-    //   console.log('p2 res', res)
-    // })
-
-    // ---------------------
-    // case_4
-    // const p1 = new MyPromise((resolve, reject) => {
-    //   setTimeout(() => {
-    //     resolve('111')
-    //   }, 1000);
-    // })
-    // const p2 = new MyPromise((resolve, reject) => {
-    //   setTimeout(() => {
-    //     reject('222')
-    //   }, 2000);
-    // })
-    // const p3 = new MyPromise((resolve, reject) => {
-    //   setTimeout(() => {
-    //     resolve('333')
-    //   }, 3000);
-    // })
-    // const p4 = new MyPromise((resolve, reject) => {
-    //   setTimeout(() => {
-    //     resolve('444')
-    //   }, 4000);
-    // })
-
-    // MyPromise.all([p1, p2, p3, p4]).then(res => {
-    //   console.log('all resolve', res)
-    // }, err => {
-    //   console.log('all reject', err)
-    // })
-
-    // ---------------------
-    // case_5
-    MyPromise.reject(new MyPromise(resolve => {
-      setTimeout(() => {
-        resolve('111')
-      }, 1000);
-    })).then(res => {
-      console.log('res', res)
-    }, err => {
-      console.log('err', err)
-    })
-
-
-  }
-</script>
-
-<body>
-  <p>
-    实现函数节流
-  </p>
-</body>
-
+  <body>
+    <p>实现函数节流</p>
+  </body>
 </html>

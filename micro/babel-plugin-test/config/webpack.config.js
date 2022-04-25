@@ -27,10 +27,8 @@ module.exports = {
     //  是否展示进度条
     progress: true,
     //  静态服务器根路径
-    static: {
-      directory: path.resolve(__dirname, '../dist'),
-    },
-    open: true,
+    contentBase: path.resolve(__dirname, '../dist'),
+    // open: true,
   },
   module: {
     rules: [
